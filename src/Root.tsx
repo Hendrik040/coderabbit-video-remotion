@@ -11,6 +11,7 @@ import { BreakingChangeAlarm } from "./BreakingChangeAlarm";
 import { UsageBasedAddonIntro } from "./UsageBasedAddonIntro";
 import { AgentsCookSlide } from "./AgentsCookSlide";
 import { AlternativeCook } from "./AlternativeCook";
+import { CodeRabbitShips } from "./CodeRabbitShips";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -116,6 +117,14 @@ export const RemotionRoot: React.FC = () => {
         id="AlternativeCook"
         component={AlternativeCook}
         durationInFrames={240}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="CodeRabbitShips"
+        component={CodeRabbitShips}
+        durationInFrames={330}
         fps={30}
         width={1920}
         height={1080}
