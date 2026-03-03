@@ -13,12 +13,18 @@
     "build:quote": "remotion render src/index.ts CustomerQuote out/customer-quote.mp4",
     "preview": "remotion preview src/index.ts"
   },
-  "keywords": ["remotion", "video", "coderabbit", "intro"],
+  "keywords": [
+    "remotion",
+    "video",
+    "coderabbit",
+    "intro"
+  ],
   "author": "CodeRabbit",
   "license": "MIT",
   "dependencies": {
     "@remotion/bundler": "^4.0.409",
     "@remotion/cli": "^4.0.409",
+    "@remotion/google-fonts": "^4.0.431",
     "@types/react": "^19.2.9",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

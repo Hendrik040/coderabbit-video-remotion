@@ -248,7 +248,9 @@ const RabbitLogo: React.FC<{ size: number }> = ({ size }) => {
 };
 
 // Main component
-export const CodeRabbitIntro: React.FC = () => {
+export const CodeRabbitIntro: React.FC<{ tagline?: string }> = ({
+  tagline = "How to Fix your Coding Agents' Vibes",
+}) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -422,7 +424,7 @@ export const CodeRabbitIntro: React.FC = () => {
               textShadow: `0 0 20px ${COLORS.orange}40`,
             }}
           >
-            How to Fix your Coding Agents' Vibes
+            {tagline}
           </span>
         </div>
 

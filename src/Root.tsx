@@ -4,6 +4,11 @@ import { ImpactSlicerViz } from "./ImpactSlicerViz";
 import { ASTWalkViz } from "./ASTWalkViz";
 import { ReviewSystemsCompare } from "./ReviewSystemsCompare";
 import { CustomerQuote } from "./CustomerQuote";
+import { MultiRepoViz } from "./MultiRepoViz";
+import { MultiRepoVizV2 } from "./MultiRepoVizV2";
+import { ConfigOnMainViz } from "./ConfigOnMainViz";
+import { BreakingChangeAlarm } from "./BreakingChangeAlarm";
+import { UsageBasedAddonIntro } from "./UsageBasedAddonIntro";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -11,6 +16,15 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="CodeRabbitIntro"
         component={CodeRabbitIntro}
+        durationInFrames={360}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="LinkedRepoIntro"
+        component={CodeRabbitIntro}
+        defaultProps={{ tagline: "Introducing Linked Repositories in CodeRabbit" }}
         durationInFrames={360}
         fps={30}
         width={1920}
@@ -44,6 +58,46 @@ export const RemotionRoot: React.FC = () => {
         id="CustomerQuote"
         component={CustomerQuote}
         durationInFrames={510}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="MultiRepoViz"
+        component={MultiRepoViz}
+        durationInFrames={420}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="MultiRepoVizV2"
+        component={MultiRepoVizV2}
+        durationInFrames={560}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="BreakingChangeAlarm"
+        component={BreakingChangeAlarm}
+        durationInFrames={150}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="ConfigOnMainViz"
+        component={ConfigOnMainViz}
+        durationInFrames={400}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="UsageBasedAddonIntro"
+        component={UsageBasedAddonIntro}
+        durationInFrames={300}
         fps={30}
         width={1920}
         height={1080}
