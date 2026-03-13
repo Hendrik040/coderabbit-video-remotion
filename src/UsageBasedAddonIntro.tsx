@@ -82,19 +82,23 @@ export const UsageBasedAddonIntro: React.FC = () => {
           lineHeight: 1.4,
         }}
       >
-        {/* Line 1 */}
-        <div>
-          {displayLine1}
-          <span style={{ visibility: onLine1 ? cursorVisibility : "hidden" }}>|</span>
+        {/* Line 1 — phantom reserves full width so typed text never shifts */}
+        <div style={{ position: "relative", whiteSpace: "nowrap" }}>
+          <span style={{ visibility: "hidden" }}>{LINE_1}</span>
+          <span style={{ position: "absolute", left: 0, top: 0, whiteSpace: "nowrap" }}>
+            {displayLine1}
+            <span style={{ visibility: onLine1 ? cursorVisibility : "hidden" }}>|</span>
+          </span>
         </div>
 
-        {/* Line 2 — appears once we've moved past line 1 */}
-        {charsVisible > LINE_1.length && (
-          <div>
+        {/* Line 2 — always rendered to keep container height stable (no layout shift) */}
+        <div style={{ position: "relative", whiteSpace: "nowrap", visibility: charsVisible > LINE_1.length ? "visible" : "hidden" }}>
+          <span style={{ visibility: "hidden" }}>{LINE_2}</span>
+          <span style={{ position: "absolute", left: 0, top: 0, whiteSpace: "nowrap" }}>
             {displayLine2}
             <span style={{ visibility: !onLine1 ? cursorVisibility : "hidden" }}>|</span>
-          </div>
-        )}
+          </span>
+        </div>
       </div>
     </AbsoluteFill>
   );

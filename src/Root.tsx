@@ -1,4 +1,8 @@
 import { Composition } from "remotion";
+import { RateLimitWarning, RATE_LIMIT_TOTAL_FRAMES } from "./RateLimitWarning";
+import { KeepShipping, KEEP_SHIPPING_TOTAL_FRAMES } from "./KeepShipping";
+import { DidThisEverHappenToYou, DID_THIS_TOTAL_FRAMES } from "./DidThisEverHappenToYou";
+import { DidThisEverHappenToYouFast, DID_THIS_FAST_TOTAL_FRAMES } from "./DidThisEverHappenToYouFast";
 import { CodeRabbitIntro } from "./CodeRabbitIntro";
 import { ImpactSlicerViz } from "./ImpactSlicerViz";
 import { ASTWalkViz } from "./ASTWalkViz";
@@ -95,6 +99,38 @@ export const RemotionRoot: React.FC = () => {
         durationInFrames={400}
         fps={30}
         width={1080}
+        height={1080}
+      />
+      <Composition
+        id="KeepShipping"
+        component={KeepShipping}
+        durationInFrames={KEEP_SHIPPING_TOTAL_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="RateLimitWarning"
+        component={RateLimitWarning}
+        durationInFrames={RATE_LIMIT_TOTAL_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="DidThisEverHappenToYou"
+        component={DidThisEverHappenToYou}
+        durationInFrames={DID_THIS_TOTAL_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="DidThisEverHappenToYouFast"
+        component={DidThisEverHappenToYouFast}
+        durationInFrames={DID_THIS_FAST_TOTAL_FRAMES}
+        fps={30}
+        width={1920}
         height={1080}
       />
       <Composition

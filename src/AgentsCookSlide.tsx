@@ -62,12 +62,17 @@ export const AgentsCookSlide: React.FC = () => {
           fontSize: FONT_SIZE,
           fontWeight: 500,
           color: TEXT_COLOR,
-          textAlign: "center",
           lineHeight: 1.4,
+          position: "relative",
+          whiteSpace: "nowrap",
         }}
       >
-        {displayText}
-        <span style={{ visibility: cursorVisibility }}>|</span>
+        {/* Phantom reserves full width so text never shifts while typing */}
+        <span style={{ visibility: "hidden" }}>{LINE_1}</span>
+        <span style={{ position: "absolute", left: 0, top: 0, whiteSpace: "nowrap" }}>
+          {displayText}
+          <span style={{ visibility: cursorVisibility }}>|</span>
+        </span>
       </div>
     </AbsoluteFill>
   );
