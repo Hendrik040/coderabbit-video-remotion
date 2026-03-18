@@ -140,7 +140,7 @@ const CTX_SPOKES = [
 const CTX_SOURCES = [
   { label: "CODEBASE",      icon: "code",    cx: 145, cy: 498, si: 0, ax: 221, ay: 507 },
   { label: "DOCUMENTATION", icon: "bars",    cx: 195, cy: 330, si: 1, ax: 224, ay: 355 },
-  { label: "GITHUB",        icon: "fork",    cx: 580, cy: 315, si: 2, ax: 562, ay: 340 },
+  { label: "GITHUB",        icon: "github",  cx: 580, cy: 315, si: 2, ax: 562, ay: 340 },
   { label: "JIRA",          icon: "jira",    cx: 155, cy: 670, si: 3, ax: 217, ay: 645 },
   { label: "SLACK",         icon: "slack",   cx: 410, cy: 750, si: 4, ax: 412, ay: 725 },
 ];
@@ -157,6 +157,8 @@ const renderCtxIcon = (type: string, cx: number, cy: number) => {
         <rect x={ix - 9} y={cy - 1} width={18} height={3} rx={1.5} fill={CR_ORANGE} opacity={0.7} />
         <rect x={ix - 9} y={cy + 5} width={18} height={3} rx={1.5} fill={CR_ORANGE} opacity={0.4} />
       </>;
+    case "github":
+      return <image href={staticFile("github.png")} x={ix - 10} y={cy - 10} width={20} height={20} />;
     case "fork":
       // Git branch: base node + two branch nodes connected by Y-lines
       return <>
