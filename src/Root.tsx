@@ -22,6 +22,7 @@ import { RabbitAgentLoopV2, RABBIT_AGENT_LOOP_V2_TOTAL_FRAMES } from "./RabbitAg
 import { RabbitAgentLoopV3, RABBIT_AGENT_LOOP_V3_TOTAL_FRAMES } from "./RabbitAgentLoopV3";
 import { RabbitAgentLoopV4, RABBIT_AGENT_LOOP_V4_TOTAL_FRAMES } from "./RabbitAgentLoopV4";
 import { RabbitAgentLoopV5, RABBIT_AGENT_LOOP_V5_TOTAL_FRAMES } from "./RabbitAgentLoopV5";
+import { RabbitAgentLoopV6, RABBIT_AGENT_LOOP_V6_TOTAL_FRAMES } from "./RabbitAgentLoopV6";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -215,6 +216,14 @@ export const RemotionRoot: React.FC = () => {
         id="RabbitAgentLoopV5"
         component={RabbitAgentLoopV5}
         durationInFrames={RABBIT_AGENT_LOOP_V5_TOTAL_FRAMES}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="RabbitAgentLoopV6"
+        component={RabbitAgentLoopV6}
+        durationInFrames={RABBIT_AGENT_LOOP_V6_TOTAL_FRAMES}
         fps={30}
         width={1920}
         height={1080}
