@@ -141,7 +141,7 @@ const CTX_SOURCES = [
   { label: "CODEBASE",      icon: "code",    cx: 145, cy: 498, si: 0, ax: 221, ay: 507 },
   { label: "DOCUMENTATION", icon: "bars",    cx: 195, cy: 330, si: 1, ax: 224, ay: 355 },
   { label: "GITHUB",        icon: "fork",    cx: 580, cy: 315, si: 2, ax: 562, ay: 340 },
-  { label: "JIRA",          icon: "diamond", cx: 155, cy: 670, si: 3, ax: 217, ay: 645 },
+  { label: "JIRA",          icon: "jira",    cx: 155, cy: 670, si: 3, ax: 217, ay: 645 },
   { label: "SLACK",         icon: "slack",   cx: 410, cy: 750, si: 4, ax: 412, ay: 725 },
 ];
 
@@ -167,8 +167,8 @@ const renderCtxIcon = (type: string, cx: number, cy: number) => {
         <line x1={ix}    y1={cy - 1}  x2={ix - 8} y2={cy - 4} stroke={CR_ORANGE} strokeWidth={1.5} />
         <line x1={ix}    y1={cy - 1}  x2={ix + 8} y2={cy - 4} stroke={CR_ORANGE} strokeWidth={1.5} />
       </>;
-    case "diamond":
-      return <polygon points={`${ix},${cy - 9} ${ix + 9},${cy} ${ix},${cy + 9} ${ix - 9},${cy}`} fill={CR_ORANGE} />;
+    case "jira":
+      return <image href={staticFile("jira.png")} x={ix - 10} y={cy - 10} width={20} height={20} />;
     case "slack":
       return <image href={staticFile("slack.png")} x={ix - 10} y={cy - 10} width={20} height={20} />;
     default: return null;
