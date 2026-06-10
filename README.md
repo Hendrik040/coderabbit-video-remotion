@@ -1,122 +1,93 @@
-# CodeRabbit YouTube Intro - Remotion Project
+# CodeRabbit Video Studio (Remotion)
 
-A tech/futuristic animated intro for CodeRabbit's "How to Build an AI Code Review Agent" YouTube video.
+A [Remotion](https://www.remotion.dev/) project for producing CodeRabbit marketing and social videos as code. Every video is a React component, so animations are deterministic, reviewable, and easy to remix.
 
-## Features
+The most important thing to know: **this repo is built to be driven with Claude Code.** The design patterns for each video style are captured as skills in `.claude/skills/`, so you can ask Claude for a new video and it will follow the established look automatically — you rarely need to write a composition by hand.
 
-- 🐰 **CodeRabbit Logo Animation** - Spinning logo reveal with glow effects
-- ⚡ **Glitch Text Effects** - Tech-style glitch on the brand name
-- 🔮 **Particle System** - Floating particles in brand colors (orange, aquamarine, pink)
-- 💻 **Code Background** - Animated code lines appearing in the background
-- 📡 **Scan Line Effect** - Moving horizontal scan line for futuristic feel
-- 🎯 **Grid Background** - Subtle tech grid overlay
-- ✨ **Smooth Transitions** - Spring-based animations for natural movement
+## The three video families
 
-## Duration
+### 1. Typewriter text slides (`remotion-typewriter` skill)
 
-12 seconds (360 frames @ 30fps)
+Short punchy slides where text types out character by character on a black background in CodeRabbit orange — used for hooks, taglines, and intros.
 
-## Brand Colors Used
+- **Skill:** `.claude/skills/remotion-typewriter/SKILL.md`
+- **Examples:** `DidThisEverHappenToYou`, `KeepShipping`, `CodeRabbitShips`, `SuperDeveloper`, `TerminalTyping` (terminal-window variant)
+- **Look:** IBM Plex Mono 500, orange `#FF570A` on black, seeded-random jitter so renders are identical every time.
 
-- **Orange** (#FF570A) - Primary accent
-- **Aquamarine** (#25BAB1) - Secondary accent
-- **Pink** (#F2B8EB) - Secondary accent
-- **Dark** (#171717) - Background
-- **Cream** (#F6F6F1) - Text
+### 2. Animated infographic flows (`infographic-flows` skill)
 
-## Prerequisites
+Multi-phase animated diagrams that explain how something works — agent loops, pipelines, knowledge graphs, icon cycling, pill morphs.
 
-- Node.js 18+
-- npm or yarn
+- **Skill:** `.claude/skills/infographic-flows/SKILL.md`
+- **Canonical reference:** `src/RabbitAgentLoopV4.tsx`
+- **Examples:** the `RabbitAgentLoop` series (V1–V6), `MultiRepoViz`, `ASTWalkViz`, `InnerOuterLoopViz`, `ImpactSlicerViz`, the `MergeConflictResolution` series (V1–V5)
+- **Look:** same brand mono font and orange-on-black/dark-navy palette, with a shared `fi()` fade-in helper and spring-based motion.
 
-## Installation
+### 3. Simulated app-UI demos (`slack-ui-demo` skill)
+
+Videos that play like a **clean screen recording** of Slack showing a CodeRabbit feature (e.g. the `/plan` agent) — full-frame UI, real Slack dark theme, typing indicators, agent "Working…" pills. Made by studying frames from a real screen recording, then rebuilding it as a simplified, polished animation. These are the recent Slackbot agent videos.
+
+- **Skill:** `.claude/skills/slack-ui-demo/SKILL.md`
+- **Canonical reference:** `src/PlanSlackDemo.tsx`
+- **Examples:** `PlanSlackDemo` V1–V3
+- **Look:** deliberately *not* brand-styled — Lato font and Slack's real dark palette, because realism beats branding for a fake screen recording. 1920×1080 @ 30fps.
+
+## How to make a new video
+
+1. Open this repo in Claude Code.
+2. Describe what you want, e.g. *"Make a Slack demo video of the new review command"* or *"Create an infographic showing the multi-repo flow"*.
+3. The matching skill triggers automatically and gives Claude the exact fonts, colors, timing helpers, layout patterns, and verification steps for that video family.
+4. Preview in Remotion Studio, iterate, render.
+
+If you're tweaking by hand instead, copy the canonical reference component for that family — every composition follows its skill's patterns.
+
+## Getting started
+
+Requires Node.js 18+.
 
 ```bash
 npm install
+npm start        # opens Remotion Studio at http://localhost:3000
 ```
 
-## Development
+All compositions are registered in `src/Root.tsx` and show up in the Studio sidebar.
 
-Start the Remotion Studio to preview and edit:
+## Rendering
 
 ```bash
-npm start
+# Render any composition by its ID (see src/Root.tsx)
+npx remotion render src/index.ts PlanSlackDemoV3 out/plan-slack-demo.mp4
+
+# As GIF
+npx remotion render src/index.ts RabbitAgentLoopV4 out/loop.gif --codec=gif
+
+# Different resolution / frame range
+npx remotion render src/index.ts CodeRabbitIntro out/intro.mp4 --height=720 --width=1280 --frames=0-180
 ```
 
-This opens the Remotion Studio at http://localhost:3000
-
-## Render Video
-
-Render the final MP4:
-
-```bash
-npm run build
-```
-
-Output: `out/intro.mp4`
-
-### Custom Render Options
-
-```bash
-# Render as GIF
-npx remotion render src/index.ts CodeRabbitIntro out/intro.gif --codec=gif
-
-# Render at different resolution
-npx remotion render src/index.ts CodeRabbitIntro out/intro.mp4 --height=720 --width=1280
-
-# Render specific frame range
-npx remotion render src/index.ts CodeRabbitIntro out/intro.mp4 --frames=0-180
-```
-
-## Customization
-
-### Edit Text
-
-In `src/CodeRabbitIntro.tsx`, find and modify:
-
-```tsx
-// Brand name
-<GlitchText text="CodeRabbit" ... />
-
-// Tagline
-<span>How to Build an AI Code Review Agent</span>
-
-// Subtitle
-{"<"} TUTORIAL {"/>"}
-```
-
-### Adjust Timing
-
-The composition is 360 frames (12 seconds) at 30fps. Key timing:
-- Frame 30: Logo appears
-- Frame 80: Title appears
-- Frame 140: Tagline appears
-- Frame 180: Subtitle appears
-- Frame 300-360: Fade out
-
-### Change Duration
-
-In `src/Root.tsx`:
-```tsx
-<Composition
-  durationInFrames={360}  // Change this (30 frames = 1 second)
-  fps={30}
-  ...
-/>
-```
-
-## Project Structure
+## Project structure
 
 ```
-coderabbit-video-intro/
+├── .claude/skills/        # The three video-family skills (start here)
+│   ├── remotion-typewriter/
+│   ├── infographic-flows/
+│   └── slack-ui-demo/
 ├── src/
-│   ├── index.ts          # Entry point
-│   ├── Root.tsx          # Composition setup
-│   └── CodeRabbitIntro.tsx # Main animation component
-├── package.json
-├── tsconfig.json
-└── remotion.config.ts
+│   ├── Root.tsx           # All compositions registered here
+│   ├── index.ts           # Entry point
+│   └── *.tsx              # One file per composition
+├── public/                # Logos/avatars loaded via staticFile() (cr-logo.png, etc.)
+├── brand-samples/         # Brand reference assets, backgrounds, external logos
+└── out/                   # Rendered videos (gitignored)
 ```
+
+## Brand reference
+
+- **Orange** `#FF570A` — primary accent
+- **Aquamarine** `#25BAB1`, **Pink** `#F2B8EB` — secondary accents
+- **Dark** `#171717` / **Black** `#000000` — backgrounds
+- **Cream** `#F6F6F1` — light text/background
+- **Font:** IBM Plex Mono Medium (500) everywhere — except Slack UI demos, which use Lato for realism
 
 ## License
 
