@@ -1,4 +1,5 @@
 import { Composition } from "remotion";
+import { MotionBrandKit } from "./MotionBrandKit";
 import { MergeConflictResolution, MERGE_CONFLICT_TOTAL_FRAMES } from "./MergeConflictResolution";
 import { MergeConflictResolutionV2, MERGE_CONFLICT_V2_TOTAL_FRAMES } from "./MergeConflictResolutionV2";
 import { MergeConflictResolutionV3, MERGE_CONFLICT_V3_TOTAL_FRAMES } from "./MergeConflictResolutionV3";
@@ -45,6 +46,7 @@ import {
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      <Composition id="MotionBrandKit" component={MotionBrandKit} durationInFrames={360} fps={30} width={1920} height={1080}/>
       <Composition
         id="CodeRabbitIntro"
         component={CodeRabbitIntro}

@@ -2,6 +2,29 @@
 
 A [Remotion](https://www.remotion.dev/) project for producing CodeRabbit marketing and social videos as code. Every video is a React component, so animations are deterministic, reviewable, and easy to remix.
 
+## Local Motion Studio
+
+This branch adds a local editor for presenter footage and CodeRabbit overlays, integrating the Cue gesture experiment with this repository's brand components.
+
+```bash
+npm install
+npm run studio:setup  # downloads the gesture model once; footage stays local
+npm run studio       # http://127.0.0.1:4319
+```
+
+Use Node.js 22 or newer for the studio. Start with the **Developer walkthrough** or **Code & API explainer** preset, or import a video. Edit terminals, agent workflows, code panels, API diagrams, and callouts; adjust timing and placement; then export an MP4 or a transparent ProRes overlay. The sample's hand motion is simulated. Imported clips can be analyzed locally for real gestures.
+
+The terminal is shared with the existing `TerminalTyping` compositions. The compact agent workflow adapts `RabbitAgentLoopV4`'s visual language. Both are also shown in the new `MotionBrandKit` composition in Remotion Studio. Existing compositions remain available with `npm start`.
+
+Projects autosave in this browser, with JSON save/open for explicit backups. Source video lives in `.studio-data/media/`; renders go to `out/studio/`. Neither footage nor models are committed. [Studio setup, controls, and limitations](studio/README.md).
+
+```bash
+npm run test:studio   # gesture, project validation, and shared terminal checks
+npm run typecheck    # original Remotion compositions
+npm run studio:build # studio typecheck and production bundle
+npm run studio:serve # serve the production build locally
+```
+
 The most important thing to know: **this repo is built to be driven with Claude Code.** The design patterns for each video style are captured as skills in `.claude/skills/`, so you can ask Claude for a new video and it will follow the established look automatically — you rarely need to write a composition by hand.
 
 ## The three video families
