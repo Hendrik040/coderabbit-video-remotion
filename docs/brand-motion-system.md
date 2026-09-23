@@ -23,6 +23,8 @@ Selecting a swatch updates the asset preview, preset, composition layer, and exp
 | ID-01 | Logo reveal | 3.2s | Open a film, launch, or presentation | Yes |
 | TR-01 | Circle wipe | 1.8s | Cover a cut with expanding circular fields | Yes |
 | TR-02 | Stack wipe | 2s | Cover a cut with six staggered rails | Yes |
+| TR-03 | Color bar wipe | 2s | Ten brand-color bands enter left and exit right | Yes |
+| TR-04 | Change Stack pixel wipe | 2.4s | Uneven traveling pixels assemble and clear the glow | Yes |
 | TY-01 | Type reveal | 4s | Introduce a feature or chapter | Yes |
 | ID-02 | Brand sign-off | 4s | Close with a lockup, tagline, and destination | Full-frame plate |
 | BG-01 | Signal loop | 8s | Repeating orange circles and rails | Full-frame plate |
@@ -33,6 +35,10 @@ Selecting a swatch updates the asset preview, preset, composition layer, and exp
 **Linear** assets render one entrance/hold/exit or transition. **Looping** assets export one complete cycle. The large preview repeats for inspection; linear thumbnails play on hover or keyboard focus, while loop thumbnails run continuously. The Change Stack thumbnail also respects reduced-motion and page visibility settings.
 
 Transitions begin and end transparent. Their center cut frame is completely covered, including in alpha exports and in either direction. The library's **Cut at** button seeks to this exact frame. Put the exported transition above two clips in an editor and cut the underlying footage at that marker. The local composition editor supports one source video, so it does not perform a two-clip edit automatically.
+
+**Color bar wipe** uses the hero bar's ten-color sequence as horizontal bands from top to bottom, with Stack wipe's total stagger. At the default 2 seconds, all bands enter from the left, hold a fully covered frame around the 1-second cut, and continue out to the right. Each band's color, direction, and duration can be edited. Transitions render above foreground graphics and accent bars to cover the complete edit.
+
+**Change Stack pixel wipe** carries the original glow on individual square tiles that travel from left to right with varied delays and speeds. The pixels settle into a complete glow plate around the center cut, then break apart and continue off the right edge. Pixel size (8–40px), unevenness, direction, duration, brand color, lighting, and vignette are editable. The default is 16px pixels at 75% unevenness over 2.4 seconds; setting unevenness to zero synchronizes the rows. Variation is seeded so every preview, seek, and export reproduces the same motion. The cut stays opaque across all settings.
 
 The color bar reproduces the [Change Stack hero's bottom accent](https://www.coderabbit.ai/change-stack): ten anchored, overlapping color segments with a 3.2-second `cubic-bezier(.65, 0, .35, 1)` expansion. The website runs this once on entering view. **Color bar reveal** keeps that behavior and holds its final widths; **Color bar loop** adds a symmetric return, with 3.2 seconds of expansion, 0.8 seconds of hold, 3.2 seconds of return, and 0.8 seconds of rest at the default 8-second cycle. Changing cycle length scales those phases together.
 
@@ -56,6 +62,7 @@ Bars default to the source's thin 4px bottom edge on a 720p canvas. Height (4–
 - `studio/src/brand/AssetControls.tsx`: controls shared with the composition inspector.
 - `studio/src/lib/colorBar.ts` and `studio/src/brand/ColorBar.tsx`: source-matched color bar geometry, deterministic motion, and transparent overlay rendering.
 - `studio/src/lib/glowSettings.ts`, `studio/src/brand/GlowControls.tsx`, and `studio/src/brand/ChangeStackGlow.tsx`: shared lighting/vignette geometry, controls, and frame-driven canvas rendering. `glowSettings.test.ts` covers defaults, transforms, loop continuity, and preset validation.
+- `studio/src/lib/pixelWipe.ts` and `studio/src/brand/PixelGlowWipe.tsx`: deterministic pixel travel carrying the shared Change Stack renderer. `pixelWipe.test.ts` covers endpoints, cut coverage, direction, variation, seeking, and saved settings.
 - `studio/src/lib/brandAssets.test.ts`: transition endpoints and full coverage, loop periodicity, asset schema/copy limits, export dimensions, and preservation of existing projects.
 
 Run `npm run test:studio`, `npm run typecheck`, and `npm run studio:build`. After changing motion, render representative frames and inspect alpha at the first, cut, and final frames. The prior station templates and developer explainers remain available in Composition; see [the broadcast package](broadcast-package.md).

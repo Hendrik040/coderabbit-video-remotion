@@ -1,10 +1,13 @@
 import type {BrandAssetKind, Overlay, OverlayKind, Project} from '../types';
-import {colorBarColors, isColorBar} from './colorBar';
+import {colorBarColors, colorBarSegments, isColorBar} from './colorBar';
+import {pixelWipeDefaults} from './pixelWipe';
 
 export const brandAssetTemplates = {
   'logo-reveal': {code: 'ID-01', name: 'Logo reveal', family: 'Reveals', duration: 3.2, alpha: true, title: 'Tagline', body: '', titleMax: 72, bodyMax: 0, description: 'A measured entrance for the full CodeRabbit lockup.', usage: 'Open a video, product launch, or presentation.'},
   'circle-wipe': {code: 'TR-01', name: 'Circle wipe', family: 'Transitions', duration: 1.8, alpha: true, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'Orange leads. A circular field covers the cut and clears.', usage: 'Place over an edit. Cut the underlying footage at the center marker.'},
   'stack-wipe': {code: 'TR-02', name: 'Stack wipe', family: 'Transitions', duration: 2, alpha: true, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'Six staggered rails sweep across the frame together.', usage: 'Place over an edit. Cut the underlying footage at the center marker.'},
+  'color-bar-wipe': {code: 'TR-03', name: 'Color bar wipe', family: 'Transitions', duration: 2, alpha: true, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'Ten brand-color bands enter from the left, cover the cut, and clear to the right.', usage: 'Place over an edit. Cut beneath the fully covered center frame.'},
+  'pixel-glow-wipe': {code: 'TR-04', name: 'Change Stack pixel wipe', family: 'Transitions', duration: 2.4, alpha: true, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'Uneven streams of pixels carry the Change Stack glow across the frame.', usage: 'Cover a cut with a pixel sweep. The marked center frame is fully opaque.'},
   'type-reveal': {code: 'TY-01', name: 'Type reveal', family: 'Typography', duration: 4, alpha: true, title: 'Headline', body: 'Supporting line', titleMax: 72, bodyMax: 100, description: 'Confident type with a shared reveal, hold, and exit.', usage: 'Introduce a feature, chapter, or announcement.'},
   'brand-signoff': {code: 'ID-02', name: 'Brand sign-off', family: 'Idents', duration: 4, alpha: false, title: 'Tagline', body: 'Website or call to action', titleMax: 72, bodyMax: 80, description: 'The official lockup, a closing line, and a clear destination.', usage: 'Close a film or give a presentation a consistent final frame.'},
   'signal-loop': {code: 'BG-01', name: 'Signal loop', family: 'Backgrounds', duration: 8, alpha: false, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'Circles and rails repeat in an orange-led motion pattern.', usage: 'An ambient bed for event screens, titles, and holding slides.'},
@@ -13,7 +16,7 @@ export const brandAssetTemplates = {
 } as const;
 export const brandAssetKinds = Object.keys(brandAssetTemplates) as BrandAssetKind[];
 export const isBrandAsset = (kind: OverlayKind): kind is BrandAssetKind => kind in brandAssetTemplates;
-export const isTransition = (kind: OverlayKind) => kind === 'circle-wipe' || kind === 'stack-wipe';
+export const isTransition = (kind: OverlayKind) => kind === 'circle-wipe' || kind === 'stack-wipe' || kind === 'color-bar-wipe' || kind === 'pixel-glow-wipe';
 
 const base = {enabled: true, start: 0, binding: 'cue', placement: 'center', accent: '#FF570A', scale: 1, colorway: 'dark', direction: 'right'} as const;
 export const brandAssetDefaults = Object.fromEntries(brandAssetKinds.map(kind => [kind, {
@@ -22,6 +25,8 @@ export const brandAssetDefaults = Object.fromEntries(brandAssetKinds.map(kind =>
   body: kind === 'type-reveal' ? 'More context. Better code.' : kind === 'brand-signoff' ? 'coderabbit.ai' : '',
   ...(kind === 'signal-loop' || kind === 'color-bar-loop' ? {loopDuration: 8} : {}),
   ...(isColorBar(kind) ? {barHeight: 4, barPosition: 'bottom', barColors: [...colorBarColors]} : {}),
+  ...(kind === 'color-bar-wipe' ? {barColors: [...colorBarColors]} : {}),
+  ...(kind === 'pixel-glow-wipe' ? {accent: '#687FF5', intensity: 1, ...pixelWipeDefaults} : {}),
 }])) as Record<BrandAssetKind, Omit<Overlay, 'id'>>;
 
 export function assetProject(asset: Overlay, width = 1280): Project {
@@ -61,4 +66,13 @@ export function stackWipeState(frame: number, duration: number, row: number, fps
   const p = assetPhase(frame, duration, fps), delay = row * 0.014 + (accent ? 0 : 0.025);
   const enter = motionEase((p - delay) / 0.3), leave = motionEase((p - 0.6 - delay) / 0.3);
   return -1280 + 1280 * enter + 1280 * leave;
+}
+
+/** Ten bands share Stack wipe's total stagger, keeping the cut covered and the last band clear. */
+export function colorBarWipeState(frame: number, duration: number, fps = 30) {
+  const height = 720 / colorBarSegments.length;
+  return colorBarSegments.map((segment, index) => ({
+    ...segment, y: index * height, height,
+    x: stackWipeState(frame, duration, index * 5 / (colorBarSegments.length - 1), fps, true),
+  }));
 }

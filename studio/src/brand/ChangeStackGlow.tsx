@@ -6,7 +6,7 @@ import type {Overlay} from '../types';
 type GlowSettings = Pick<Overlay, 'accent' | 'intensity' | 'loopDuration' | 'lighting' | 'vignette'>;
 
 /** Shared drawing for the live library preview, the scrubber, and exported frames. */
-function drawGlow(ctx: CanvasRenderingContext2D, frame: number, fps: number, settings: GlowSettings, pixels: HeroPixel[]) {
+export function drawChangeStackGlow(ctx: CanvasRenderingContext2D, frame: number, fps: number, settings: GlowSettings, pixels: HeroPixel[]) {
   const {width, height} = ctx.canvas;
   const intensity = settings.intensity ?? 1;
   const light = {...lightingDefaults, ...settings.lighting};
@@ -81,7 +81,7 @@ export function ChangeStackGlow({overlay, frame, fps}: {overlay: Overlay; frame:
   const pixels = useMemo(() => lighting ? createHeroPixels(1280, 720, {x, y, angle, width, height, softness}) : heroPixels, [x, y, angle, width, height, softness, !!lighting]);
   useLayoutEffect(() => {
     const ctx = canvas.current?.getContext('2d');
-    if (ctx) drawGlow(ctx, frame, fps, {accent, intensity, loopDuration, lighting, vignette}, pixels);
+    if (ctx) drawChangeStackGlow(ctx, frame, fps, {accent, intensity, loopDuration, lighting, vignette}, pixels);
   }, [frame, fps, loopDuration, intensity, accent, lighting, vignette, pixels]);
   return <canvas ref={canvas} width={1280} height={720} aria-label="Looping Change Stack glow background" style={{position: 'absolute', inset: 0, width: 1280, height: 720, opacity: overlay.opacity ?? 1}}/>;
 }
@@ -101,7 +101,7 @@ export function ChangeStackGlowThumbnail({overlay}: {overlay?: Overlay}) {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const settings = {accent: '#888888', lighting, vignette, intensity, loopDuration};
     let raf = 0, origin = 0, lastFrame = -1, inView = true;
-    const draw = (frame: number) => {drawGlow(ctx, frame, 30, settings, pixels);};
+    const draw = (frame: number) => {drawChangeStackGlow(ctx, frame, 30, settings, pixels);};
     const tick = (now: number) => {
       if (!origin) origin = now;
       const frame = Math.floor((now - origin) * 30 / 1000) % Math.round((loopDuration ?? 16) * 30);

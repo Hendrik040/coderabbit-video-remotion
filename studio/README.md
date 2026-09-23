@@ -22,11 +22,15 @@ For production mode, run `npm run studio:build`, then `npm run studio:serve`. Ex
 
 ## Linear and looping assets
 
-**Library → Linear** contains **Logo reveal**, **Circle wipe**, **Stack wipe**, **Type reveal**, **Brand sign-off**, and **Color bar reveal**. **Library → Looping** contains **Signal loop**, **Change Stack glow**, and **Color bar loop**. Select, customize, and export one asset as MP4 or, where supported, transparent ProRes 4444. Transitions show their exact cut frame. Save/open JSON presets or add the asset to the existing composition.
+**Library → Linear** contains **Logo reveal**, **Circle wipe**, **Stack wipe**, **Color bar wipe**, **Change Stack pixel wipe**, **Type reveal**, **Brand sign-off**, and **Color bar reveal**. **Library → Looping** contains **Signal loop**, **Change Stack glow**, and **Color bar loop**. Select, customize, and export one asset as MP4 or, where supported, transparent ProRes 4444. Transitions show their exact cut frame. Save/open JSON presets or add the asset to the existing composition.
 
 The color bar matches the ten segments and 3.2-second expansion at the bottom of the Change Stack hero. Its loop variant adds a smooth return. Choose the strip's height and position, then select individual segments to edit with the shared brand swatches. Both variants support transparent export and layer above other composition assets.
 
+**Color bar wipe** turns those ten colors into full-frame horizontal bands. They enter from the left with Stack wipe's stagger, cover the center cut, and exit to the right. Edit each band's color, reverse the direction, or change the duration. All transitions render above other layers and export with transparent first and last frames in ProRes 4444.
+
 **Change Stack glow** has separate **Lighting** and **Vignette** controls. Move, rotate, stretch, and soften the light; adjust its intensity and ambient fill. Shape the vignette with its own center, dimensions, angle, strength, and feather. Reset either section to its original appearance. These settings save with the asset preset or composition and apply to preview and export without changing the loop timing.
+
+**Change Stack pixel wipe** uses that same glow as a transition. Individual pixels travel unevenly from left to right, form a solid plate around the cut, and scatter off the right edge. Edit pixel size and unevenness, or use the shared lighting, vignette, and palette controls. Direction can be reversed. The default 2.4-second asset has transparent endpoints and supports ProRes 4444 export.
 
 The composition editor retains the complete component collection and the earlier presets. [Broadcast package guide](../docs/broadcast-package.md).
 

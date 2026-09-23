@@ -37,7 +37,7 @@ test('color bar loop moves and returns to an identical rest frame at the seam an
 });
 
 test('color bar presets preserve edited segments and placement through save and export validation', () => {
-  for (const kind of ['color-bar-reveal', 'color-bar-loop'] as const) {
+  for (const kind of ['color-bar-reveal', 'color-bar-loop', 'color-bar-wipe'] as const) {
     const asset = {id: kind, ...brandAssetDefaults[kind], barHeight: 28, barPosition: 'top' as const, barColors: ['#25E2A8', ...brandAssetDefaults[kind].barColors!.slice(1)], loopDuration: 12};
     const project = assetProject(asset, 1920);
     assert.deepEqual(projectSchema.parse(JSON.parse(JSON.stringify(project))), project);

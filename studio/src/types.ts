@@ -1,7 +1,7 @@
 import type {GlowLighting, GlowVignette} from './lib/glowSettings';
 export type Gesture = 'Open_Palm' | 'Pointing_Up' | 'Pinch' | 'Swipe' | 'None';
 export type BroadcastKind = 'presenter' | 'headline' | 'triage' | 'stack' | 'ticker' | 'bug' | 'ident';
-export type BrandAssetKind = 'logo-reveal' | 'circle-wipe' | 'stack-wipe' | 'type-reveal' | 'brand-signoff' | 'signal-loop' | 'color-bar-reveal' | 'color-bar-loop';
+export type BrandAssetKind = 'logo-reveal' | 'circle-wipe' | 'stack-wipe' | 'color-bar-wipe' | 'pixel-glow-wipe' | 'type-reveal' | 'brand-signoff' | 'signal-loop' | 'color-bar-reveal' | 'color-bar-loop';
 export type OverlayKind = 'code' | 'diagram' | 'callout' | 'terminal' | 'agentflow' | 'hero' | BroadcastKind | BrandAssetKind;
 export type AssetType = 'linear' | 'looping';
 export type Binding = 'cue' | 'progress' | 'follow';
@@ -16,6 +16,7 @@ export type Overlay = {
   lighting?: Partial<GlowLighting>; vignette?: Partial<GlowVignette>;
   colorway?: 'dark' | 'light'; direction?: 'left' | 'right';
   barHeight?: number; barPosition?: 'top' | 'center' | 'bottom'; barColors?: string[];
+  pixelSize?: number; scatter?: number;
 };
 export type Project = {
   name: string; mediaUrl: string | null; mediaName: string; duration: number; fps: number;

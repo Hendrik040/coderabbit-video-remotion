@@ -1,10 +1,11 @@
 import React, {type CSSProperties} from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {broadcastMotion} from '../lib/broadcast';
-import {assetPhase, circleWipeState, motionEase, signalPhase, stackWipeState} from '../lib/brandAssets';
+import {assetPhase, circleWipeState, colorBarWipeState, motionEase, signalPhase, stackWipeState} from '../lib/brandAssets';
 import {brand} from './Broadcast';
 import {isColorBar} from '../lib/colorBar';
 import {ColorBar} from './ColorBar';
+import {PixelGlowWipe} from './PixelGlowWipe';
 import type {Overlay} from '../types';
 
 const font = 'Geist, sans-serif';
@@ -16,6 +17,7 @@ function Lockup({width, light = false, style}: {width: number; light?: boolean; 
 
 export function MotionAsset({overlay: o, frame, fps}: {overlay: Overlay; frame: number; fps: number}) {
   if (isColorBar(o.kind)) return <ColorBar overlay={o} frame={frame} fps={fps}/>;
+  if (o.kind === 'pixel-glow-wipe') return <PixelGlowWipe overlay={o} frame={frame} fps={fps}/>;
   const accentColor = o.accent;
   const light = o.colorway === 'light';
   const background = light ? brand.white : brand.ink;
@@ -36,6 +38,11 @@ export function MotionAsset({overlay: o, frame, fps}: {overlay: Overlay; frame: 
       </svg>
       <Lockup width={380} light={light} style={{position: 'absolute', top: 332, left: 450, opacity: wipe.logo}}/>
     </AbsoluteFill>;
+  }
+  if (o.kind === 'color-bar-wipe') {
+    return <svg width="1280" height="720" viewBox="0 0 1280 720" aria-label="Color bar wipe transition" style={{position: 'absolute', inset: 0, overflow: 'hidden'}}>
+      {colorBarWipeState(frame, o.duration, fps).map((band, index) => <rect key={band.name} x={reverse ? -band.x : band.x} y={band.y} width={1280} height={band.height} fill={o.barColors?.[index] ?? band.color}/>)}
+    </svg>;
   }
   if (o.kind === 'stack-wipe') {
     const logo = motionEase((p - 0.37) / 0.07) * (1 - motionEase((p - 0.55) / 0.05));

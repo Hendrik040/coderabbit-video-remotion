@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {appendBrandAsset, assetProject, brandAssetDefaults, brandAssetKinds, brandAssetTemplates, circleWipeState, cutFrame, signalPhase, stackWipeState} from './brandAssets';
+import {appendBrandAsset, assetProject, brandAssetDefaults, brandAssetKinds, brandAssetTemplates, circleWipeState, colorBarWipeState, cutFrame, signalPhase, stackWipeState} from './brandAssets';
 import {projectSchema} from './schema';
 import {demoProject} from './demo';
 
@@ -48,6 +48,33 @@ test('signal loops reproduce the same phase after a cycle and when seeking backw
     for (const frame of [0, 1, 29, 90, cycle - 1]) {
       assert.equal(signalPhase(frame, 30, seconds), signalPhase(frame + cycle, 30, seconds));
       assert.equal(signalPhase(frame, 30, seconds), signalPhase(frame - cycle, 30, seconds));
+    }
+  }
+});
+
+test('color bar wipe enters from the left, covers every row at the cut, and exits to the right', () => {
+  for (const duration of [0.1, 0.6, 2, 7.5, 12]) {
+    const last = Math.ceil(duration * 30) - 1;
+    const start = colorBarWipeState(0, duration);
+    const covered = colorBarWipeState(cutFrame(duration), duration);
+    const end = colorBarWipeState(last, duration);
+    let bottom = 0;
+    covered.forEach((band, index) => {
+      assert.equal(start[index].x, -1280);
+      assert.equal(band.x, 0);
+      assert.equal(end[index].x, 1280);
+      assert.equal(band.y, bottom);
+      bottom += band.height;
+    });
+    assert.equal(bottom, 720);
+    let previous = start;
+    for (let frame = 1; frame <= last; frame++) {
+      const bands = colorBarWipeState(frame, duration);
+      bands.forEach((band, index) => {
+        assert.ok(band.x >= previous[index].x, 'Every band travels in the same direction for entrance and exit');
+        if (index > 0) assert.ok(band.x <= bands[index - 1].x, 'The stagger stays in order');
+      });
+      previous = bands;
     }
   }
 });

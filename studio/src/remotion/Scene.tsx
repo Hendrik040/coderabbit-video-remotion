@@ -1,7 +1,7 @@
 import React from 'react';
 import {ChangeStackGlow} from '../brand/ChangeStackGlow';
 import {MotionAsset} from '../brand/MotionAssets';
-import {isBrandAsset} from '../lib/brandAssets';
+import {isBrandAsset, isTransition} from '../lib/brandAssets';
 import {activeLoopAssets, assetType} from '../lib/looping';
 import {isColorBar} from '../lib/colorBar';
 import {BroadcastBackdrop, BroadcastOverlay, useBroadcastFonts} from '../brand/Broadcast';
@@ -102,7 +102,7 @@ export const Scene: React.FC<SceneProps> = ({project, transparent = false}) => {
       </>}
       {backgrounds.map(overlay => overlay.kind === 'hero' ? <ChangeStackGlow key={overlay.id} overlay={overlay} frame={frame - overlay.start * fps} fps={fps}/> : <MotionAsset key={overlay.id} overlay={overlay} frame={frame - overlay.start * fps} fps={fps}/>)}
       {!transparent && project.showTracking && hand && <TrackedHand sample={hand} simulated={project.sampleMode}/>}
-      {project.overlays.filter(o => o.enabled && assetType(o.kind) === 'linear' && !isColorBar(o.kind)).map(overlay => {
+      {project.overlays.filter(o => o.enabled && assetType(o.kind) === 'linear' && !isColorBar(o.kind) && !isTransition(o.kind)).map(overlay => {
         const local = frame - overlay.start * fps;
         if (local < 0 || local >= overlay.duration * fps) return null;
         if (isBrandAsset(overlay.kind)) return <MotionAsset key={overlay.id} overlay={overlay} frame={local} fps={fps}/>;
@@ -121,6 +121,10 @@ export const Scene: React.FC<SceneProps> = ({project, transparent = false}) => {
         </div>;
       })}
       {project.overlays.filter(o => o.enabled && isColorBar(o.kind)).map(overlay => {
+        const local = frame - overlay.start * fps;
+        return local >= 0 && local < overlay.duration * fps ? <MotionAsset key={overlay.id} overlay={overlay} frame={local} fps={fps}/> : null;
+      })}
+      {project.overlays.filter(o => o.enabled && isTransition(o.kind)).map(overlay => {
         const local = frame - overlay.start * fps;
         return local >= 0 && local < overlay.duration * fps ? <MotionAsset key={overlay.id} overlay={overlay} frame={local} fps={fps}/> : null;
       })}
