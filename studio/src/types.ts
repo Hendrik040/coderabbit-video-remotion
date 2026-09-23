@@ -1,6 +1,8 @@
+import type {GlowLighting, GlowVignette} from './lib/glowSettings';
 export type Gesture = 'Open_Palm' | 'Pointing_Up' | 'Pinch' | 'Swipe' | 'None';
 export type BroadcastKind = 'presenter' | 'headline' | 'triage' | 'stack' | 'ticker' | 'bug' | 'ident';
-export type OverlayKind = 'code' | 'diagram' | 'callout' | 'terminal' | 'agentflow' | 'hero' | BroadcastKind;
+export type BrandAssetKind = 'logo-reveal' | 'circle-wipe' | 'stack-wipe' | 'type-reveal' | 'brand-signoff' | 'signal-loop' | 'color-bar-reveal' | 'color-bar-loop';
+export type OverlayKind = 'code' | 'diagram' | 'callout' | 'terminal' | 'agentflow' | 'hero' | BroadcastKind | BrandAssetKind;
 export type AssetType = 'linear' | 'looping';
 export type Binding = 'cue' | 'progress' | 'follow';
 export type Placement = 'left' | 'right' | 'center';
@@ -11,12 +13,16 @@ export type Overlay = {
   start: number; duration: number; binding: Binding; placement: Placement; accent: string; scale: number;
   kicker?: string;
   loopDuration?: number; intensity?: number; opacity?: number;
+  lighting?: Partial<GlowLighting>; vignette?: Partial<GlowVignette>;
+  colorway?: 'dark' | 'light'; direction?: 'left' | 'right';
+  barHeight?: number; barPosition?: 'top' | 'center' | 'bottom'; barColors?: string[];
 };
 export type Project = {
   name: string; mediaUrl: string | null; mediaName: string; duration: number; fps: number;
   width: number; height: number; samples: Sample[]; cues: Cue[]; overlays: Overlay[];
   sampleMode: boolean; showTracking: boolean; mute: boolean;
   broadcast?: boolean;
+  brandAsset?: boolean;
 };
 export type SceneProps = {project: Project; transparent?: boolean};
 export const gestureLabel: Record<Gesture, string> = {Open_Palm: 'Open palm', Pointing_Up: 'Point', Pinch: 'Pinch', Swipe: 'Hand sweep', None: 'No gesture'};

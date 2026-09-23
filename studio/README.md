@@ -1,8 +1,8 @@
 # CodeRabbit Motion Studio
 
-A local React + Remotion broadcast editor. Seven named station templates combine current CodeRabbit logos and typography with consistent motion. The editor stays monochrome. Cue's footage import, gesture analysis, timeline, and export remain available alongside the earlier developer walkthrough graphics.
+A local React + Remotion library for reusable CodeRabbit brand assets. Start with a logo reveal, transition, title, sign-off, or looping background; edit it and export it independently. The studio stays monochrome, with brand color in the rendered assets. [Catalog, motion rules, and reuse workflow](../docs/brand-motion-system.md).
 
-Start with **Load a preset → Broadcast rundown**. Edit a presenter name and role, segment headings, product cards, ticker, and station identity. [Template catalog, brand sources, motion rules, and layout guide](../docs/broadcast-package.md). Gesture model setup is optional for broadcast editing and rendering.
+**Composition** opens the existing footage and timeline editor, including station templates, developer explainers, and gesture analysis. Its saved project is separate from the asset library. Gesture model setup is optional for brand asset editing and rendering.
 
 ## Start
 
@@ -22,7 +22,13 @@ For production mode, run `npm run studio:build`, then `npm run studio:serve`. Ex
 
 ## Linear and looping assets
 
-**Components → Linear** contains the station templates and explainer graphics. **Components → Looping** contains **Change Stack glow**, a seamless procedural background based on the product-page hero. Add it behind your graphics or load **Change Stack glow loop** for a standalone export. Cycle length, glow intensity, opacity and color are editable; the editor itself remains monochrome.
+**Library → Linear** contains **Logo reveal**, **Circle wipe**, **Stack wipe**, **Type reveal**, **Brand sign-off**, and **Color bar reveal**. **Library → Looping** contains **Signal loop**, **Change Stack glow**, and **Color bar loop**. Select, customize, and export one asset as MP4 or, where supported, transparent ProRes 4444. Transitions show their exact cut frame. Save/open JSON presets or add the asset to the existing composition.
+
+The color bar matches the ten segments and 3.2-second expansion at the bottom of the Change Stack hero. Its loop variant adds a smooth return. Choose the strip's height and position, then select individual segments to edit with the shared brand swatches. Both variants support transparent export and layer above other composition assets.
+
+**Change Stack glow** has separate **Lighting** and **Vignette** controls. Move, rotate, stretch, and soften the light; adjust its intensity and ambient fill. Shape the vignette with its own center, dimensions, angle, strength, and feather. Reset either section to its original appearance. These settings save with the asset preset or composition and apply to preview and export without changing the loop timing.
+
+The composition editor retains the complete component collection and the earlier presets. [Broadcast package guide](../docs/broadcast-package.md).
 
 ## Make a walkthrough
 
@@ -73,4 +79,4 @@ npm run typecheck
 npm run studio:build
 ```
 
-The automated checks cover gesture debouncing, confidence filtering, interpolation, missing hands, all four preset schemas, all thirteen overlay kinds, broadcast motion boundaries, seamless loop phases, playback categories, background timing, and import retiming, invalid saved projects, and shared terminal timing. Browser and export checks should additionally cover footage import, detection, editing/undo, project reload, H.264 audio, and transparent ProRes output.
+The automated checks cover transition cut coverage and transparent endpoints, reusable asset presets and export dimensions, preservation of existing compositions, glow and vignette geometry, gesture debouncing, confidence filtering, interpolation, missing hands, all four preset schemas, all nineteen overlay kinds, broadcast motion boundaries, seamless loop phases, playback categories, background timing, and import retiming, invalid saved projects, and shared terminal timing. Browser and export checks should additionally cover footage import, detection, editing/undo, project reload, H.264 audio, and transparent ProRes output.

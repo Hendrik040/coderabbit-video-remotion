@@ -4,7 +4,7 @@ A [Remotion](https://www.remotion.dev/) project for producing CodeRabbit marketi
 
 ## Local Motion Studio
 
-This branch adds a local editor for presenter footage and CodeRabbit overlays, integrating the Cue gesture experiment with this repository's brand components.
+A local library of reusable CodeRabbit motion assets, with an optional composition editor for footage and layered graphics.
 
 ```bash
 npm install
@@ -12,9 +12,9 @@ npm run studio:setup  # downloads the gesture model once; footage stays local
 npm run studio       # http://127.0.0.1:4319
 ```
 
-Use Node.js 22 or newer for the studio. Start with **Broadcast rundown** for seven named station templates: an ident, presenter strap, segment title, Triage board, Change Stack, ticker, and station bug. The package uses official logos, Geist/Hack typography, and shared entrance/exit timing. The editor remains monochrome. See the [broadcast package guide](docs/broadcast-package.md).
+Use Node.js 22 or newer for the studio. The **Brand motion** library contains logo reveals, circular and stacked transitions, a type reveal, a brand sign-off, and two looping backgrounds. Preview and export each asset independently in 720p or 1080p, save editable presets, or add it to a composition. Official logos, Geist/Hack typography, and shared motion rules keep the assets consistent. The editor stays monochrome. See the [brand motion system](docs/brand-motion-system.md).
 
-The **Developer walkthrough** and **Code & API explainer** presets remain available, or import a video. Edit terminals, agent workflows, code panels, API diagrams, and callouts; adjust timing and placement; then export an MP4 or a transparent ProRes overlay. The sample's hand motion is simulated. Imported clips can be analyzed locally for real gestures.
+In **Composition**, the **Broadcast rundown**, **Developer walkthrough**, and **Code & API explainer** presets remain available, or import a video. Edit terminals, agent workflows, code panels, API diagrams, and callouts; adjust timing and placement; then export an MP4 or a transparent ProRes overlay. The sample's hand motion is simulated. Imported clips can be analyzed locally for real gestures.
 
 The terminal is shared with the existing `TerminalTyping` compositions. The compact agent workflow adapts `RabbitAgentLoopV4`'s visual language. Both are also shown in the new `MotionBrandKit` composition in Remotion Studio. Existing compositions remain available with `npm start`.
 

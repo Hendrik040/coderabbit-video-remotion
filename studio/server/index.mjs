@@ -46,7 +46,8 @@ app.post('/api/render', async (req, res) => {
     if (!['mp4', 'alpha'].includes(req.body.format)) return res.status(400).json({error: 'Choose MP4 or transparent overlay.'});
     const transparent = req.body.format === 'alpha';
     const id = randomUUID();
-    const filename = `coderabbit-${id.slice(0, 8)}.${transparent ? 'mov' : 'mp4'}`;
+    const stem = project.brandAsset ? project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80) : 'coderabbit';
+    const filename = `${stem}-${id.slice(0, 8)}.${transparent ? 'mov' : 'mp4'}`;
     const job = {id, status: 'bundling', progress: 0, filename};
     jobs.set(id, job); activeJob = id;
     res.json(job);

@@ -1,9 +1,11 @@
 import {heroDefaults, heroProject} from './looping';
 import {broadcastDefaults, broadcastProject} from './broadcast';
+import {brandAssetDefaults} from './brandAssets';
 import type {Project, Sample, Overlay, OverlayKind} from '../types';
 
 export const overlayDefaults: Record<OverlayKind, Omit<Overlay, 'id'>> = {
   ...broadcastDefaults,
+  ...brandAssetDefaults,
   hero: heroDefaults,
   terminal: {kind: 'terminal', enabled: true, title: '~/my-project', body: 'git diff --stat\ngit status --short', start: 0.6, duration: 4.6, binding: 'cue', placement: 'left', accent: '#FF570A', scale: 1},
   agentflow: {kind: 'agentflow', enabled: true, title: 'A better development loop.', body: 'Plan,Code,Review', start: 5.4, duration: 3.9, binding: 'progress', placement: 'left', accent: '#FF570A', scale: 1},

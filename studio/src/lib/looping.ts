@@ -1,10 +1,12 @@
 import {broadcastKinds} from './broadcast';
+import {brandAssetKinds} from './brandAssets';
+import {inversePoint, lightingDefaults, lightingTransform, type GlowLighting} from './glowSettings';
 import type {AssetType, Overlay, OverlayKind, Project} from '../types';
 
-export const assetType = (kind: OverlayKind): AssetType => kind === 'hero' ? 'looping' : 'linear';
+export const assetType = (kind: OverlayKind): AssetType => kind === 'hero' || kind === 'signal-loop' || kind === 'color-bar-loop' ? 'looping' : 'linear';
 export const assetCollections: Record<AssetType, OverlayKind[]> = {
-  linear: [...broadcastKinds, 'terminal', 'agentflow', 'code', 'diagram', 'callout'],
-  looping: ['hero'],
+  linear: [...brandAssetKinds.filter(kind => assetType(kind) === 'linear'), ...broadcastKinds, 'terminal', 'agentflow', 'code', 'diagram', 'callout'],
+  looping: ['signal-loop', 'hero', 'color-bar-loop'],
 };
 export const heroDefaults: Omit<Overlay, 'id'> = {
   kind: 'hero', enabled: true, title: 'Change Stack glow', body: '', start: 0, duration: 16,
@@ -58,8 +60,10 @@ type PixelChange = {phase: number; opacity: number};
 export type HeroPixel = {x: number; y: number; mask: number; initial: number; changes: PixelChange[]};
 
 /** 4px squares, 2px gaps, each holding its brightness until an independent change. */
-export function createHeroPixels(width: number, height: number): HeroPixel[] {
+export function createHeroPixels(width: number, height: number, lighting: Partial<GlowLighting> = {}): HeroPixel[] {
   const [a, b, c, d, tx, ty] = heroBeamTransform(width, height);
+  const transform = lightingTransform(width, height, lighting);
+  const softness = lighting.softness ?? lightingDefaults.softness;
   const determinant = a * d - b * c;
   const bleed = 71 * height / 720, gridHeight = height + bleed;
   const pixels: HeroPixel[] = [];
@@ -67,11 +71,13 @@ export function createHeroPixels(width: number, height: number): HeroPixel[] {
     const y = row * 6 - bleed;
     if (y + 4 <= 0) continue;
     for (let col = 0; col * 6 < width; col++) {
-      const x = col * 6, dx = x - tx, dy = y - ty;
+      const x = col * 6;
+      const [sourceX, sourceY] = inversePoint(transform, x, y);
+      const dx = sourceX - tx, dy = sourceY - ty;
       const u = (d * dx - c * dy) / determinant, v = (a * dy - b * dx) / determinant;
-      const beam = unit(1 - Math.hypot(u, v) / 10);
-      const vertical = unit((y + bleed) / (96 * height / 720)) * unit((height - y) / (gridHeight * 0.25));
-      const horizontal = unit((width * 0.7 - x) / (width * 0.14));
+      const beam = unit((1 - Math.hypot(u, v) / 10) / softness);
+      const vertical = unit((sourceY + bleed) / (96 * height / 720)) * unit((height - sourceY) / (gridHeight * 0.25));
+      const horizontal = unit((width * 0.7 - sourceX) / (width * 0.14));
       const mask = beam * vertical * horizontal;
       if (mask < 0.005) continue;
 
