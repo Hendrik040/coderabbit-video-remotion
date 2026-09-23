@@ -1,8 +1,10 @@
 import type {BrandAssetKind, Overlay, OverlayKind, Project} from '../types';
 import {colorBarColors, colorBarSegments, isColorBar} from './colorBar';
 import {pixelWipeDefaults} from './pixelWipe';
+import {cycleProgress, frameProgress, motionCurves} from './motion';
 
 export const brandAssetTemplates = {
+  'name-intro': {code: 'LT-01', name: 'Name intro', family: 'Lower thirds', duration: 5, alpha: true, title: 'Name', body: 'Position', titleMax: 56, bodyMax: 72, description: 'A solid name panel with position and company, revealed from your chosen side.', usage: 'Introduce a speaker over footage. Choose the side that leaves their face clear.'},
   'logo-reveal': {code: 'ID-01', name: 'Logo reveal', family: 'Reveals', duration: 3.2, alpha: true, title: 'Tagline', body: '', titleMax: 72, bodyMax: 0, description: 'A measured entrance for the full CodeRabbit lockup.', usage: 'Open a video, product launch, or presentation.'},
   'circle-wipe': {code: 'TR-01', name: 'Circle wipe', family: 'Transitions', duration: 1.8, alpha: true, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'Orange leads. A circular field covers the cut and clears.', usage: 'Place over an edit. Cut the underlying footage at the center marker.'},
   'stack-wipe': {code: 'TR-02', name: 'Stack wipe', family: 'Transitions', duration: 2, alpha: true, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'Six staggered rails sweep across the frame together.', usage: 'Place over an edit. Cut the underlying footage at the center marker.'},
@@ -16,6 +18,8 @@ export const brandAssetTemplates = {
   'color-bar-loop': {code: 'AC-02', name: 'Color bar loop', family: 'Brand accents', duration: 8, alpha: true, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'The hero’s color expansion, followed by a smooth return and seamless repeat.', usage: 'Add a continuous brand accent over footage, holding screens, or the Change Stack glow.'},
 } as const;
 export const brandAssetKinds = Object.keys(brandAssetTemplates) as BrandAssetKind[];
+// Retain renderers for saved projects, while removing retired assets from both pickers.
+export const availableBrandAssetKinds = brandAssetKinds.filter(kind => !['logo-reveal', 'circle-wipe', 'signal-loop', 'type-reveal', 'brand-signoff'].includes(kind));
 export const isBrandAsset = (kind: OverlayKind): kind is BrandAssetKind => kind in brandAssetTemplates;
 export const isTransition = (kind: OverlayKind) => kind === 'circle-wipe' || kind === 'stack-wipe' || kind === 'color-bar-wipe' || kind === 'pixel-glow-wipe';
 
@@ -28,6 +32,7 @@ export const brandAssetDefaults = Object.fromEntries(brandAssetKinds.map(kind =>
   ...(isColorBar(kind) ? {barHeight: 4, barPosition: 'bottom', barColors: [...colorBarColors]} : {}),
   ...(kind === 'color-bar-wipe' ? {barColors: [...colorBarColors]} : {}),
   ...(kind === 'pixel-glow-wipe' ? {accent: '#687FF5', intensity: 1, ...pixelWipeDefaults} : {}),
+  ...(kind === 'name-intro' ? {title: 'Your name', body: 'Position', company: 'CodeRabbit', placement: 'left', textColor: '#121014'} : {}),
 }])) as Record<BrandAssetKind, Omit<Overlay, 'id'>>;
 
 export function assetProject(asset: Overlay, width = 1280): Project {
@@ -43,13 +48,12 @@ export function appendBrandAsset(project: Project, asset: Overlay, id: string): 
   return {...project, overlays: [...project.overlays, {...asset, id, enabled: true, start: 0, duration: Math.min(asset.duration, project.duration)}]};
 }
 
-export const unit = (value: number) => Math.max(0, Math.min(1, value));
-export const motionEase = (value: number) => {const t = unit(value); return t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;};
-export const assetPhase = (frame: number, duration: number, fps = 30) => unit(frame / Math.max(2, Math.ceil(duration * fps) - 1));
+export {unit} from './motion';
+export const motionEase = motionCurves.travel;
+export const assetPhase = frameProgress;
 export const cutFrame = (duration: number, fps = 30) => Math.floor(Math.ceil(duration * fps) / 2);
 export function signalPhase(frame: number, fps = 30, seconds = 8) {
-  const length = Math.max(1, Math.round(seconds * fps));
-  return ((frame % length) + length) % length / length;
+  return cycleProgress(frame, seconds, fps);
 }
 
 /** Solid coverage surrounds the center cut; the first and last frames are transparent. */

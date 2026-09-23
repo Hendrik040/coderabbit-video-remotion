@@ -38,19 +38,4 @@ export function retimeOverlays(overlays: Overlay[], oldDuration: number, newDura
   });
 }
 
-const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
-const easeOut = (v: number) => 1 - Math.pow(1 - clamp01(v), 3);
-/** 18f reveal / hold / 12f retract at 30fps. Compress proportionally on short clips.
- * Absolute frame math means seeking and exports never depend on playback history.
- * The first and final rendered frames are fully clear, including staggered children.
- */
-export function broadcastMotion(frame: number, duration: number, fps = 30, stagger = 0) {
-  const last = Math.max(2, Math.ceil(duration * fps) - 1);
-  const factor = Math.min(1, last / fps);
-  const enterFrames = 18 * fps / 30 * factor;
-  const exitFrames = 12 * fps / 30 * factor;
-  const delay = Math.min(stagger * fps / 30 * factor, enterFrames * 0.6);
-  const enter = easeOut((frame - delay) / Math.max(0.001, enterFrames - delay));
-  const leave = easeOut((frame - (last - exitFrames)) / Math.max(0.001, exitFrames));
-  return {enter, leave, opacity: enter * (1 - leave), offset: (1 - enter) * 28 - leave * 12};
-}
+export {revealMotion as broadcastMotion} from './motion';

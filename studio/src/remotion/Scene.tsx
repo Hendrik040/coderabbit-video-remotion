@@ -5,11 +5,11 @@ import {isBrandAsset, isTransition} from '../lib/brandAssets';
 import {activeLoopAssets, assetType} from '../lib/looping';
 import {isColorBar} from '../lib/colorBar';
 import {BroadcastBackdrop, BroadcastOverlay, useBroadcastFonts} from '../brand/Broadcast';
-import {isBroadcast} from '../lib/broadcast';
+import {broadcastMotion, isBroadcast} from '../lib/broadcast';
 import '@fontsource/ibm-plex-mono/500.css';
 import {TerminalWindow, terminalDuration} from '../../../src/brand/TerminalWindow';
 import {AgentFlow} from '../../../src/brand/AgentFlow';
-import {AbsoluteFill, Html5Video, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Html5Video, useCurrentFrame, useVideoConfig} from 'remotion';
 import {clamp, sampleAt} from '../lib/gesture';
 import {gestureLabel, type Overlay, type Sample, type SceneProps} from '../types';
 
@@ -41,7 +41,7 @@ function ApiDiagram({overlay, progress}: {overlay: Overlay; progress: number}) {
     <div style={{color: '#eff1f6', fontSize: 27, fontWeight: 500, marginBottom: 35}}>{overlay.title}</div>
     <div style={{display: 'flex', alignItems: 'center'}}>
       {labels.map((label, i) => <React.Fragment key={i}>
-        {i > 0 && <div style={{height: 2, flex: 1, background: '#ffffff20', position: 'relative'}}><div style={{height: 2, width: `${clamp(progress * 2 - (i - 1)) * 100}%`, background: overlay.accent}}/><div style={{position: 'absolute', right: -1, top: -4, width: 8, height: 8, borderTop: '2px solid #667181', borderRight: '2px solid #667181', transform: 'rotate(45deg)'}}/></div>}
+        {i > 0 && <div style={{height: 2, flex: 1, background: '#ffffff20', position: 'relative'}}><div style={{height: 2, width: '100%', background: overlay.accent, transform: `scaleX(${clamp(progress * 2 - (i - 1))})`, transformOrigin: 'left'}}/><div style={{position: 'absolute', right: -1, top: -4, width: 8, height: 8, borderTop: '2px solid #667181', borderRight: '2px solid #667181', transform: 'rotate(45deg)'}}/></div>}
         <div style={{width: 119, textAlign: 'center', padding: '20px 5px', background: progress >= i / 2 ? `${overlay.accent}18` : '#ffffff05', border: `1px solid ${progress >= i / 2 ? `${overlay.accent}66` : '#ffffff1a'}`, borderRadius: 12}}>
           <div style={{font: `26px ${mono}`, marginBottom: 12, color: progress >= i / 2 ? overlay.accent : '#708090'}}>{['⌘', '{ }', '▤'][i]}</div>
           <div style={{fontSize: 15, color: '#d9e0e9', overflowWrap: 'anywhere'}}>{label}</div>
@@ -107,8 +107,7 @@ export const Scene: React.FC<SceneProps> = ({project, transparent = false}) => {
         if (local < 0 || local >= overlay.duration * fps) return null;
         if (isBrandAsset(overlay.kind)) return <MotionAsset key={overlay.id} overlay={overlay} frame={local} fps={fps}/>;
         if (isBroadcast(overlay.kind)) return <BroadcastOverlay key={overlay.id} overlay={overlay} frame={local} fps={fps} hasBackground={backgrounds.length > 0}/>;
-        const entrance = spring({frame: local, fps, config: {damping: 22, stiffness: 130, mass: 0.8}});
-        const exit = interpolate(local, [Math.max(0, overlay.duration * fps - 8), overlay.duration * fps], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+        const motion = broadcastMotion(local, overlay.duration, fps);
         const progress = overlay.binding === 'progress' && hand?.visible ? clamp((hand.x - 0.18) / 0.65) : clamp(local / (overlay.duration * fps * 0.8));
         const w = ['diagram', 'agentflow'].includes(overlay.kind) ? 580 : overlay.kind === 'callout' ? 440 : 550;
         let x = overlay.placement === 'left' ? 58 : overlay.placement === 'right' ? 1222 - w * overlay.scale : (1280 - w * overlay.scale) / 2;
@@ -116,7 +115,7 @@ export const Scene: React.FC<SceneProps> = ({project, transparent = false}) => {
         if (overlay.binding === 'follow' && hand?.visible) {x = clamp(hand.x * 1280 - w / 2, 40, 1240 - w * overlay.scale); y = clamp(hand.y * 720 + 52, 50, 720 - (overlay.kind === 'callout' ? 195 : 390) * overlay.scale - 35);}
         const commands = overlay.body.split('\n').filter(Boolean).slice(0, 6).map(input => ({input, holdFrames: 8}));
         const typedFrame = Math.round(progress * terminalDuration(commands));
-        return <div key={overlay.id} style={{position: 'absolute', left: x, top: y, width: w, opacity: entrance * exit, transform: `translateY(${(1 - entrance) * 27}px) scale(${overlay.scale * (0.97 + entrance * 0.03)})`, transformOrigin: 'top left'}}>
+        return <div key={overlay.id} style={{position: 'absolute', left: 0, top: 0, width: w, opacity: motion.opacity, transform: `translate(${x}px, ${y + motion.offset}px) scale(${overlay.scale * (0.97 + motion.enter * 0.03)})`, transformOrigin: 'top left'}}>
           {overlay.kind === 'terminal' ? <TerminalWindow compact commands={commands} title={overlay.title} frame={typedFrame} fps={fps} accent={overlay.accent}/> : overlay.kind === 'agentflow' ? <AgentFlow title={overlay.title} labels={overlay.body.split(',')} progress={progress} accent={overlay.accent}/> : overlay.kind === 'code' ? <CodePanel overlay={overlay} progress={progress}/> : overlay.kind === 'diagram' ? <ApiDiagram overlay={overlay} progress={progress}/> : <Callout overlay={overlay}/>}
         </div>;
       })}

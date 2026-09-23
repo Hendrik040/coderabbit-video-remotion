@@ -1,11 +1,13 @@
 import React, {type CSSProperties} from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {broadcastMotion} from '../lib/broadcast';
+import {staggerFrames} from '../lib/motion';
 import {assetPhase, circleWipeState, colorBarWipeState, motionEase, signalPhase, stackWipeState} from '../lib/brandAssets';
 import {brand} from './Broadcast';
 import {isColorBar} from '../lib/colorBar';
 import {ColorBar} from './ColorBar';
 import {PixelGlowWipe} from './PixelGlowWipe';
+import {NameIntro} from './NameIntro';
 import type {Overlay} from '../types';
 
 const font = 'Geist, sans-serif';
@@ -16,6 +18,7 @@ function Lockup({width, light = false, style}: {width: number; light?: boolean; 
 }
 
 export function MotionAsset({overlay: o, frame, fps}: {overlay: Overlay; frame: number; fps: number}) {
+  if (o.kind === 'name-intro') return <NameIntro overlay={o} frame={frame} fps={fps}/>;
   if (isColorBar(o.kind)) return <ColorBar overlay={o} frame={frame} fps={fps}/>;
   if (o.kind === 'pixel-glow-wipe') return <PixelGlowWipe overlay={o} frame={frame} fps={fps}/>;
   const accentColor = o.accent;
@@ -41,7 +44,7 @@ export function MotionAsset({overlay: o, frame, fps}: {overlay: Overlay; frame: 
   }
   if (o.kind === 'color-bar-wipe') {
     return <svg width="1280" height="720" viewBox="0 0 1280 720" aria-label="Color bar wipe transition" style={{position: 'absolute', inset: 0, overflow: 'hidden'}}>
-      {colorBarWipeState(frame, o.duration, fps).map((band, index) => <rect key={band.name} x={reverse ? -band.x : band.x} y={band.y} width={1280} height={band.height} fill={o.barColors?.[index] ?? band.color}/>)}
+      {colorBarWipeState(frame, o.duration, fps).map((band, index) => <rect key={band.name} transform={`translate(${reverse ? -band.x : band.x} 0)`} y={band.y} width={1280} height={band.height} fill={o.barColors?.[index] ?? band.color}/>)}
     </svg>;
   }
   if (o.kind === 'stack-wipe') {
@@ -49,7 +52,7 @@ export function MotionAsset({overlay: o, frame, fps}: {overlay: Overlay; frame: 
     return <AbsoluteFill>
       <svg width="1280" height="720" viewBox="0 0 1280 720" style={{position: 'absolute', inset: 0}}>
         {Array.from({length: 6}, (_, row) => <React.Fragment key={row}>
-          {[true, false].map(accent => {const x = stackWipeState(frame, o.duration, row, fps, accent); return <rect key={String(accent)} x={reverse ? -x : x} y={row * 120} width={1280} height={120} fill={accent ? accentColor : background}/>;})}
+          {[true, false].map(accent => {const x = stackWipeState(frame, o.duration, row, fps, accent); return <rect key={String(accent)} transform={`translate(${reverse ? -x : x} 0)`} y={row * 120} width={1280} height={120} fill={accent ? accentColor : background}/>;})}
         </React.Fragment>)}
       </svg>
       <Lockup width={380} light={light} style={{position: 'absolute', top: 332, left: 450, opacity: logo}}/>
@@ -82,7 +85,7 @@ export function MotionAsset({overlay: o, frame, fps}: {overlay: Overlay; frame: 
         <circle cx={281} cy={628} r={5} fill={accentColor}/>
       </svg>
       <Lockup width={480} light={light} style={{...centeredLogo, top: o.title ? 285 : 325, transform: `translateY(${motion.offset}px)`}}/>
-      <div style={{...copy, position: 'absolute', left: 230, right: 230, top: 405, color: muted, textAlign: 'center', opacity: broadcastMotion(frame, o.duration, fps, 6).opacity, transform: `translateY(${motion.offset}px)`}}>{o.title}</div>
+      <div style={{...copy, position: 'absolute', left: 230, right: 230, top: 405, color: muted, textAlign: 'center', opacity: broadcastMotion(frame, o.duration, fps, 2 * staggerFrames).opacity, transform: `translateY(${motion.offset}px)`}}>{o.title}</div>
     </AbsoluteFill>;
   }
   if (o.kind === 'type-reveal') {
@@ -92,19 +95,19 @@ export function MotionAsset({overlay: o, frame, fps}: {overlay: Overlay; frame: 
       <div style={{position: 'absolute', top: 69, left: 72}}><Lockup width={238} light={light}/></div>
       <div style={{position: 'absolute', left: 72, top: 212, right: 94}}>
         {lines.map((line, i) => {
-          const lineMotion = broadcastMotion(frame, o.duration, fps, i * 3);
+          const lineMotion = broadcastMotion(frame, o.duration, fps, i * staggerFrames);
           return <div key={i} style={{overflow: 'hidden', paddingBottom: 8}}><div style={{fontWeight: 600, fontSize: size, lineHeight: 1.06, letterSpacing: -4.5, color: i === lines.length - 1 && lines.length > 1 ? accentColor : foreground, transform: `translateY(${(1 - lineMotion.enter) * 125 + lineMotion.leave * -125}%)`, overflowWrap: 'anywhere'}}>{line}</div></div>;
         })}
       </div>
-      <div style={{...copy, position: 'absolute', left: 76, top: 566, right: 150, color: muted, fontSize: 24, opacity: broadcastMotion(frame, o.duration, fps, 6).opacity}}>{o.body}</div>
-      <div style={{position: 'absolute', right: 72, bottom: 70, width: 70 * motion.enter, height: 7, borderRadius: 4, background: accentColor}}/>
+      <div style={{...copy, position: 'absolute', left: 76, top: 566, right: 150, color: muted, fontSize: 24, opacity: broadcastMotion(frame, o.duration, fps, 2 * staggerFrames).opacity}}>{o.body}</div>
+      <div style={{position: 'absolute', right: 72, bottom: 70, width: 70, height: 7, borderRadius: 4, background: accentColor, transform: `scaleX(${motion.enter})`, transformOrigin: 'left'}}/>
     </AbsoluteFill>;
   }
   // Sign-off is a complete end card. Its plate remains opaque throughout the asset.
   return <AbsoluteFill style={{background, color: foreground, fontFamily: font}}>
-    <div style={{position: 'absolute', left: 0, bottom: 0, width: 1280 * motion.enter * (1 - motion.leave), height: 14, background: accentColor}}/>
+    <div style={{position: 'absolute', left: 0, bottom: 0, width: 1280, height: 14, background: accentColor, transform: `scaleX(${motion.enter * (1 - motion.leave)})`, transformOrigin: 'left'}}/>
     <Lockup width={520} light={light} style={{position: 'absolute', top: 244, left: 380, opacity: motion.opacity, transform: `translateY(${motion.offset}px)`}}/>
-    <div style={{...copy, position: 'absolute', top: 384, left: 170, right: 170, textAlign: 'center', opacity: broadcastMotion(frame, o.duration, fps, 3).opacity, fontSize: 32}}>{o.title}</div>
-    <div style={{...copy, position: 'absolute', top: 547, left: 170, right: 170, textAlign: 'center', opacity: broadcastMotion(frame, o.duration, fps, 6).opacity, color: muted, fontSize: 21}}>{o.body}</div>
+    <div style={{...copy, position: 'absolute', top: 384, left: 170, right: 170, textAlign: 'center', opacity: broadcastMotion(frame, o.duration, fps, staggerFrames).opacity, fontSize: 32}}>{o.title}</div>
+    <div style={{...copy, position: 'absolute', top: 547, left: 170, right: 170, textAlign: 'center', opacity: broadcastMotion(frame, o.duration, fps, 2 * staggerFrames).opacity, color: muted, fontSize: 21}}>{o.body}</div>
   </AbsoluteFill>;
 }

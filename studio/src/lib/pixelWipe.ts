@@ -1,4 +1,5 @@
 import {changeStackPixelGrid} from './pixelGrid';
+import {frameProgress, unit} from './motion';
 
 export const pixelWipeDefaults = {pixelSize: changeStackPixelGrid.size, scatter: 0.75};
 export const pixelWipeTiming = {revealEnd: 0.44, fadeStart: 0.56};
@@ -7,7 +8,6 @@ export type WipePixel = {
   rowDelay: number; timing: number; exitTiming: number; speed: number; brightness: number;
 };
 
-const unit = (value: number) => Math.max(0, Math.min(1, value));
 const ease = (value: number) => {const t = unit(value); return t * t * (3 - 2 * t);};
 const noise = (x: number, y: number) => {
   let n = Math.imul(x + 17, 374761393) ^ Math.imul(y + 31, 668265263);
@@ -31,7 +31,7 @@ export function createWipePixels(pixelSize = pixelWipeDefaults.pixelSize): WipeP
   });
 }
 
-export const pixelWipePhase = (frame: number, duration: number, fps = 30) => unit(frame / Math.max(2, Math.ceil(duration * fps) - 1));
+export const pixelWipePhase = frameProgress;
 
 /** Visibility passes over a stationary grid: reveal, full field, then fade from the same edge. */
 export function pixelWipeState(pixel: WipePixel, phase: number, scatter = pixelWipeDefaults.scatter, direction: 'left' | 'right' = 'right') {

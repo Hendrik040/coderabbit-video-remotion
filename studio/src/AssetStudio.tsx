@@ -1,21 +1,24 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
 import {Player, type PlayerRef} from '@remotion/player';
-import {ArrowDownToLine, ArrowRight, ArrowUpRight, Check, Download, FolderOpen, Infinity as LoopIcon, Layers3, LoaderCircle, Pause, Play, Plus, RotateCcw, SlidersHorizontal, X} from 'lucide-react';
+import {ArrowDownToLine, ArrowRight, ArrowUpRight, Check, Download, FolderOpen, Infinity as LoopIcon, Layers3, LoaderCircle, Plus, RotateCcw, SlidersHorizontal, X} from 'lucide-react';
 import {Scene} from './remotion/Scene';
 import {AssetControls} from './brand/AssetControls';
 import {colorBarRevealTiming, colorBarTransitionTiming, isColorBar} from './lib/colorBar';
 import {pixelWipeTiming} from './lib/pixelWipe';
 import {ChangeStackGlowThumbnail} from './brand/ChangeStackGlow';
-import {assetProject, brandAssetDefaults, brandAssetKinds, brandAssetTemplates, cutFrame, isTransition} from './lib/brandAssets';
+import {assetProject, availableBrandAssetKinds, brandAssetDefaults, brandAssetTemplates, cutFrame, isTransition} from './lib/brandAssets';
 import {assetType, heroDefaults} from './lib/looping';
 import {projectSchema} from './lib/schema';
 import {clamp} from './lib/gesture';
+import {revealTiming} from './lib/motion';
+import {usePreviewActivity, useReducedMotion} from './hooks/usePreviewActivity';
+import {AssetTransport, timecode} from './components/AssetTransport';
 import type {AssetType, BrandAssetKind, Overlay} from './types';
 import './asset-studio.css';
 
 type LibraryKind = BrandAssetKind | 'hero';
 const catalog = {...brandAssetTemplates, hero: {code: 'BG-02', name: 'Change Stack glow', family: 'Backgrounds', duration: 16, alpha: false, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'The product hero’s drifting light and independently flickering pixels.', usage: 'A quiet background for product stories and supporting titles.'}};
-const libraryKinds: LibraryKind[] = [...brandAssetKinds, 'hero'];
+const libraryKinds: LibraryKind[] = [...availableBrandAssetKinds, 'hero'];
 const defaults = {...brandAssetDefaults, hero: heroDefaults};
 const storageKey = 'coderabbit-brand-asset-presets-v1';
 const initialPresets = () => {
@@ -30,23 +33,31 @@ const initialPresets = () => {
   } catch { /* Invalid presets leave the bundled assets available. */ }
   return presets;
 };
-const timecode = (frame: number) => `${String(Math.floor(frame / 30)).padStart(2, '0')}:${String(frame % 30).padStart(2, '0')}`;
 type AssetJob = {id: string; status: string; progress: number; url?: string; filename?: string; error?: string; assetName: string};
 
-/** Rest on a useful frame; hover/focus plays the actual asset rather than a mock animation. */
-export function AssetThumbnail({kind, animated = false, asset}: {kind: BrandAssetKind; animated?: boolean; asset?: Overlay}) {
+/** Rest on a useful frame; pointer hover resumes the actual asset without remounting. */
+export const AssetThumbnail = memo(function AssetThumbnail({kind, animated = false, asset}: {kind: BrandAssetKind; animated?: boolean; asset?: Overlay}) {
+  const container = useRef<HTMLDivElement>(null);
+  const player = useRef<PlayerRef>(null);
+  const active = usePreviewActivity(container);
   const project = useMemo(() => assetProject({...(asset ?? {id: kind, ...brandAssetDefaults[kind]}), ...(isColorBar(kind) ? {barHeight: 56, barPosition: 'center' as const} : {})}), [kind, asset]);
   const inputProps = useMemo(() => ({project}), [project]);
-  return <div className="asset-thumb-player" aria-hidden="true"><Player key={`${kind}-${animated}`} component={Scene} inputProps={inputProps} durationInFrames={Math.ceil(project.duration * 30)} compositionWidth={1280} compositionHeight={720} fps={30} initialFrame={animated ? 0 : Math.floor(project.duration * 30 * (isTransition(kind) ? 0.24 : 0.48))} autoPlay={animated} loop controls={false} clickToPlay={false} style={{width: '100%', pointerEvents: 'none'}}/></div>;
-}
+  const frames = Math.ceil(project.duration * 30);
+  useEffect(() => {
+    const p = player.current;
+    if (!p) return;
+    if (p.getCurrentFrame() >= frames) p.seekTo(frames - 1);
+    if (animated && active) p.play(); else p.pause();
+  }, [active, animated, frames]);
+  return <div ref={container} className="asset-thumb-player" aria-hidden="true"><Player ref={player} component={Scene} inputProps={inputProps} durationInFrames={frames} compositionWidth={1280} compositionHeight={720} fps={30} initialFrame={Math.floor(frames * (isTransition(kind) ? 0.24 : 0.48))} initiallyMuted loop controls={false} clickToPlay={false} style={{width: '100%', pointerEvents: 'none'}}/></div>;
+});
 
 export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComposition: () => void; onAddToComposition: (asset: Overlay) => void}) {
   const [presets, setPresets] = useState(initialPresets);
-  const [selected, setSelected] = useState<LibraryKind>('logo-reveal');
+  const [selected, setSelected] = useState<LibraryKind>('name-intro');
   const [group, setGroup] = useState<AssetType>('linear');
   const [hovered, setHovered] = useState<LibraryKind | null>(null);
-  const [frame, setFrame] = useState(0);
-  const [playing, setPlaying] = useState(true);
+  const reducedMotion = useReducedMotion();
   const [showAlpha, setShowAlpha] = useState(false);
   const [format, setFormat] = useState<'mp4' | 'alpha'>('mp4');
   const [resolution, setResolution] = useState(1280);
@@ -58,24 +69,16 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
   const project = useMemo(() => assetProject(asset), [asset]);
   const inputProps = useMemo(() => ({project, transparent: showAlpha && meta.alpha}), [project, showAlpha, meta.alpha]);
   const frames = Math.ceil(project.duration * 30);
+  const timing = revealTiming(project.duration);
   const transition = isTransition(selected);
   const particleTransition = selected === 'pixel-glow-wipe';
   const barTransition = selected === 'color-bar-transition';
   const activeExport = !!job && !['done', 'error'].includes(job.status);
   const choose = (kind: LibraryKind) => {setSelected(kind); setGroup(assetType(kind)); setShowAlpha(false); if (!catalog[kind].alpha) setFormat('mp4');};
   const edit = (patch: Partial<Overlay>) => setPresets(previous => ({...previous, [selected]: {...previous[selected], ...patch}}));
-  const seek = (next: number) => {player.current?.pause(); player.current?.seekTo(next); setFrame(next);};
+  const seek = (next: number) => {player.current?.pause(); player.current?.seekTo(next);};
 
   useEffect(() => {try {localStorage.setItem(storageKey, JSON.stringify(presets));} catch {setError('Could not save edits on this device. Use Save preset to keep this asset.');}}, [presets]);
-  useEffect(() => {
-    const p = player.current;
-    if (!p) return;
-    const update = (event: {detail: {frame: number}}) => setFrame(event.detail.frame);
-    const play = () => setPlaying(true), pause = () => setPlaying(false);
-    p.addEventListener('frameupdate', update); p.addEventListener('play', play); p.addEventListener('pause', pause);
-    setFrame(p.getCurrentFrame()); setPlaying(p.isPlaying());
-    return () => {p.removeEventListener('frameupdate', update); p.removeEventListener('play', play); p.removeEventListener('pause', pause);};
-  }, [selected, frames]);
   useEffect(() => {
     if (!job?.id || ['done', 'error'].includes(job.status)) return;
     const timer = window.setInterval(async () => {
@@ -123,7 +126,7 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
     <div className="asset-layout">
       <aside className="asset-library"><div className="asset-library-heading"><span>Library</span><span>{libraryKinds.length} assets</span></div>
         <div className="kit-switch" role="group" aria-label="Asset playback type">{(['linear', 'looping'] as const).map(type => <button key={type} aria-pressed={group === type} onClick={() => setGroup(type)}>{type === 'linear' ? 'Linear' : 'Looping'}<span>{libraryKinds.filter(kind => assetType(kind) === type).length}</span></button>)}</div>
-        <div className="asset-library-cards">{libraryKinds.filter(kind => assetType(kind) === group).map(kind => <button key={kind} className={`asset-card ${selected === kind ? 'is-selected' : ''}`} aria-label={`Preview ${catalog[kind].name}`} aria-pressed={selected === kind} onClick={() => choose(kind)} onMouseEnter={() => setHovered(kind)} onMouseLeave={() => setHovered(null)} onFocus={() => setHovered(kind)} onBlur={() => setHovered(null)}>
+        <div className="asset-library-cards">{libraryKinds.filter(kind => assetType(kind) === group).map(kind => <button key={kind} className={`asset-card ${selected === kind ? 'is-selected' : ''}`} aria-label={`Preview ${catalog[kind].name}`} aria-pressed={selected === kind} onClick={() => choose(kind)} onPointerEnter={event => {if (event.pointerType === 'mouse' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) setHovered(kind);}} onPointerLeave={() => setHovered(null)}>
           <div className="asset-card-preview">{kind === 'hero' ? <ChangeStackGlowThumbnail overlay={presets[kind]}/> : <AssetThumbnail kind={kind} asset={presets[kind]} animated={hovered === kind || assetType(kind) === 'looping'}/>}<span className="asset-card-code">{catalog[kind].code}</span></div>
           <div className="asset-card-title"><strong>{catalog[kind].name}</strong>{assetType(kind) === 'looping' ? <LoopIcon size={12}/> : <span>{presets[kind].duration}s</span>}</div><span className="asset-card-family">{catalog[kind].family}</span>
         </button>)}</div>
@@ -132,14 +135,14 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
       <main className="asset-main">
         <div className="asset-title-row"><div><div className="asset-eyebrow">{meta.code}<span>/</span>{meta.family}</div><h1>{meta.name}</h1></div><span className="asset-type-tag">{assetType(selected) === 'looping' ? <LoopIcon size={13}/> : <ArrowRight size={13}/>} {assetType(selected)}<i/>{project.duration}s</span></div>
         <p className="asset-description">{meta.description}</p>
-        <div className={`asset-stage ${showAlpha && meta.alpha ? 'asset-checkerboard' : ''}`}><Player key={`${selected}-${frames}`} ref={player} component={Scene} inputProps={inputProps} durationInFrames={frames} compositionWidth={1280} compositionHeight={720} fps={30} autoPlay loop controls={false} clickToPlay={false} style={{width: '100%'}}/></div>
-        <div className="asset-transport"><button className="asset-play" aria-label={playing ? 'Pause asset preview' : 'Play asset preview'} onClick={() => playing ? player.current?.pause() : player.current?.play()}>{playing ? <Pause size={15} fill="currentColor"/> : <Play size={15} fill="currentColor"/>}</button><span className="asset-timecode">{timecode(frame)} <span>/ {timecode(frames)}</span></span><input type="range" aria-label="Asset playhead" min={0} max={frames - 1} value={Math.min(frame, frames - 1)} onChange={e => seek(Number(e.target.value))}/><button className="icon-button" title="Replay asset" aria-label="Replay asset" onClick={() => {player.current?.seekTo(0); player.current?.play();}}><RotateCcw size={14}/></button>{meta.alpha && <button className={`asset-alpha-toggle ${showAlpha ? 'is-active' : ''}`} aria-label="Preview transparency" aria-pressed={showAlpha} onClick={() => setShowAlpha(!showAlpha)}><Layers3 size={14}/></button>}</div>
+        <div className={`asset-stage ${showAlpha && meta.alpha ? 'asset-checkerboard' : ''}`}><Player key={selected} ref={player} component={Scene} inputProps={inputProps} durationInFrames={frames} compositionWidth={1280} compositionHeight={720} fps={30} autoPlay={!reducedMotion} initiallyMuted loop controls={false} clickToPlay={false} style={{width: '100%'}}/></div>
+        <AssetTransport key={selected} player={player} frames={frames} alpha={meta.alpha} showAlpha={showAlpha} onAlphaChange={setShowAlpha}/>
         <div className="asset-motion-strip" aria-label={particleTransition ? 'Reveal, full screen, fade out' : transition ? 'Cover, cut, clear' : assetType(selected) === 'looping' ? 'Seamless cycle' : barTransition ? 'Reveal, drift, exit' : isColorBar(selected) ? 'Expand, drift' : 'Reveal, hold, exit'}>
           {assetType(selected) === 'looping' ? <div className="asset-cycle"><LoopIcon size={15}/><span>One complete cycle</span><span>{project.duration}s</span></div>
             : particleTransition ? <><span style={{flex: pixelWipeTiming.revealEnd}}>Reveal</span><button style={{flex: pixelWipeTiming.fadeStart - pixelWipeTiming.revealEnd}} onClick={() => seek(cutFrame(project.duration))}>Full screen {timecode(cutFrame(project.duration))}<i/></button><span style={{flex: 1 - pixelWipeTiming.fadeStart}}>Fade out</span></>
             : barTransition ? <><span style={{flex: colorBarTransitionTiming.reveal}}>Reveal</span><span style={{flex: colorBarTransitionTiming.exit - colorBarTransitionTiming.reveal}}>Drift</span><span style={{flex: 1 - colorBarTransitionTiming.exit}}>Exit</span></>
             : isColorBar(selected) ? <><span style={{flex: colorBarRevealTiming.expand}}>Expand</span><span style={{flex: 1 - colorBarRevealTiming.expand}}>Drift</span></>
-            : <><span style={{flex: transition ? 36 : 18}}> {transition ? 'Cover' : 'Reveal'}</span><button disabled={!transition} style={{flex: transition ? 28 : 52}} onClick={() => seek(cutFrame(project.duration))}>{transition ? `Cut at ${timecode(cutFrame(project.duration))}` : 'Hold'}{transition && <i/>}</button><span style={{flex: transition ? 36 : 12}}>{transition ? 'Clear' : 'Exit'}</span></>}
+            : <><span style={{flex: transition ? 36 : timing.enter}}> {transition ? 'Cover' : 'Reveal'}</span>{(transition || timing.hold > 0) && <button disabled={!transition} style={{flex: transition ? 28 : timing.hold}} onClick={() => seek(cutFrame(project.duration))}>{transition ? `Cut at ${timecode(cutFrame(project.duration))}` : 'Hold'}{transition && <i/>}</button>}<span style={{flex: transition ? 36 : timing.exit}}>{transition ? 'Clear' : 'Exit'}</span></>}
         </div>
         <div className="asset-use-row"><div><span className="asset-eyebrow">Made to reuse</span><p>{meta.usage}</p></div><button className="button button-light" disabled={activeExport} onClick={() => {try {onAddToComposition(project.overlays[0]);} catch (e) {setError(e instanceof Error ? e.message : 'Could not add the asset.');}}}><Plus size={14}/> Add to composition</button></div>
       </main>

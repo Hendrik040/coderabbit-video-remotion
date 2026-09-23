@@ -1,4 +1,5 @@
 import type {OverlayKind} from '../types';
+import {cycleProgress, frameProgress, motionCurves} from './motion';
 
 // Change Stack hero: the site's exact segment starts, widths, stacking, and sRGB colors.
 // https://www.coderabbit.ai/change-stack — ChangeStackColorBar / CodeRabbitColorBar.
@@ -21,29 +22,17 @@ export const colorBarRevealTiming = {expand: 0.8};
 export const colorBarTransitionTiming = {reveal: 0.32, exit: 0.68};
 
 const expandedSegments = (expansion: number) => colorBarSegments.map(segment => ({...segment, width: segment.size + (Math.max(segment.size, segment.expanded) - segment.size) * expansion}));
-const linearPhase = (frame: number, fps: number, seconds: number) => Math.max(0, Math.min(1, frame / Math.max(2, Math.ceil(seconds * fps) - 1)));
+const linearPhase = (frame: number, fps: number, seconds: number) => frameProgress(frame, seconds, fps);
 
 // Reserve part of the expansion for a constant drift, so the eased reveal never settles.
 const revealExpansion = (phase: number, expandUntil: number) => 0.85 * colorBarEase(phase / expandUntil) + 0.15 * phase;
 
 /** CSS cubic-bezier(.65, 0, .35, 1), evaluated by frame for identical preview and export. */
-export function colorBarEase(progress: number) {
-  if (progress <= 0) return 0;
-  if (progress >= 1) return 1;
-  let lo = 0, hi = 1;
-  for (let i = 0; i < 24; i++) {
-    const t = (lo + hi) / 2;
-    const x = 3 * (1 - t) ** 2 * t * 0.65 + 3 * (1 - t) * t ** 2 * 0.35 + t ** 3;
-    if (x < progress) lo = t; else hi = t;
-  }
-  const t = (lo + hi) / 2;
-  return 3 * (1 - t) * t ** 2 + t ** 3;
-}
+export const colorBarEase = motionCurves.colorBar;
 
 export function colorBarState(frame: number, fps: number, seconds: number, loop = false) {
   if (!loop) return expandedSegments(revealExpansion(linearPhase(frame, fps, seconds), colorBarRevealTiming.expand));
-  const cycleFrames = Math.max(1, Math.round(seconds * fps));
-  const phase = ((frame % cycleFrames) + cycleFrames) % cycleFrames / cycleFrames;
+  const phase = cycleProgress(frame, seconds, fps);
   // The reusable loop adds a hold and a symmetric return, with a rest at the seam.
   const progress = phase < 0.4 ? phase / 0.4 : phase < 0.5 ? 1 : phase < 0.9 ? (0.9 - phase) / 0.4 : 0;
   const expansion = colorBarEase(progress);

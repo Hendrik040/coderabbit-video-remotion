@@ -1,17 +1,18 @@
 .palette-picker{margin-top:22px;font-size:10px;color:#a1a1a1;min-width:0}
 .palette-heading,.palette-current{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .palette-heading{color:#d4d4d4}
+.name-color-targets button{display:flex;align-items:center;justify-content:center;gap:8px}
 .palette-current-chip{width:14px;height:14px;border-radius:2px;box-shadow:inset 0 0 0 1px #ffffff24}
 .palette-current{margin-top:9px;font-size:10px;min-width:0}
 .palette-current code{font:9px var(--mono);color:#858585}
 .palette-caption{font-size:9px;color:#888;margin:17px 0 10px}
 .palette-main{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .palette-option{display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;min-width:0;border-radius:3px}
-.palette-option:hover:not(:disabled){filter:none}
+
 .palette-square{display:grid;place-items:center;position:relative;width:100%;aspect-ratio:1;border-radius:3px;box-shadow:inset 0 0 0 1px #ffffff24}
 .palette-main .palette-square{width:38px}
 .palette-option[aria-pressed=true] .palette-square{outline:1px solid #eee;outline-offset:2px}
-.palette-option:hover .palette-square{outline:1px solid #939393;outline-offset:2px}
+
 .palette-option:focus-visible{outline:2px solid #eee;outline-offset:4px}
 .palette-option-label{font-size:9px;color:#8b8b8b;line-height:1}
 .palette-option[aria-pressed=true] .palette-option-label{color:#eee}

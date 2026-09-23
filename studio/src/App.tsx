@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
 import {Player, type PlayerRef} from '@remotion/player';
 import {ArrowDownToLine, ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, Infinity as LoopIcon, Code2, Terminal, Workflow, Download, Eye, EyeOff, FileVideo, Film, FolderOpen, GitBranch, Hand, Layers3, Link2, LoaderCircle, MessageSquare, MousePointer2, MoveHorizontal, Pause, Play, Plus, ScanLine, Settings2, ShieldCheck, Sparkle, Trash2, Undo2, Upload, Volume2, VolumeX, X} from 'lucide-react';
 import {Scene} from './remotion/Scene';
@@ -17,22 +17,22 @@ import {gestureLabel, type AssetType, type Binding, type Overlay, type OverlayKi
 
 const brandNames = Object.fromEntries(brandAssetKinds.map(kind => [kind, brandAssetTemplates[kind].name])) as Record<import('./types').BrandAssetKind, string>;
 const kindNames: Record<OverlayKind, string> = {...brandNames, ...Object.fromEntries(broadcastKinds.map(k => [k, broadcastTemplates[k].name])) as Record<OverlayKind, string>,hero: 'Change Stack glow', terminal: 'Terminal', agentflow: 'Agent workflow', code: 'Code panel', diagram: 'API flow', callout: 'Callout'};
-const kindIcons = {'color-bar-reveal': MoveHorizontal, 'color-bar-transition': MoveHorizontal, 'color-bar-loop': LoopIcon,'logo-reveal': Sparkle, 'circle-wipe': MoveHorizontal, 'stack-wipe': Layers3, 'color-bar-wipe': Layers3, 'pixel-glow-wipe': ScanLine, 'type-reveal': Code2, 'brand-signoff': Film, 'signal-loop': LoopIcon,hero: LoopIcon, ident: Film, presenter: MessageSquare, headline: Code2, triage: Layers3, stack: GitBranch, ticker: MoveHorizontal, bug: ShieldCheck,terminal: Terminal, agentflow: Workflow, code: Code2, diagram: GitBranch, callout: MessageSquare};
+const kindIcons = {'name-intro': MessageSquare, 'color-bar-reveal': MoveHorizontal, 'color-bar-transition': MoveHorizontal, 'color-bar-loop': LoopIcon,'logo-reveal': Sparkle, 'circle-wipe': MoveHorizontal, 'stack-wipe': Layers3, 'color-bar-wipe': Layers3, 'pixel-glow-wipe': ScanLine, 'type-reveal': Code2, 'brand-signoff': Film, 'signal-loop': LoopIcon,hero: LoopIcon, ident: Film, presenter: MessageSquare, headline: Code2, triage: Layers3, stack: GitBranch, ticker: MoveHorizontal, bug: ShieldCheck,terminal: Terminal, agentflow: Workflow, code: Code2, diagram: GitBranch, callout: MessageSquare};
 const formatTime = (seconds: number) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(Math.floor(seconds) % 60).toString().padStart(2, '0')}.${Math.floor((seconds % 1) * 10)}`;
 type Job = {id: string; status: string; progress: number; url?: string; error?: string; filename?: string};
 
-function Miniature({kind}: {kind: OverlayKind}) {
+const Miniature = memo(function Miniature({kind}: {kind: OverlayKind}) {
   if (isBrandAsset(kind)) return <div className="miniature"><AssetThumbnail kind={kind} animated={assetType(kind) === 'looping'}/></div>;
   if (kind === 'hero') return <div className="miniature mini-hero" aria-hidden="true"><ChangeStackGlowThumbnail/><LoopIcon size={23}/><span>16s seamless loop</span></div>;
   if (isBroadcast(kind)) return <div className={`miniature broadcast-mini mini-${kind}`} aria-hidden="true"><span>{broadcastTemplates[kind].code}</span><div><i/><strong>{kind === 'presenter' ? 'Presenter name' : kind === 'triage' ? 'Now  /  Next' : kind === 'stack' ? '01  /  02  /  03' : kind === 'ticker' ? 'ON THE DESK —' : kind === 'bug' ? 'CodeRabbit' : 'The Review Desk'}</strong><small>{kind === 'presenter' ? 'Role / organization' : 'DEVELOPER BROADCAST'}</small></div></div>;
   return <div className={`miniature mini-${kind}`} aria-hidden="true">
     {(kind === 'code' || kind === 'terminal') ? <div className="mini-window"><div className="mini-dots"><i/><i/><i/><span>component.tsx</span></div><div className="mini-lines"><i/><i/><i/><i/></div></div> : (kind === 'diagram' || kind === 'agentflow') ? <div className="mini-nodes"><span>{kind === 'agentflow' ? 'Plan' : 'Client'}</span><i/><span>{kind === 'agentflow' ? 'Code' : 'API'}</span><i/><span>{kind === 'agentflow' ? 'Review' : 'DB'}</span></div> : <div className="mini-note"><span>Something worth explaining.</span><i/><i/></div>}
   </div>;
-}
+});
 
 function readComposition(): Project {
   try {const saved = localStorage.getItem('coderabbit-motion-project'); if (saved) return projectSchema.parse(JSON.parse(saved));} catch { /* Keep the asset studio available if a saved project is invalid. */ }
-  return {...assetProject({id: 'logo-reveal', ...brandAssetDefaults['logo-reveal']}), name: 'CodeRabbit brand composition', duration: 12};
+  return {...assetProject({id: 'name-intro', ...brandAssetDefaults['name-intro']}), name: 'CodeRabbit brand composition', duration: 12};
 }
 export function App() {
   const [view, setView] = useState<'assets' | 'composition'>('assets');
@@ -66,6 +66,7 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
   const projectInput = useRef<HTMLInputElement>(null);
   const history = useRef<Project[]>([]);
   const projectRef = useRef(project);
+  const sceneProps = useMemo(() => ({project}), [project]);
   projectRef.current = project;
   const abort = useRef<AbortController | null>(null);
   const selected = project.overlays.find(o => o.id === selectedId);
@@ -73,7 +74,7 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
   const template = selected && isBroadcast(selected.kind) ? broadcastTemplates[selected.kind] : undefined;
   const onlyLooping = project.overlays.some(o => o.enabled) && project.overlays.filter(o => o.enabled).every(o => assetType(o.kind) === 'looping');
   const isLooping = selected ? assetType(selected.kind) === 'looping' : false;
-  const addKind = selected && assetType(selected.kind) === libraryGroup ? selected.kind : assetCollections[libraryGroup][0];
+  const addKind = selected && assetCollections[libraryGroup].includes(selected.kind) ? selected.kind : assetCollections[libraryGroup][0];
   const time = frame / project.fps;
   const currentHand = sampleAt(project.samples, time);
   const activeExport = job && !['done', 'error'].includes(job.status);
@@ -210,7 +211,7 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
         <div className="preview-space">
           <div className="preview-meta"><span><i/>{onlyLooping ? 'LOOPING ASSET / SEAMLESS' : project.brandAsset ? 'BRAND ASSETS / COMPOSITION' : project.broadcast && project.sampleMode ? 'BROADCAST / SAMPLE RUNDOWN' : project.sampleMode ? 'SAMPLE / SIMULATED MOTION' : project.mediaName}</span><span>1280 × 720 <span className="meta-separator">/</span> 30 FPS</span></div>
           <div className="player-frame">
-            <Player key={`${project.mediaUrl}-${project.duration}`} ref={player} component={Scene} inputProps={{project}} durationInFrames={Math.max(1, Math.ceil(project.duration * project.fps))} compositionWidth={project.width} compositionHeight={project.height} fps={project.fps} initialFrame={Math.min(frame, Math.ceil(project.duration * project.fps) - 1)} style={{width: '100%'}} controls={false} clickToPlay={false} loop={onlyLooping} moveToBeginningWhenEnded={false}/>
+            <Player key={`${project.mediaUrl}-${project.duration}`} ref={player} component={Scene} inputProps={sceneProps} durationInFrames={Math.max(1, Math.ceil(project.duration * project.fps))} compositionWidth={project.width} compositionHeight={project.height} fps={project.fps} initialFrame={Math.min(frame, Math.ceil(project.duration * project.fps) - 1)} style={{width: '100%'}} controls={false} clickToPlay={false} loop={onlyLooping} moveToBeginningWhenEnded={false}/>
             {busy && <div className="preview-busy"><LoaderCircle className="spin" size={24}/><span>{busy}</span></div>}
           </div>
           <div className="transport">

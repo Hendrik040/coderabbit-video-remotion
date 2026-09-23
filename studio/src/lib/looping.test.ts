@@ -4,10 +4,11 @@ import {activeLoopAssets, assetCollections, assetType, heroPixelOpacity, heroPix
 import {demoProject, overlayDefaults} from './demo';
 import {projectSchema} from './schema';
 
-test('every component belongs to exactly one playback type', () => {
+test('every available component belongs to exactly one playback type', () => {
   const kinds = Object.values(assetCollections).flat();
   assert.equal(new Set(kinds).size, kinds.length);
-  assert.deepEqual([...kinds].sort(), Object.keys(overlayDefaults).sort());
+  const available = Object.keys(overlayDefaults).filter(kind => !['logo-reveal', 'circle-wipe', 'signal-loop', 'type-reveal', 'brand-signoff'].includes(kind));
+  assert.deepEqual([...kinds].sort(), available.sort());
   for (const [type, collection] of Object.entries(assetCollections)) {
     for (const kind of collection) assert.equal(assetType(kind), type);
   }

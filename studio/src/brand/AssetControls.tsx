@@ -8,8 +8,10 @@ import {isColorBar} from '../lib/colorBar';
 import {ColorBarControls} from './ColorBarControls';
 import {GlowControls} from './GlowControls';
 import {PixelWipeControls} from './PixelWipeControls';
+import {NameIntroControls} from './NameIntroControls';
 
 export function AssetControls({asset, onChange}: {asset: Overlay; onChange: (patch: Partial<Overlay>) => void}) {
+  if (asset.kind === 'name-intro') return <NameIntroControls asset={asset} onChange={onChange}/>;
   if (asset.kind === 'hero') return <GlowControls asset={asset} onChange={onChange}/>;
   if (asset.kind === 'pixel-glow-wipe') return <PixelWipeControls asset={asset} onChange={onChange}/>;
   const template = isBrandAsset(asset.kind) ? brandAssetTemplates[asset.kind] : undefined;

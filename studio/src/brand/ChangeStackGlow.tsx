@@ -1,8 +1,9 @@
-import React, {useEffect, useLayoutEffect, useMemo, useRef} from 'react';
+import React, {memo, useEffect, useLayoutEffect, useMemo, useRef} from 'react';
 import {createHeroPixels, heroBeamTransform, heroPixelOpacity, heroPixels, heroState, type HeroPixel} from '../lib/looping';
 import {inversePoint, lightingDefaults, lightingTransform, vignetteDefaults, vignetteTransform} from '../lib/glowSettings';
 import type {Overlay} from '../types';
 import {changeStackPixelGrid} from '../lib/pixelGrid';
+import {usePreviewActivity} from '../hooks/usePreviewActivity';
 
 type GlowSettings = Pick<Overlay, 'accent' | 'intensity' | 'loopDuration' | 'lighting' | 'vignette'>;
 
@@ -90,8 +91,10 @@ export function ChangeStackGlow({overlay, frame, fps}: {overlay: Overlay; frame:
 const thumbnailPixels = createHeroPixels(320, 180);
 
 /** This timer belongs only to the library thumbnail; the composition can remain paused. */
-export function ChangeStackGlowThumbnail({overlay}: {overlay?: Overlay}) {
+export const ChangeStackGlowThumbnail = memo(function ChangeStackGlowThumbnail({overlay}: {overlay?: Overlay}) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const active = usePreviewActivity(canvas);
+  const elapsed = useRef(0);
   const {lighting, vignette, intensity, loopDuration} = overlay ?? {};
   const {x, y, angle, width, height, softness} = {...lightingDefaults, ...lighting};
   const pixels = useMemo(() => lighting ? createHeroPixels(320, 180, {x, y, angle, width, height, softness}) : thumbnailPixels, [x, y, angle, width, height, softness, !!lighting]);
@@ -99,32 +102,19 @@ export function ChangeStackGlowThumbnail({overlay}: {overlay?: Overlay}) {
     const element = canvas.current;
     const ctx = element?.getContext('2d');
     if (!element || !ctx) return;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const settings = {accent: '#888888', lighting, vignette, intensity, loopDuration};
-    let raf = 0, origin = 0, lastFrame = -1, inView = true;
+    let raf = 0, previous: number | undefined, lastFrame = -1;
     const draw = (frame: number) => {drawChangeStackGlow(ctx, frame, 30, settings, pixels);};
     const tick = (now: number) => {
-      if (!origin) origin = now;
-      const frame = Math.floor((now - origin) * 30 / 1000) % Math.round((loopDuration ?? 16) * 30);
+      if (previous !== undefined) elapsed.current += now - previous;
+      previous = now;
+      const frame = Math.floor(elapsed.current * 30 / 1000);
       if (frame !== lastFrame) {draw(frame); lastFrame = frame;}
       raf = requestAnimationFrame(tick);
     };
-    const sync = () => {
-      cancelAnimationFrame(raf);
-      if (!document.hidden && inView && !reducedMotion.matches) raf = requestAnimationFrame(tick);
-    };
-    draw(0);
-    const observer = new IntersectionObserver(([entry]) => {inView = entry.isIntersecting; sync();});
-    observer.observe(element);
-    document.addEventListener('visibilitychange', sync);
-    reducedMotion.addEventListener('change', sync);
-    sync();
-    return () => {
-      cancelAnimationFrame(raf);
-      observer.disconnect();
-      document.removeEventListener('visibilitychange', sync);
-      reducedMotion.removeEventListener('change', sync);
-    };
-  }, [lighting, vignette, intensity, loopDuration, pixels]);
+    draw(Math.floor(elapsed.current * 30 / 1000));
+    if (active) raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [active, lighting, vignette, intensity, loopDuration, pixels]);
   return <canvas ref={canvas} width={320} height={180} className="mini-hero-canvas" aria-hidden="true"/>;
-}
+});

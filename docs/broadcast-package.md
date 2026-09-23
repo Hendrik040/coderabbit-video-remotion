@@ -20,7 +20,7 @@ Importing footage scales the existing timing proportionally, preserving overlaps
 
 ## Motion and layout
 
-All templates share `broadcastMotion`: 18 frames in, a readable hold, then 12 frames out at 30 fps. Text uses 0 / 3 / 6-frame staggers. Motion compresses proportionally for clips under one second. The first and last rendered frames are clear; absolute frame calculations keep scrubbing, replay and exports deterministic.
+All templates share `broadcastMotion`: 18 frames in, a readable hold, then 12 frames out at 30 fps. Text enters in 60 ms beats (0 / 1.8 / 3.6 reference frames at 30 fps), with a shared strong ease-out curve. The same motion also drives developer explainer entrances and exits. Motion compresses proportionally for clips under one second. The first and last rendered frames are clear; absolute frame calculations keep scrubbing, replay and exports deterministic.
 
 Use at least 3 seconds for titles and 5 seconds for product boards. The ticker advances to the next item every 3.5 seconds after its entrance; allow enough duration for every item. The sample ticker uses a single line. The final item holds until the layer exits.
 
@@ -42,7 +42,7 @@ Geist 1.7.2 (Vercel) and Hack 3.003 (Source Foundry) are bundled in `public/bran
 
 ## Implementation and validation
 
-- `studio/src/lib/broadcast.ts`: stable template registry, defaults, rundown, shared motion and import retiming.
+- `studio/src/lib/broadcast.ts`: stable template registry, defaults, rundown, and import retiming; `studio/src/lib/motion.ts` supplies the shared reveal and exit timing.
 - `studio/src/brand/Broadcast.tsx`: brand tokens, local font loading, official logo and seven renderers.
 - `studio/src/lib/schema.ts`: backward-compatible optional broadcast/edition fields and copy validation.
 - `studio/src/remotion/Scene.tsx`: same scene for the editor Player and local exports.

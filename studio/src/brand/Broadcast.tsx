@@ -1,6 +1,7 @@
 import React, {useEffect, useState, type CSSProperties} from 'react';
 import {AbsoluteFill, Img, cancelRender, continueRender, delayRender, staticFile} from 'remotion';
 import {broadcastMotion} from '../lib/broadcast';
+import {staggerFrames} from '../lib/motion';
 import type {Overlay} from '../types';
 
 export const brand = {orange: '#FF570A', mint: '#25E2A8', cobalt: '#687FF5', ink: '#121113', panel: '#211F26', raised: '#322F37', line: '#49454F', white: '#EEEDEF', muted: '#B5B2BC'};
@@ -54,9 +55,9 @@ export function BroadcastOverlay({overlay: o, frame, fps, hasBackground = false}
   return <div style={frameStyle}>
     {full && !hasBackground && <AbsoluteFill style={{background: brand.ink, clipPath: `inset(0 ${(1 - motion.enter + motion.leave) * 100}% 0 0)`}}/>}
     {o.kind === 'ident' && <>
-      <div style={{position: 'absolute', left: 64, top: 64, right: 64, height: 3, background: brand.line}}><div style={{width: `${motion.enter * 100}%`, height: 3, background: brand.orange}}/></div>
+      <div style={{position: 'absolute', left: 64, top: 64, right: 64, height: 3, background: brand.line}}><div style={{width: '100%', height: 3, background: brand.orange, transform: `scaleX(${motion.enter})`, transformOrigin: 'left'}}/></div>
       <Reveal {...common} style={{position: 'absolute', left: 64, top: 112}}><Logo width={260}/></Reveal>
-      <Reveal {...common} delay={3} style={{position: 'absolute', left: 64, top: 249, maxWidth: 925}}>
+      <Reveal {...common} delay={staggerFrames} style={{position: 'absolute', left: 64, top: 249, maxWidth: 925}}>
         <div style={{...label, color: brand.orange, marginBottom: 25}}>{kicker}</div>
         <h1 style={{...heading, fontSize: o.title.length > 27 ? 74 : 92, maxWidth: 1020, WebkitLineClamp: 2}}>{o.title}</h1>
         <div style={{...body, marginTop: 26, maxWidth: 900}}>{o.body}</div>
@@ -66,30 +67,30 @@ export function BroadcastOverlay({overlay: o, frame, fps, hasBackground = false}
     {o.kind === 'headline' && <>
       <Reveal {...common} style={{position: 'absolute', left: 64, top: 78, ...label, color: brand.orange}}>{kicker}</Reveal>
       <div style={{position: 'absolute', top: 182, bottom: 132, left: 64, width: 5, background: brand.orange, transform: `scaleY(${motion.enter})`, transformOrigin: 'top'}}/>
-      <Reveal {...common} delay={3} style={{position: 'absolute', left: 104, top: 196, width: 1030}}><h1 style={{...heading, fontSize: o.title.length > 55 ? 66 : 82}}>{o.title}</h1><div style={{...body, marginTop: 28, maxWidth: 880}}>{o.body}</div></Reveal>
-      <Reveal {...common} delay={6} style={{position: 'absolute', left: 104, bottom: 72, ...label, color: brand.muted}}>THE REVIEW DESK <span style={{padding: '0 22px', color: brand.line}}>/</span> IN FOCUS</Reveal>
+      <Reveal {...common} delay={staggerFrames} style={{position: 'absolute', left: 104, top: 196, width: 1030}}><h1 style={{...heading, fontSize: o.title.length > 55 ? 66 : 82}}>{o.title}</h1><div style={{...body, marginTop: 28, maxWidth: 880}}>{o.body}</div></Reveal>
+      <Reveal {...common} delay={2 * staggerFrames} style={{position: 'absolute', left: 104, bottom: 72, ...label, color: brand.muted}}>THE REVIEW DESK <span style={{padding: '0 22px', color: brand.line}}>/</span> IN FOCUS</Reveal>
     </>}
     {o.kind === 'presenter' && <div style={{position: 'absolute', left: 64, bottom: 146, width: 750, transform: `translateX(${(1 - motion.enter) * -32 - motion.leave * 20}px)`}}>
       <div style={{display: 'inline-block', padding: '9px 17px', background: brand.orange, color: brand.ink, ...label, maxWidth: 750, ...lineClamp(1)}}>{kicker || 'AT THE DESK'}</div>
       <div style={{background: brand.panel, border: `1px solid ${brand.line}`, borderLeft: `4px solid ${brand.orange}`, padding: '22px 27px 25px'}}>
-        <Reveal {...common} delay={3}><div style={{...heading, fontSize: o.title.length > 28 ? 34 : 44, letterSpacing: -1, WebkitLineClamp: 1}}>{o.title}</div><div style={{...body, marginTop: 8, fontSize: 21, WebkitLineClamp: 1}}>{o.body}</div></Reveal>
+        <Reveal {...common} delay={staggerFrames}><div style={{...heading, fontSize: o.title.length > 28 ? 34 : 44, letterSpacing: -1, WebkitLineClamp: 1}}>{o.title}</div><div style={{...body, marginTop: 8, fontSize: 21, WebkitLineClamp: 1}}>{o.body}</div></Reveal>
       </div>
     </div>}
     {(o.kind === 'triage' || o.kind === 'stack') && <>
       <Reveal {...common} style={{position: 'absolute', left: 64, top: 80, ...label, color: brand.orange}}>{kicker}</Reveal>
-      <Reveal {...common} delay={3} style={{position: 'absolute', left: 64, top: 204, width: 465}}>
+      <Reveal {...common} delay={staggerFrames} style={{position: 'absolute', left: 64, top: 204, width: 465}}>
         <h1 style={{...heading, fontSize: o.title.length > 40 ? 55 : 64}}>{o.title}</h1>
         <div style={{...label, color: brand.muted, marginTop: 30, fontWeight: 400}}>{o.kind === 'triage' ? 'VALUE / RISK / EFFORT' : 'INTENT / IMPLEMENTATION / CONTEXT'}</div>
         <div style={{marginTop: 68, width: 50, height: 4, background: brand.orange}}/>
       </Reveal>
       <div style={{position: 'absolute', left: 585, top: 198, width: 630}}>
         {o.kind === 'triage' ? <>
-          <div style={{display: 'flex', gap: 14}}>{['NOW', 'NEXT'].map((name, i) => <Reveal key={name} {...common} delay={3 + i * 3} style={{...panel, width: 307, minHeight: 290, padding: 23}}>
+          <div style={{display: 'flex', gap: 14}}>{['NOW', 'NEXT'].map((name, i) => <Reveal key={name} {...common} delay={(i + 1) * staggerFrames} style={{...panel, width: 307, minHeight: 290, padding: 23}}>
             <div style={{...label, display: 'flex', alignItems: 'center', gap: 9, color: i === 0 ? brand.orange : brand.muted}}><span style={{width: 7, height: 7, borderRadius: 7, background: i === 0 ? brand.orange : brand.muted}}/>{name}<span style={{marginLeft: 'auto', color: brand.muted}}>01</span></div>
             <div style={{borderTop: `1px solid ${brand.line}`, marginTop: 22, paddingTop: 24}}><span style={{font: `12px ${mono}`, color: brand.muted}}>SAMPLE / {i === 0 ? 'REVIEW PRIORITY' : 'UP NEXT'}</span><div style={{...heading, fontSize: 28, lineHeight: 1.22, letterSpacing: -0.6, marginTop: 18, WebkitLineClamp: 4}}>{items[i] ?? ['Review the next pull request', 'Plan the next review'][i]}</div></div>
           </Reveal>)}</div>
-          <Reveal {...common} delay={6} style={{...label, color: brand.muted, fontSize: 11, marginTop: 22, fontWeight: 400}}>ILLUSTRATIVE QUEUE / EDIT TO MATCH YOUR STORY</Reveal>
-        </> : items.slice(0, 3).map((item, i) => <Reveal key={i} {...common} delay={i * 3} style={{...panel, marginLeft: i * 17, width: 596 - i * 17, padding: '24px 25px', marginBottom: 12, display: 'flex', gap: 22, alignItems: 'center', minHeight: 96}}>
+          <Reveal {...common} delay={2 * staggerFrames} style={{...label, color: brand.muted, fontSize: 11, marginTop: 22, fontWeight: 400}}>ILLUSTRATIVE QUEUE / EDIT TO MATCH YOUR STORY</Reveal>
+        </> : items.slice(0, 3).map((item, i) => <Reveal key={i} {...common} delay={i * staggerFrames} style={{...panel, marginLeft: i * 17, width: 596 - i * 17, padding: '24px 25px', marginBottom: 12, display: 'flex', gap: 22, alignItems: 'center', minHeight: 96}}>
           <span style={{...label, fontSize: 16, color: i === 0 ? brand.orange : brand.muted}}>0{i + 1}</span><div style={{...heading, fontSize: 26, lineHeight: 1.22, letterSpacing: -0.5, WebkitLineClamp: 2}}>{item}</div><span style={{marginLeft: 'auto', color: i === 2 ? brand.mint : brand.line, fontSize: 22}}>↗</span>
         </Reveal>)}
       </div>

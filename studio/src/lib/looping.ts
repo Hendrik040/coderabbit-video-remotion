@@ -1,13 +1,14 @@
 import {broadcastKinds} from './broadcast';
-import {brandAssetKinds} from './brandAssets';
+import {availableBrandAssetKinds} from './brandAssets';
 import {inversePoint, lightingDefaults, lightingTransform, type GlowLighting} from './glowSettings';
 import {changeStackPixelGrid} from './pixelGrid';
+import {cycleProgress, motionCurves, unit} from './motion';
 import type {AssetType, Overlay, OverlayKind, Project} from '../types';
 
 export const assetType = (kind: OverlayKind): AssetType => kind === 'hero' || kind === 'signal-loop' || kind === 'color-bar-loop' ? 'looping' : 'linear';
 export const assetCollections: Record<AssetType, OverlayKind[]> = {
-  linear: [...brandAssetKinds.filter(kind => assetType(kind) === 'linear'), ...broadcastKinds, 'terminal', 'agentflow', 'code', 'diagram', 'callout'],
-  looping: ['signal-loop', 'hero', 'color-bar-loop'],
+  linear: [...availableBrandAssetKinds.filter(kind => assetType(kind) === 'linear'), ...broadcastKinds, 'terminal', 'agentflow', 'code', 'diagram', 'callout'],
+  looping: ['hero', 'color-bar-loop'],
 };
 export const heroDefaults: Omit<Overlay, 'id'> = {
   kind: 'hero', enabled: true, title: 'Change Stack glow', body: '', start: 0, duration: 16,
@@ -19,24 +20,10 @@ export function heroProject(): Project {
   return {name: 'Change Stack glow · seamless loop', mediaUrl: null, mediaName: 'Looping background', duration: 16, fps: 30, width: 1280, height: 720, samples: [], cues: [], overlays: [{id: 'hero', ...heroDefaults}], sampleMode: true, showTracking: false, mute: false, broadcast: true};
 }
 
-// Match the reference's cubic-bezier(.45, 0, .55, 1) on each half of the drift.
-function driftEase(progress: number) {
-  if (progress === 0 || progress === 1) return progress;
-  let lo = 0, hi = 1;
-  for (let i = 0; i < 20; i++) {
-    const t = (lo + hi) / 2;
-    const x = 3 * (1 - t) ** 2 * t * 0.45 + 3 * (1 - t) * t ** 2 * 0.55 + t ** 3;
-    if (x < progress) lo = t; else hi = t;
-  }
-  const t = (lo + hi) / 2;
-  return 3 * (1 - t) * t ** 2 + t ** 3;
-}
-
 /** Periodic phase, including fractional cycle lengths. No wall clock or random state. */
 export function heroState(frame: number, fps: number, seconds = 16) {
-  const cycleFrames = Math.max(1, Math.round(seconds * fps));
-  const phase = ((frame % cycleFrames) + cycleFrames) % cycleFrames / cycleFrames;
-  const drift = driftEase(phase <= 0.5 ? phase * 2 : (1 - phase) * 2);
+  const phase = cycleProgress(frame, seconds, fps);
+  const drift = motionCurves.glow(phase <= 0.5 ? phase * 2 : (1 - phase) * 2);
   return {phase, x: 16 * drift, y: -8 * drift, scale: 1 + 0.025 * drift, glow: 1 - 0.05 * drift};
 }
 
@@ -46,7 +33,6 @@ const noise = (x: number, y: number) => {
   n = Math.imul(n ^ (n >>> 13), 1274126177);
   return ((n ^ (n >>> 16)) >>> 0) / 4294967295;
 };
-const unit = (n: number) => Math.max(0, Math.min(1, n));
 
 /** Reference SVG ellipse, fitted to the video frame (including the hero's top bleed). */
 export function heroBeamTransform(width: number, height: number): [number, number, number, number, number, number] {
