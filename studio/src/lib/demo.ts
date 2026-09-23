@@ -1,6 +1,10 @@
+import {heroDefaults, heroProject} from './looping';
+import {broadcastDefaults, broadcastProject} from './broadcast';
 import type {Project, Sample, Overlay, OverlayKind} from '../types';
 
 export const overlayDefaults: Record<OverlayKind, Omit<Overlay, 'id'>> = {
+  ...broadcastDefaults,
+  hero: heroDefaults,
   terminal: {kind: 'terminal', enabled: true, title: '~/my-project', body: 'git diff --stat\ngit status --short', start: 0.6, duration: 4.6, binding: 'cue', placement: 'left', accent: '#FF570A', scale: 1},
   agentflow: {kind: 'agentflow', enabled: true, title: 'A better development loop.', body: 'Plan,Code,Review', start: 5.4, duration: 3.9, binding: 'progress', placement: 'left', accent: '#FF570A', scale: 1},
   code: {kind: 'code', enabled: true, title: 'useGesture.ts', body: 'const gesture = useGesture(video);\n\nif (gesture.is("open-palm")) {\n  reveal(<CodePanel />);\n}\n\n// Your movement. Your components.', start: 1.2, duration: 4.1, binding: 'cue', placement: 'left', accent: '#FF570A', scale: 1},
@@ -8,7 +12,9 @@ export const overlayDefaults: Record<OverlayKind, Omit<Overlay, 'id'>> = {
   callout: {kind: 'callout', enabled: true, title: 'Review smarter. Ship faster.', body: 'More context. Better reviews. CodeRabbit.', start: 9.1, duration: 2.6, binding: 'cue', placement: 'right', accent: '#F2B8EB', scale: 1},
 };
 
-export function demoProject(preset: 'walkthrough' | 'technical' = 'walkthrough'): Project {
+export function demoProject(preset: 'broadcast' | 'walkthrough' | 'technical' | 'loop' = 'broadcast'): Project {
+  if (preset === 'loop') return heroProject();
+  if (preset === 'broadcast') return broadcastProject();
   const samples: Sample[] = Array.from({length: 145}, (_, i) => {
     const t = i / 12;
     const x = t < 5.4 ? 0.72 + 0.045 * Math.sin(t * 1.5) : t < 8.6 ? 0.22 + ((t - 5.4) / 3.2) * 0.61 : 0.7 + 0.06 * Math.sin((t - 8.6) * 1.3);

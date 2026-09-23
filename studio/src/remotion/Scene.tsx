@@ -1,4 +1,8 @@
 import React from 'react';
+import {ChangeStackGlow} from '../brand/ChangeStackGlow';
+import {activeLoopAssets, assetType} from '../lib/looping';
+import {BroadcastBackdrop, BroadcastOverlay, useBroadcastFonts} from '../brand/Broadcast';
+import {isBroadcast} from '../lib/broadcast';
 import '@fontsource/ibm-plex-mono/500.css';
 import {TerminalWindow, terminalDuration} from '../../../src/brand/TerminalWindow';
 import {AgentFlow} from '../../../src/brand/AgentFlow';
@@ -74,14 +78,17 @@ function TrackedHand({sample, simulated}: {sample: Sample; simulated: boolean}) 
 }
 
 export const Scene: React.FC<SceneProps> = ({project, transparent = false}) => {
+  useBroadcastFonts();
   const frame = useCurrentFrame();
   const {fps, width, height} = useVideoConfig();
   const time = frame / fps;
   const hand = sampleAt(project.samples, time);
+  const backgrounds = activeLoopAssets(project.overlays, frame, fps);
   return <AbsoluteFill style={{background: transparent ? 'transparent' : '#0c0c0b', fontFamily: sans, overflow: 'hidden'}}>
     {!transparent && project.mediaUrl && <Html5Video src={project.mediaUrl} muted={project.mute} style={{width: '100%', height: '100%', objectFit: 'contain'}}/>}
     <div style={{position: 'absolute', width: 1280, height: 720, transform: `scale(${width / 1280}, ${height / 720})`, transformOrigin: '0 0'}}>
-      {!transparent && project.sampleMode && <>
+      {!transparent && !backgrounds.length && project.sampleMode && project.broadcast && <BroadcastBackdrop showSlate={!project.overlays.some(o => o.enabled && ['ident', 'headline', 'triage', 'stack'].includes(o.kind) && time >= o.start && time < o.start + o.duration)}/>}
+      {!transparent && !backgrounds.length && project.sampleMode && !project.broadcast && <>
         <AbsoluteFill style={{backgroundImage: 'radial-gradient(ellipse at 78% 48%, #FF570A0f, transparent 50%), radial-gradient(#ffffff0e 1px, transparent 1px)', backgroundSize: 'auto, 28px 28px'}}/>
         <div style={{position: 'absolute', top: 40, left: 55, font: `13px ${mono}`, letterSpacing: 2, color: '#9c94b0'}}>CODERABBIT <span style={{color: '#47454f', margin: '0 13px'}}>/</span> MOTION STUDIO</div>
         <div style={{position: 'absolute', top: 41, right: 55, font: `15px ${mono}`, color: '#8c859c'}}>BRAND KIT / 01</div>
@@ -89,10 +96,12 @@ export const Scene: React.FC<SceneProps> = ({project, transparent = false}) => {
         <div style={{position: 'absolute', top: 172, left: 59, fontSize: 19, color: '#96968b'}}>Developer stories, directed by you.</div>
         <div style={{position: 'absolute', bottom: 38, left: 57, right: 57, display: 'flex', justifyContent: 'space-between', font: `11px ${mono}`, letterSpacing: 1.5, color: '#787184'}}><span>SIMULATED HAND TRACK · SAMPLE SCENE</span><span>CODERABBIT · DEVELOPER WALKTHROUGH</span></div>
       </>}
+      {backgrounds.map(overlay => <ChangeStackGlow key={overlay.id} overlay={overlay} frame={frame - overlay.start * fps} fps={fps}/>)}
       {!transparent && project.showTracking && hand && <TrackedHand sample={hand} simulated={project.sampleMode}/>}
-      {project.overlays.filter(o => o.enabled).map(overlay => {
+      {project.overlays.filter(o => o.enabled && assetType(o.kind) === 'linear').map(overlay => {
         const local = frame - overlay.start * fps;
         if (local < 0 || local >= overlay.duration * fps) return null;
+        if (isBroadcast(overlay.kind)) return <BroadcastOverlay key={overlay.id} overlay={overlay} frame={local} fps={fps} hasBackground={backgrounds.length > 0}/>;
         const entrance = spring({frame: local, fps, config: {damping: 22, stiffness: 130, mass: 0.8}});
         const exit = interpolate(local, [Math.max(0, overlay.duration * fps - 8), overlay.duration * fps], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
         const progress = overlay.binding === 'progress' && hand?.visible ? clamp((hand.x - 0.18) / 0.65) : clamp(local / (overlay.duration * fps * 0.8));

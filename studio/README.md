@@ -1,6 +1,8 @@
 # CodeRabbit Motion Studio
 
-A local React + Remotion editor for developer walkthroughs. It brings Cue's footage import, gesture analysis, timeline, and export into CodeRabbit Video Studio, using the repository's orange, cream, aquamarine, and IBM Plex Mono visual language.
+A local React + Remotion broadcast editor. Seven named station templates combine current CodeRabbit logos and typography with consistent motion. The editor stays monochrome. Cue's footage import, gesture analysis, timeline, and export remain available alongside the earlier developer walkthrough graphics.
+
+Start with **Load a preset → Broadcast rundown**. Edit a presenter name and role, segment headings, product cards, ticker, and station identity. [Template catalog, brand sources, motion rules, and layout guide](../docs/broadcast-package.md). Gesture model setup is optional for broadcast editing and rendering.
 
 ## Start
 
@@ -17,6 +19,10 @@ Open http://127.0.0.1:4319. `PORT` changes the port; development hot reload uses
 On this Codex desktop workspace, dependencies are installed already. `./studio/start.sh` also starts the editor and can use Codex's bundled Node runtime if Node is absent from your shell's PATH.
 
 For production mode, run `npm run studio:build`, then `npm run studio:serve`. Existing authored videos still use `npm start` and the original render scripts.
+
+## Linear and looping assets
+
+**Components → Linear** contains the station templates and explainer graphics. **Components → Looping** contains **Change Stack glow**, a seamless procedural background based on the product-page hero. Add it behind your graphics or load **Change Stack glow loop** for a standalone export. Cycle length, glow intensity, opacity and color are editable; the editor itself remains monochrome.
 
 ## Make a walkthrough
 
@@ -45,7 +51,7 @@ For production mode, run `npm run studio:build`, then `npm run studio:serve`. Ex
 | `src/TerminalTyping.tsx` | Original composition wrapper, with its existing defaults and command presets |
 | `src/brand/AgentFlow.tsx` | Compact, progress-driven adaptation of `RabbitAgentLoopV4`'s plan/code/review graphics |
 | `src/MotionBrandKit.tsx` | Remotion composition showcasing the shared brand components |
-| `studio/src/remotion/Scene.tsx` | Shared preview/export scene, base footage, and all five overlay renderers |
+| `studio/src/remotion/Scene.tsx` | Shared preview/export scene, base footage, and the broadcast / legacy overlay renderers |
 | `studio/src/App.tsx` | Editor, presets, local autosave, inspector, timeline, and export UI |
 | `studio/src/lib/` | Gesture processing, project schema, and presets |
 | `studio/src/workers/tracking.worker.ts` | Local MediaPipe worker |
@@ -67,4 +73,4 @@ npm run typecheck
 npm run studio:build
 ```
 
-The automated checks cover gesture debouncing, confidence filtering, interpolation, missing hands, both preset schemas, all five overlay kinds, invalid saved projects, and shared terminal timing. Browser and export checks should additionally cover footage import, detection, editing/undo, project reload, H.264 audio, and transparent ProRes output.
+The automated checks cover gesture debouncing, confidence filtering, interpolation, missing hands, all four preset schemas, all thirteen overlay kinds, broadcast motion boundaries, seamless loop phases, playback categories, background timing, and import retiming, invalid saved projects, and shared terminal timing. Browser and export checks should additionally cover footage import, detection, editing/undo, project reload, H.264 audio, and transparent ProRes output.

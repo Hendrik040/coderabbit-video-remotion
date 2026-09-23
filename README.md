@@ -12,7 +12,9 @@ npm run studio:setup  # downloads the gesture model once; footage stays local
 npm run studio       # http://127.0.0.1:4319
 ```
 
-Use Node.js 22 or newer for the studio. Start with the **Developer walkthrough** or **Code & API explainer** preset, or import a video. Edit terminals, agent workflows, code panels, API diagrams, and callouts; adjust timing and placement; then export an MP4 or a transparent ProRes overlay. The sample's hand motion is simulated. Imported clips can be analyzed locally for real gestures.
+Use Node.js 22 or newer for the studio. Start with **Broadcast rundown** for seven named station templates: an ident, presenter strap, segment title, Triage board, Change Stack, ticker, and station bug. The package uses official logos, Geist/Hack typography, and shared entrance/exit timing. The editor remains monochrome. See the [broadcast package guide](docs/broadcast-package.md).
+
+The **Developer walkthrough** and **Code & API explainer** presets remain available, or import a video. Edit terminals, agent workflows, code panels, API diagrams, and callouts; adjust timing and placement; then export an MP4 or a transparent ProRes overlay. The sample's hand motion is simulated. Imported clips can be analyzed locally for real gestures.
 
 The terminal is shared with the existing `TerminalTyping` compositions. The compact agent workflow adapts `RabbitAgentLoopV4`'s visual language. Both are also shown in the new `MotionBrandKit` composition in Remotion Studio. Existing compositions remain available with `npm start`.
 
