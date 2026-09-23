@@ -2,6 +2,7 @@ import React, {useEffect, useLayoutEffect, useMemo, useRef} from 'react';
 import {createHeroPixels, heroBeamTransform, heroPixelOpacity, heroPixels, heroState, type HeroPixel} from '../lib/looping';
 import {inversePoint, lightingDefaults, lightingTransform, vignetteDefaults, vignetteTransform} from '../lib/glowSettings';
 import type {Overlay} from '../types';
+import {changeStackPixelGrid} from '../lib/pixelGrid';
 
 type GlowSettings = Pick<Overlay, 'accent' | 'intensity' | 'loopDuration' | 'lighting' | 'vignette'>;
 
@@ -52,7 +53,7 @@ export function drawChangeStackGlow(ctx: CanvasRenderingContext2D, frame: number
     const opacity = heroPixelOpacity(pixel, state.phase, intensity);
     if (opacity < 0.001) continue;
     ctx.globalAlpha = opacity;
-    ctx.fillRect(pixel.x, pixel.y, 4, 4);
+    ctx.fillRect(pixel.x, pixel.y, changeStackPixelGrid.size, changeStackPixelGrid.size);
   }
   ctx.globalAlpha = 1;
 

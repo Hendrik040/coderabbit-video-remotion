@@ -1,24 +1,29 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {colorBarState} from './colorBar';
+import {colorBarState, colorBarTransitionState} from './colorBar';
 import {assetProject, brandAssetDefaults} from './brandAssets';
 import {projectSchema} from './schema';
 
-test('hero reveal expands the five foreground colors at fixed anchors and holds after 3.2 seconds', () => {
+test('hero reveal keeps the foreground colors moving through the final frame at every duration', () => {
   const start = colorBarState(0, 30, 4);
-  const middle = colorBarState(48, 30, 4);
-  const end = colorBarState(96, 30, 4);
-  assert.deepEqual(colorBarState(119, 30, 4), end);
+  const end = colorBarState(119, 30, 4);
   assert.deepEqual(end.map(s => s.start), start.map(s => s.start));
   assert.deepEqual(end.flatMap((s, i) => s.width > start[i].width ? [s.name] : []), ['Green', 'Bright green', 'Indigo', 'Orange', 'Peach']);
-  for (let i = 0; i < start.length; i++) {
-    assert.ok(Math.abs(middle[i].width - (start[i].width + end[i].width) / 2) < 1e-7);
-    assert.ok(end[i].width >= start[i].width);
-  }
   // The source keeps orange above peach, and expanded accents above the neutral beds.
   assert.ok(end[7].z > end[8].z && end[8].z > end[9].z);
-  for (const seconds of [0.6, 1.1, 3.2, 4, 12]) {
-    assert.deepEqual(colorBarState(Math.ceil(seconds * 30) - 1, 30, seconds), end);
+  for (const seconds of [0.1, 0.6, 1.1, 3.2, 4, 12]) {
+    const last = Math.ceil(seconds * 30) - 1;
+    assert.deepEqual(colorBarState(last, 30, seconds), end);
+    let previous = start;
+    for (let frame = 1; frame <= last; frame++) {
+      const state = colorBarState(frame, 30, seconds);
+      for (const i of [1, 2, 5, 7, 8]) assert.ok(state[i].width > previous[i].width, `${seconds}s frame ${frame}: ${state[i].name} must keep moving`);
+      assert.deepEqual(state.map(s => s.start), start.map(s => s.start));
+      previous = state;
+    }
+    // Even the quiet tail must move visibly, not just differ by floating-point noise.
+    const tail = colorBarState(Math.floor(last * 0.8), 30, seconds);
+    assert.ok((end[5].width - tail[5].width) * 1280 > 6);
   }
 });
 
@@ -37,7 +42,7 @@ test('color bar loop moves and returns to an identical rest frame at the seam an
 });
 
 test('color bar presets preserve edited segments and placement through save and export validation', () => {
-  for (const kind of ['color-bar-reveal', 'color-bar-loop', 'color-bar-wipe'] as const) {
+  for (const kind of ['color-bar-reveal', 'color-bar-loop', 'color-bar-wipe', 'color-bar-transition'] as const) {
     const asset = {id: kind, ...brandAssetDefaults[kind], barHeight: 28, barPosition: 'top' as const, barColors: ['#25E2A8', ...brandAssetDefaults[kind].barColors!.slice(1)], loopDuration: 12};
     const project = assetProject(asset, 1920);
     assert.deepEqual(projectSchema.parse(JSON.parse(JSON.stringify(project))), project);
@@ -46,5 +51,38 @@ test('color bar presets preserve edited segments and placement through save and 
     for (const patch of [{barHeight: 0}, {barHeight: 145}, {barPosition: 'left'}, {barColors: ['#FF570A']}, {barColors: Array(10).fill('red')}]) {
       assert.equal(projectSchema.safeParse({...project, overlays: [{...project.overlays[0], ...patch}]}).success, false);
     }
+  }
+});
+
+test('bottom bar reveals from the left, drifts while fully visible, then exits to the right', () => {
+  const expanded = colorBarState(119, 30, 4);
+  for (const seconds of [0.1, 0.6, 2, 4, 12]) {
+    const last = Math.ceil(seconds * 30) - 1;
+    const start = colorBarTransitionState(0, 30, seconds);
+    const end = colorBarTransitionState(last, 30, seconds);
+    assert.deepEqual([start.left, start.right], [0, 1]);
+    assert.deepEqual([end.left, end.right], [1, 0]);
+    const hold = colorBarTransitionState(Math.floor(last / 2), 30, seconds);
+    assert.deepEqual([hold.left, hold.right], [0, 0]);
+    assert.ok(hold.segments[5].width < expanded[5].width);
+    assert.deepEqual(end.segments, expanded);
+    let previous = start;
+    for (let frame = 0; frame <= last; frame++) {
+      const state = colorBarTransitionState(frame, 30, seconds);
+      assert.ok(state.left >= previous.left && state.right <= previous.right);
+      assert.ok(state.left + state.right <= 1);
+      if (frame > 0) assert.ok(state.segments[5].width > previous.segments[5].width);
+      previous = state;
+    }
+    const entrance = colorBarTransitionState(last * 0.16, 30, seconds);
+    const exit = colorBarTransitionState(last * 0.84, 30, seconds);
+    assert.equal(entrance.left, 0);
+    assert.ok(Math.abs(entrance.right - 0.5) < 1e-7);
+    assert.ok(Math.abs(exit.left - 0.5) < 1e-7);
+    assert.equal(exit.right, 0);
+    const settledIn = colorBarTransitionState(last * 0.32, 30, seconds);
+    const beforeExit = colorBarTransitionState(last * 0.68, 30, seconds);
+    assert.deepEqual([settledIn.left, settledIn.right, beforeExit.left, beforeExit.right], [0, 0, 0, 0]);
+    assert.ok((beforeExit.segments[5].width - settledIn.segments[5].width) * 1280 > 10);
   }
 });

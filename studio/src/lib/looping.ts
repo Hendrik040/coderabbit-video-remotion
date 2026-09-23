@@ -1,6 +1,7 @@
 import {broadcastKinds} from './broadcast';
 import {brandAssetKinds} from './brandAssets';
 import {inversePoint, lightingDefaults, lightingTransform, type GlowLighting} from './glowSettings';
+import {changeStackPixelGrid} from './pixelGrid';
 import type {AssetType, Overlay, OverlayKind, Project} from '../types';
 
 export const assetType = (kind: OverlayKind): AssetType => kind === 'hero' || kind === 'signal-loop' || kind === 'color-bar-loop' ? 'looping' : 'linear';
@@ -61,17 +62,18 @@ export type HeroPixel = {x: number; y: number; mask: number; initial: number; ch
 
 /** 4px squares, 2px gaps, each holding its brightness until an independent change. */
 export function createHeroPixels(width: number, height: number, lighting: Partial<GlowLighting> = {}): HeroPixel[] {
+  const {size, gap} = changeStackPixelGrid, step = size + gap;
   const [a, b, c, d, tx, ty] = heroBeamTransform(width, height);
   const transform = lightingTransform(width, height, lighting);
   const softness = lighting.softness ?? lightingDefaults.softness;
   const determinant = a * d - b * c;
   const bleed = 71 * height / 720, gridHeight = height + bleed;
   const pixels: HeroPixel[] = [];
-  for (let row = 0; row * 6 - bleed < height; row++) {
-    const y = row * 6 - bleed;
-    if (y + 4 <= 0) continue;
-    for (let col = 0; col * 6 < width; col++) {
-      const x = col * 6;
+  for (let row = 0; row * step - bleed < height; row++) {
+    const y = row * step - bleed;
+    if (y + size <= 0) continue;
+    for (let col = 0; col * step < width; col++) {
+      const x = col * step;
       const [sourceX, sourceY] = inversePoint(transform, x, y);
       const dx = sourceX - tx, dy = sourceY - ty;
       const u = (d * dx - c * dy) / determinant, v = (a * dy - b * dx) / determinant;

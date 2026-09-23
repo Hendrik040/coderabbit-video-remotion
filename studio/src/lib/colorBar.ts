@@ -16,7 +16,15 @@ export const colorBarSegments = [
 ] as const;
 
 export const colorBarColors = colorBarSegments.map(segment => segment.color);
-export const isColorBar = (kind: OverlayKind) => kind === 'color-bar-reveal' || kind === 'color-bar-loop';
+export const isColorBar = (kind: OverlayKind) => kind === 'color-bar-reveal' || kind === 'color-bar-loop' || kind === 'color-bar-transition';
+export const colorBarRevealTiming = {expand: 0.8};
+export const colorBarTransitionTiming = {reveal: 0.32, exit: 0.68};
+
+const expandedSegments = (expansion: number) => colorBarSegments.map(segment => ({...segment, width: segment.size + (Math.max(segment.size, segment.expanded) - segment.size) * expansion}));
+const linearPhase = (frame: number, fps: number, seconds: number) => Math.max(0, Math.min(1, frame / Math.max(2, Math.ceil(seconds * fps) - 1)));
+
+// Reserve part of the expansion for a constant drift, so the eased reveal never settles.
+const revealExpansion = (phase: number, expandUntil: number) => 0.85 * colorBarEase(phase / expandUntil) + 0.15 * phase;
 
 /** CSS cubic-bezier(.65, 0, .35, 1), evaluated by frame for identical preview and export. */
 export function colorBarEase(progress: number) {
@@ -33,12 +41,19 @@ export function colorBarEase(progress: number) {
 }
 
 export function colorBarState(frame: number, fps: number, seconds: number, loop = false) {
+  if (!loop) return expandedSegments(revealExpansion(linearPhase(frame, fps, seconds), colorBarRevealTiming.expand));
   const cycleFrames = Math.max(1, Math.round(seconds * fps));
   const phase = ((frame % cycleFrames) + cycleFrames) % cycleFrames / cycleFrames;
-  // The linear version matches the website's 3.2s expansion, then holds.
   // The reusable loop adds a hold and a symmetric return, with a rest at the seam.
-  const progress = loop ? phase < 0.4 ? phase / 0.4 : phase < 0.5 ? 1 : phase < 0.9 ? (0.9 - phase) / 0.4 : 0
-    : frame / Math.max(1, Math.min(3.2 * fps, Math.ceil(seconds * fps) - 1));
+  const progress = phase < 0.4 ? phase / 0.4 : phase < 0.5 ? 1 : phase < 0.9 ? (0.9 - phase) / 0.4 : 0;
   const expansion = colorBarEase(progress);
-  return colorBarSegments.map(segment => ({...segment, width: segment.size + (Math.max(segment.size, segment.expanded) - segment.size) * expansion}));
+  return expandedSegments(expansion);
+}
+
+/** Reveal the bottom strip from the left, keep the colors drifting, then clear to the right. */
+export function colorBarTransitionState(frame: number, fps: number, seconds: number) {
+  const phase = linearPhase(frame, fps, seconds);
+  const enter = colorBarEase(phase / colorBarTransitionTiming.reveal);
+  const leave = colorBarEase((phase - colorBarTransitionTiming.exit) / (1 - colorBarTransitionTiming.exit));
+  return {left: leave, right: 1 - enter, segments: expandedSegments(revealExpansion(phase, colorBarTransitionTiming.reveal))};
 }
