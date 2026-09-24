@@ -2,14 +2,16 @@ import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from 're
 import {Player, type PlayerRef} from '@remotion/player';
 import {ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, Infinity as LoopIcon, Code2, Terminal, Workflow, Download, Eye, EyeOff, FileVideo, Film, FolderOpen, GitBranch, Hand, Layers3, Link2, LoaderCircle, MessageSquare, MousePointer2, MoveHorizontal, Pause, Play, Plus, ScanLine, Settings2, ShieldCheck, Sparkle, Trash2, Undo2, Upload, Volume2, VolumeX, X} from 'lucide-react';
 import {Scene} from './remotion/Scene';
-import {AssetStudio, AssetThumbnail} from './AssetStudio';
+import {AssetStudio} from './AssetStudio';
+import {AssetThumbnail} from './components/AssetThumbnail';
+import {LibrarySection} from './components/LibrarySection';
+import {groupLibraryKinds} from './lib/assetLibrary';
 import {TimelineCues} from './components/TimelineCues';
 import {TimeSeek} from './components/TimeSeek';
 import {ExportDialog} from './components/ExportDialog';
 import {AssetControls} from './brand/AssetControls';
 import {PalettePicker} from './brand/PalettePicker';
 import {appendBrandAsset, assetProject, brandAssetDefaults, brandAssetKinds, brandAssetTemplates, isBrandAsset} from './lib/brandAssets';
-import {ChangeStackGlowThumbnail} from './brand/ChangeStackGlow';
 import {broadcastKinds, broadcastTemplates, isBroadcast, retimeOverlays} from './lib/broadcast';
 import {assetCollections, assetType} from './lib/looping';
 import {demoProject, overlayDefaults} from './lib/demo';
@@ -24,12 +26,11 @@ import {gestureLabel, type AssetType, type Binding, type Overlay, type OverlayKi
 
 const brandNames = Object.fromEntries(brandAssetKinds.map(kind => [kind, brandAssetTemplates[kind].name])) as Record<import('./types').BrandAssetKind, string>;
 const kindNames: Record<OverlayKind, string> = {...brandNames, ...Object.fromEntries(broadcastKinds.map(k => [k, broadcastTemplates[k].name])) as Record<OverlayKind, string>,hero: 'Change Stack glow', terminal: 'Terminal', agentflow: 'Agent workflow', code: 'Code panel', diagram: 'API flow', callout: 'Callout'};
-const kindIcons = {'name-intro': MessageSquare, 'color-bar-reveal': MoveHorizontal, 'color-bar-transition': MoveHorizontal, 'color-bar-loop': LoopIcon,'logo-reveal': Sparkle, 'circle-wipe': MoveHorizontal, 'stack-wipe': Layers3, 'color-bar-wipe': Layers3, 'pixel-glow-wipe': ScanLine, 'type-reveal': Code2, 'brand-signoff': Film, 'signal-loop': LoopIcon,hero: LoopIcon, ident: Film, presenter: MessageSquare, headline: Code2, triage: Layers3, stack: GitBranch, ticker: MoveHorizontal, bug: ShieldCheck,terminal: Terminal, agentflow: Workflow, code: Code2, diagram: GitBranch, callout: MessageSquare};
+const kindIcons = {'name-intro': MessageSquare, 'name-intro-wipe': MoveHorizontal, 'color-bar-reveal': MoveHorizontal, 'color-bar-transition': MoveHorizontal, 'color-bar-loop': LoopIcon,'logo-reveal': Sparkle, 'circle-wipe': MoveHorizontal, 'stack-wipe': Layers3, 'color-bar-wipe': Layers3, 'pixel-glow-wipe': ScanLine, 'type-reveal': Code2, 'brand-signoff': Film, 'signal-loop': LoopIcon,hero: LoopIcon, ident: Film, presenter: MessageSquare, headline: Code2, triage: Layers3, stack: GitBranch, ticker: MoveHorizontal, bug: ShieldCheck,terminal: Terminal, agentflow: Workflow, code: Code2, diagram: GitBranch, callout: MessageSquare};
 const formatTime = (seconds: number) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(Math.floor(seconds) % 60).toString().padStart(2, '0')}.${Math.floor((seconds % 1) * 10)}`;
 
 const Miniature = memo(function Miniature({kind}: {kind: OverlayKind}) {
-  if (isBrandAsset(kind)) return <div className="miniature"><AssetThumbnail kind={kind} animated={assetType(kind) === 'looping'}/></div>;
-  if (kind === 'hero') return <div className="miniature mini-hero" aria-hidden="true"><ChangeStackGlowThumbnail/><LoopIcon size={23}/><span>16s seamless loop</span></div>;
+  if (isBrandAsset(kind) || kind === 'hero') return <div className="miniature"><AssetThumbnail kind={kind}/></div>;
   if (isBroadcast(kind)) return <div className={`miniature broadcast-mini mini-${kind}`} aria-hidden="true"><span>{broadcastTemplates[kind].code}</span><div><i/><strong>{kind === 'presenter' ? 'Presenter name' : kind === 'triage' ? 'Now  /  Next' : kind === 'stack' ? '01  /  02  /  03' : kind === 'ticker' ? 'ON THE DESK —' : kind === 'bug' ? 'CodeRabbit' : 'The Review Desk'}</strong><small>{kind === 'presenter' ? 'Role / organization' : 'DEVELOPER BROADCAST'}</small></div></div>;
   return <div className={`miniature mini-${kind}`} aria-hidden="true">
     {(kind === 'code' || kind === 'terminal') ? <div className="mini-window"><div className="mini-dots"><i/><i/><i/><span>component.tsx</span></div><div className="mini-lines"><i/><i/><i/><i/></div></div> : (kind === 'diagram' || kind === 'agentflow') ? <div className="mini-nodes"><span>{kind === 'agentflow' ? 'Plan' : 'Client'}</span><i/><span>{kind === 'agentflow' ? 'Code' : 'API'}</span><i/><span>{kind === 'agentflow' ? 'Review' : 'DB'}</span></div> : <div className="mini-note"><span>Something worth explaining.</span><i/><i/></div>}
@@ -183,9 +184,9 @@ function CompositionEditor({initialProject, initialSelectedId, onOpenAssets}: {i
         <div className="library-tabs" role="tablist" aria-label="Assets"><button role="tab" aria-selected={libraryTab === 'components'} onClick={() => setLibraryTab('components')}>Components</button><button role="tab" aria-selected={libraryTab === 'footage'} onClick={() => setLibraryTab('footage')}>Footage</button></div>
         {libraryTab === 'components' ? <>
           <p className="panel-intro">Select an asset.<br/>Add it to your composition.</p><div className="kit-switch" role="group" aria-label="Asset type"><button aria-pressed={libraryGroup === 'linear'} onClick={() => setLibraryGroup('linear')}>Linear <span>{assetCollections.linear.length}</span></button><button aria-pressed={libraryGroup === 'looping'} onClick={() => setLibraryGroup('looping')}>Looping <span>{assetCollections.looping.length}</span></button></div>
-          <div className="component-library">{assetCollections[libraryGroup].map(kind => {const Icon = kindIcons[kind]; return <button className={`component-card ${selected?.kind === kind ? 'is-selected' : ''}`} key={kind} aria-label={`Select ${kindNames[kind]} component`} onClick={() => {const existing = project.overlays.find(o => o.kind === kind); existing ? selectOverlay(existing) : addOverlay(kind);}}>
+          <div className="component-library component-library-grouped">{groupLibraryKinds(assetCollections[libraryGroup]).map(group => <LibrarySection key={group.id} name={group.name} count={group.kinds.length} selected={selected && group.kinds.includes(selected.kind) ? selected.id : undefined}>{group.kinds.map(kind => {const Icon = kindIcons[kind]; return <button className={`component-card ${selected?.kind === kind ? 'is-selected' : ''}`} key={kind} aria-label={`Select ${kindNames[kind]} component`} onClick={() => {const existing = project.overlays.find(o => o.kind === kind); existing ? selectOverlay(existing) : addOverlay(kind);}}>
             <Miniature kind={kind}/><div className="component-caption"><Icon size={15}/><span>{kindNames[kind]}</span><span className="component-language">{assetType(kind) === 'looping' ? 'LOOP' : isBrandAsset(kind) ? brandAssetTemplates[kind].code : isBroadcast(kind) ? broadcastTemplates[kind].code : (kind === 'diagram' || kind === 'agentflow') ? 'FLOW' : 'TEXT'}</span></div>
-          </button>;})}</div>
+          </button>;})}</LibrarySection>)}</div>
           <button className="button button-light add-layer" onClick={() => addOverlay(addKind)}><Plus size={14}/> Add {kindNames[addKind].toLowerCase()}</button>
         </> : <div className="footage-content">
           <div className="source-card"><Film size={27}/><strong>{project.mediaName}</strong><span>{formatTime(project.duration)} · 30 fps · 720p canvas</span><span className="source-mode">{project.broadcast && project.sampleMode ? 'Broadcast sample' : project.sampleMode ? 'Simulated sample' : 'Local video'}</span></div>

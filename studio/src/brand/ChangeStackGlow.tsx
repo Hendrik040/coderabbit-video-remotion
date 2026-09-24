@@ -1,13 +1,12 @@
-import React, {memo, useEffect, useLayoutEffect, useMemo, useRef} from 'react';
+import React, {useLayoutEffect, useMemo, useRef} from 'react';
 import {createHeroPixels, heroBeamTransform, heroPixelOpacity, heroPixels, heroState, type HeroPixel} from '../lib/looping';
 import {inversePoint, lightingDefaults, lightingTransform, vignetteDefaults, vignetteTransform} from '../lib/glowSettings';
 import type {Overlay} from '../types';
 import {changeStackPixelGrid} from '../lib/pixelGrid';
-import {usePreviewActivity} from '../hooks/usePreviewActivity';
 
 type GlowSettings = Pick<Overlay, 'accent' | 'intensity' | 'loopDuration' | 'lighting' | 'vignette'>;
 
-/** Shared drawing for the live library preview, the scrubber, and exported frames. */
+/** Shared drawing for the main preview, the scrubber, and exported frames. */
 export function drawChangeStackGlow(ctx: CanvasRenderingContext2D, frame: number, fps: number, settings: GlowSettings, pixels: HeroPixel[]) {
   const {width, height} = ctx.canvas;
   const intensity = settings.intensity ?? 1;
@@ -87,34 +86,3 @@ export function ChangeStackGlow({overlay, frame, fps}: {overlay: Overlay; frame:
   }, [frame, fps, loopDuration, intensity, accent, lighting, vignette, pixels]);
   return <canvas ref={canvas} width={1280} height={720} aria-label="Looping Change Stack glow background" style={{position: 'absolute', inset: 0, width: 1280, height: 720, opacity: overlay.opacity ?? 1}}/>;
 }
-
-const thumbnailPixels = createHeroPixels(320, 180);
-
-/** This timer belongs only to the library thumbnail; the composition can remain paused. */
-export const ChangeStackGlowThumbnail = memo(function ChangeStackGlowThumbnail({overlay}: {overlay?: Overlay}) {
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const active = usePreviewActivity(canvas);
-  const elapsed = useRef(0);
-  const {lighting, vignette, intensity, loopDuration} = overlay ?? {};
-  const {x, y, angle, width, height, softness} = {...lightingDefaults, ...lighting};
-  const pixels = useMemo(() => lighting ? createHeroPixels(320, 180, {x, y, angle, width, height, softness}) : thumbnailPixels, [x, y, angle, width, height, softness, !!lighting]);
-  useEffect(() => {
-    const element = canvas.current;
-    const ctx = element?.getContext('2d');
-    if (!element || !ctx) return;
-    const settings = {accent: '#888888', lighting, vignette, intensity, loopDuration};
-    let raf = 0, previous: number | undefined, lastFrame = -1;
-    const draw = (frame: number) => {drawChangeStackGlow(ctx, frame, 30, settings, pixels);};
-    const tick = (now: number) => {
-      if (previous !== undefined) elapsed.current += now - previous;
-      previous = now;
-      const frame = Math.floor(elapsed.current * 30 / 1000);
-      if (frame !== lastFrame) {draw(frame); lastFrame = frame;}
-      raf = requestAnimationFrame(tick);
-    };
-    draw(Math.floor(elapsed.current * 30 / 1000));
-    if (active) raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [active, lighting, vignette, intensity, loopDuration, pixels]);
-  return <canvas ref={canvas} width={320} height={180} className="mini-hero-canvas" aria-hidden="true"/>;
-});

@@ -1,7 +1,7 @@
 import type {GlowLighting, GlowVignette} from './lib/glowSettings';
 export type Gesture = 'Open_Palm' | 'Pointing_Up' | 'Pinch' | 'Swipe' | 'None';
 export type BroadcastKind = 'presenter' | 'headline' | 'triage' | 'stack' | 'ticker' | 'bug' | 'ident';
-export type BrandAssetKind = 'name-intro' | 'logo-reveal' | 'circle-wipe' | 'stack-wipe' | 'color-bar-wipe' | 'pixel-glow-wipe' | 'type-reveal' | 'brand-signoff' | 'signal-loop' | 'color-bar-reveal' | 'color-bar-loop' | 'color-bar-transition';
+export type BrandAssetKind = 'name-intro' | 'name-intro-wipe' | 'logo-reveal' | 'circle-wipe' | 'stack-wipe' | 'color-bar-wipe' | 'pixel-glow-wipe' | 'type-reveal' | 'brand-signoff' | 'signal-loop' | 'color-bar-reveal' | 'color-bar-loop' | 'color-bar-transition';
 export type OverlayKind = 'code' | 'diagram' | 'callout' | 'terminal' | 'agentflow' | 'hero' | BroadcastKind | BrandAssetKind;
 export type AssetType = 'linear' | 'looping';
 export type Binding = 'cue' | 'progress' | 'follow';
@@ -12,7 +12,7 @@ export type Overlay = {
   id: string; kind: OverlayKind; enabled: boolean; title: string; body: string;
   start: number; duration: number; binding: Binding; placement: Placement; accent: string; scale: number;
   kicker?: string;
-  company?: string; textColor?: string; detailBackground?: string;
+  company?: string; textColor?: string; detailBackground?: string; detailTextColor?: string;
   loopDuration?: number; intensity?: number; opacity?: number;
   lighting?: Partial<GlowLighting>; vignette?: Partial<GlowVignette>;
   colorway?: 'dark' | 'light'; direction?: 'left' | 'right';

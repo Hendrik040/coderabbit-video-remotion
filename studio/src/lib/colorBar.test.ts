@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {colorBarState, colorBarTransitionState} from './colorBar';
+import {colorBarIntroState, colorBarIntroTiming, colorBarSegments, colorBarState, colorBarTransitionState} from './colorBar';
 import {assetProject, brandAssetDefaults} from './brandAssets';
 import {projectSchema} from './schema';
+import {staggerFrames} from './motion';
 
 test('hero reveal keeps the foreground colors moving through the final frame at every duration', () => {
   const start = colorBarState(0, 30, 4);
@@ -85,4 +86,45 @@ test('bottom bar reveals from the left, drifts while fully visible, then exits t
     assert.deepEqual([settledIn.left, settledIn.right, beforeExit.left, beforeExit.right], [0, 0, 0, 0]);
     assert.ok((beforeExit.segments[5].width - settledIn.segments[5].width) * 1280 > 10);
   }
+});
+
+test('color bar intros stagger the final panels while the palette travels as one continuous bar', () => {
+  for (const fps of [24, 30, 60]) for (const duration of [0.1, 0.6, 2, 5, 12]) {
+    const timing = colorBarIntroTiming(duration, fps);
+    const nameAt = (frame: number) => colorBarIntroState(frame, fps, duration);
+    const detailsAt = (frame: number) => colorBarIntroState(frame, fps, duration, staggerFrames);
+    for (const at of [nameAt, detailsAt]) {
+      const start = at(0), end = at(timing.last);
+      assert.deepEqual([start.enter, start.leave, end.enter, end.leave], [0, 0, 1, 1]);
+      assert.deepEqual([start.cardLeft, start.cardRight, end.cardLeft, end.cardRight], [0, 1, 1, 0]);
+      let previous = start;
+      for (let frame = 0; frame <= timing.last; frame++) {
+        const state = at(frame), base = nameAt(frame);
+        assert.ok(state.enter >= previous.enter && state.leave >= previous.leave, 'the outer wipe never reverses');
+        assert.ok(state.enter >= state.leave, 'the wipe cannot turn inside out on short durations');
+        assert.ok(state.cardLeft >= previous.cardLeft && state.cardRight <= previous.cardRight, 'each panel reveal and exit keeps moving forward');
+        assert.ok(state.cardLeft + state.cardRight <= 1 + 1e-9);
+        assert.ok(state.cardLeft >= state.leave && state.cardRight >= 1 - state.enter, 'the final panel stays within the outer sweep');
+        assert.deepEqual([state.enter, state.leave, state.segments], [base.enter, base.leave, base.segments], 'staggering the panels never splits or offsets the palette');
+        assert.deepEqual(state.segments.map(segment => segment.color), colorBarSegments.map(segment => segment.color));
+        previous = state;
+      }
+      if (duration >= 5) {
+        const hold = at(timing.enter);
+        assert.deepEqual([hold.cardLeft, hold.cardRight], [0, 0], 'both panels are fully visible throughout the reading hold');
+      }
+      const middle = at(timing.enter * 0.7);
+      at(timing.last);
+      assert.deepEqual(at(timing.enter * 0.7), middle, 'seeking backwards reproduces the same colors');
+      const fullPalette = at(timing.enter / 2);
+      assert.deepEqual([fullPalette.enter, fullPalette.leave, fullPalette.cardLeft, fullPalette.cardRight], [1, 0, 0, 1], 'the whole palette appears before either selected fill');
+      const exitPalette = at(timing.last - timing.exit / 2);
+      assert.deepEqual([exitPalette.leave, exitPalette.cardLeft, exitPalette.cardRight], [0, 1, 0], 'both final panels withdraw before the palette clears');
+    }
+    const revealFrame = timing.enter * 0.75;
+    const exitFrame = timing.last - timing.exit * 0.75;
+    assert.ok(nameAt(revealFrame).cardRight < detailsAt(revealFrame).cardRight, 'the name reveals before the details');
+    assert.ok(nameAt(exitFrame).cardLeft > detailsAt(exitFrame).cardLeft, 'the name exits before the details');
+  }
+  assert.ok(colorBarIntroTiming(5).hold / 30 > 2.8, 'the five-second intro keeps a readable hold');
 });

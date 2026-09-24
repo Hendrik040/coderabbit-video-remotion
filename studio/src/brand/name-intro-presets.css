@@ -1,0 +1,17 @@
+.name-presets {margin-top: 24px;}
+.name-presets-heading {display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; font-size: 10px;}
+.name-presets-heading > span:last-child {font-size: 9px; color: #929292; text-align: right;}
+.name-presets-grid {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;}
+.name-preset {display: flex; flex-direction: column; padding: 5px; min-width: 0; border: 1px solid #363636; border-radius: 5px; text-align: left; background: #202020;}
+.name-preset[aria-pressed=true] {border-color: #c9c9c9; background: #2a2a2a;}
+.name-preset-art {display: block; width: 100%; overflow: hidden; border-radius: 2px;}
+.name-preset-art > span {display: block; padding: 11px 8px; font-size: 12px; font-weight: 600; white-space: nowrap; letter-spacing: -.3px;}
+.name-preset-art > span + span {padding: 6px 8px; font-size: 7px; font-weight: 400; letter-spacing: 0;}
+.name-preset-caption {display: flex; justify-content: space-between; align-items: center; gap: 4px; min-height: 28px; padding: 6px 2px 2px; font-size: 9px; line-height: 1.4;}
+.name-custom-colors {margin-top: 20px; border-top: 1px solid #343434; padding-top: 14px;}
+.name-colors-heading {color: #c4c4c4; font-size: 10px; padding: 4px 0;}
+.name-custom-colors .name-color-targets {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; border: 0;}
+.name-custom-colors .name-color-targets button {display: flex; justify-content: flex-start; align-items: center; gap: 7px; text-transform: none; border: 1px solid #3a3a3a; border-radius: 4px; font-size: 10px; padding: 9px 7px;}
+@media (hover: hover) and (pointer: fine) {
+  .name-preset:hover {border-color: #aaa;}
+}

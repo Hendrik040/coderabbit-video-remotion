@@ -1,0 +1,100 @@
+.asset-layout {grid-template-columns: 264px minmax(460px, 1fr) 280px;}
+.asset-library {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: calc(100vh - 76px);
+  position: sticky;
+  top: 0;
+  overflow: hidden;
+  border-right: 1px solid #303030;
+  background: #191919;
+}
+.asset-library-heading {flex-shrink: 0; min-height: 62px;}
+.library-filter {
+  display: flex;
+  flex-shrink: 0;
+  margin: 0 16px 16px;
+  padding: 3px;
+  gap: 3px;
+  border: 1px solid #343434;
+  border-radius: 6px;
+}
+.library-filter button {
+  flex: 1;
+  padding: 7px 3px;
+  border-radius: 3px;
+  color: #aaa;
+  font-size: 10px;
+}
+.library-filter button[aria-pressed=true] {background: #ddd; color: #171717;}
+.asset-library-groups {flex: 1; min-height: 0; overflow-y: auto; padding: 0 12px 18px; scrollbar-width: thin;}
+.library-section + .library-section {margin-top: 10px;}
+.library-section h3 {margin: 0; font-size: 11px; font-weight: 500;}
+.library-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 4px;
+  text-align: left;
+  color: #d0d0d0;
+}
+.library-section-toggle > svg {color: #838383;}
+.library-section-toggle[aria-expanded=false] > svg {transform: rotate(-90deg);}
+.library-section-count {margin-left: auto; padding: 2px 5px; color: #969696; font: 9px var(--mono); font-variant-numeric: tabular-nums;}
+.library-section-selected {height: 4px; width: 4px; border-radius: 50%; background: #ddd;}
+.library-section-items:not([hidden]) {display: flex; flex-direction: column; gap: 6px;}
+.asset-card {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 72px;
+  padding: 7px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  text-align: left;
+  background: #202020;
+}
+.asset-card.is-selected {border-color: #b8b8b8; background: #2a2a2a;}
+.asset-card-preview {aspect-ratio: 8 / 5; border: 1px solid #343434; border-radius: 3px; overflow: hidden; background: #111; pointer-events: none;}
+.asset-thumbnail {display: block; width: 100%; height: 100%; pointer-events: none;}
+.asset-card-label {min-width: 0;}
+.asset-card-label > strong {display: block; font-size: 11px; font-weight: 500; line-height: 1.4; overflow-wrap: break-word;}
+.asset-card-meta {display: flex; flex-wrap: wrap; align-items: center; gap: 5px 8px; margin-top: 6px; color: #979797; font: 8px var(--mono);}
+.asset-card-meta > span {display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;}
+.asset-library-bottom {flex-shrink: 0;}
+.component-library.component-library-grouped {display: block;}
+.component-library-grouped .library-section-toggle {padding-left: 0; padding-right: 0;}
+.component-library-grouped .library-section-items {gap: 10px;}
+.component-library-grouped .asset-thumbnail {width: auto; max-width: 100%;}
+
+@media (hover: hover) and (pointer: fine) {
+  .library-section-toggle:hover {color: #fff;}
+  .library-filter button:not([aria-pressed=true]):hover {background: #292929; color: #eee;}
+}
+@media (min-width: 1700px) {
+  .asset-layout {grid-template-columns: 280px minmax(520px, 1fr) 300px;}
+  .asset-card {grid-template-columns: 96px minmax(0, 1fr); min-height: 76px;}
+}
+@media (max-width: 1200px) and (min-width: 951px) {
+  .asset-layout {grid-template-columns: 228px minmax(400px, 1fr) 245px;}
+  .asset-card {grid-template-columns: 70px minmax(0, 1fr); gap: 8px;}
+}
+@media (min-width: 951px) {.asset-library {height: 100%; top: auto;}}
+@media (max-width: 950px) and (min-width: 651px) {
+  .asset-layout {grid-template-columns: 228px minmax(0, 1fr);}
+  .asset-card {grid-template-columns: 70px minmax(0, 1fr); gap: 8px;}
+}
+@media (max-width: 650px) {
+  .asset-library {order: 1; height: auto; position: static; border-right: 0; border-top: 1px solid #303030;}
+  .asset-library-groups {overflow: visible;}
+  .asset-library .library-section-items:not([hidden]),
+  .component-library-grouped .library-section-items:not([hidden]) {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));}
+  .asset-card {grid-template-columns: minmax(0, 1fr); gap: 9px; align-content: start;}
+  .asset-card-preview {aspect-ratio: 16 / 9;}
+  .asset-card-label {padding: 0 3px 3px;}
+}

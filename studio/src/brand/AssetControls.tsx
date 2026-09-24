@@ -1,5 +1,5 @@
 import React from 'react';
-import {brandAssetTemplates, isBrandAsset, isTransition} from '../lib/brandAssets';
+import {brandAssetTemplates, isBrandAsset, isNameIntro, isTransition} from '../lib/brandAssets';
 import {assetType} from '../lib/looping';
 import {clamp} from '../lib/gesture';
 import type {Overlay} from '../types';
@@ -11,7 +11,7 @@ import {PixelWipeControls} from './PixelWipeControls';
 import {NameIntroControls} from './NameIntroControls';
 
 export function AssetControls({asset, onChange}: {asset: Overlay; onChange: (patch: Partial<Overlay>) => void}) {
-  if (asset.kind === 'name-intro') return <NameIntroControls asset={asset} onChange={onChange}/>;
+  if (isNameIntro(asset.kind)) return <NameIntroControls asset={asset} onChange={onChange}/>;
   if (asset.kind === 'hero') return <GlowControls asset={asset} onChange={onChange}/>;
   if (asset.kind === 'pixel-glow-wipe') return <PixelWipeControls asset={asset} onChange={onChange}/>;
   const template = isBrandAsset(asset.kind) ? brandAssetTemplates[asset.kind] : undefined;

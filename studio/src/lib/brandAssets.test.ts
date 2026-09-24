@@ -104,16 +104,27 @@ test('saved assets enforce bounded copy and supported colorways/directions', () 
   }
 });
 
-test('name intros retain independent colors, company, and placement through presets and composition insertion', () => {
-  for (const placement of ['left', 'right'] as const) {
-    const asset = {id: 'speaker', ...brandAssetDefaults['name-intro'], title: 'Jordan Lee', body: 'Head of Engineering', company: 'Example Company', accent: '#003E28', detailBackground: '#171D37', textColor: '#F7F2EF', placement};
+test('both name intro types retain colors, content, and placement through presets and composition insertion', () => {
+  for (const placement of ['left', 'right'] as const) for (const kind of ['name-intro', 'name-intro-wipe'] as const) {
+    const asset = {id: 'speaker', ...brandAssetDefaults[kind], title: 'Jordan Lee', body: 'Head of Engineering', company: 'Example Company', accent: '#003E28', detailBackground: '#171D37', textColor: '#F7F2EF', detailTextColor: '#9DB3FF', placement};
     const project = assetProject(asset);
     assert.deepEqual(projectSchema.parse(JSON.parse(JSON.stringify(project))).overlays[0], asset);
     const composition = appendBrandAsset(demoProject(), asset, 'intro');
     const restored = projectSchema.parse(JSON.parse(JSON.stringify(composition))).overlays.at(-1);
     assert.deepEqual(restored, {...asset, id: 'intro'});
-    for (const patch of [{company: 'x'.repeat(73)}, {textColor: 'transparent'}, {textColor: '#FF00ZZ'}, {detailBackground: 'transparent'}]) {
+    for (const patch of [{company: 'x'.repeat(73)}, {textColor: 'transparent'}, {textColor: '#FF00ZZ'}, {detailBackground: 'transparent'}, {detailTextColor: 'transparent'}, {introTransition: 'unknown'}]) {
       assert.equal(projectSchema.safeParse({...project, overlays: [{...asset, ...patch}]}).success, false);
     }
+  }
+});
+
+test('presets using the former animation option migrate to the separate color bar intro without losing edits', () => {
+  const asset = {id: 'speaker', ...brandAssetDefaults['name-intro'], title: 'Jordan Lee', body: 'Engineer', company: 'Example', detailBackground: '#171D37', placement: 'right' as const};
+  for (const introTransition of [undefined, 'reveal', 'color-bar']) {
+    const project = assetProject({...asset, start: 0});
+    const legacy = {...project, overlays: [{...asset, introTransition}]};
+    const restored = projectSchema.parse(JSON.parse(JSON.stringify(legacy)));
+    assert.deepEqual(restored.overlays[0], {...asset, kind: introTransition === 'color-bar' ? 'name-intro-wipe' : 'name-intro'});
+    assert.deepEqual(projectSchema.parse(JSON.parse(JSON.stringify(restored))), restored, 'migration only runs once');
   }
 });

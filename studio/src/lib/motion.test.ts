@@ -4,6 +4,7 @@ import {brandMotion, cycleProgress, frameProgress, motionCurves, revealMotion, r
 import {availableBrandAssetKinds, assetProject, brandAssetDefaults} from './brandAssets';
 import {assetCollections} from './looping';
 import {projectSchema} from './schema';
+import {groupLibraryKinds} from './assetLibrary';
 
 test('foregrounds enter promptly, hold legibly, and return to their entrance edge with clear endpoints', () => {
   for (const fps of [24, 30, 60]) for (const duration of [0.1, 0.6, 1, 3.2, 12, 19]) {
@@ -68,7 +69,9 @@ test('motion curves do not overshoot and repeating phases are stable across back
 });
 
 test('removed assets disappear from both pickers while existing projects remain readable', () => {
-  assert.equal(availableBrandAssetKinds.length + 1, 8);
+  assert.equal(availableBrandAssetKinds.length + 1, 9);
+  assert.deepEqual(groupLibraryKinds(availableBrandAssetKinds).find(group => group.id === 'names')?.kinds, ['name-intro', 'name-intro-wipe']);
+  assert.ok(assetCollections.linear.includes('name-intro-wipe'));
   for (const kind of ['logo-reveal', 'circle-wipe', 'signal-loop', 'type-reveal', 'brand-signoff'] as const) {
     assert.ok(!availableBrandAssetKinds.includes(kind));
     assert.ok(!assetCollections.linear.includes(kind));

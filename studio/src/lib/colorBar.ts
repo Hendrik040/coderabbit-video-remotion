@@ -1,5 +1,5 @@
 import type {OverlayKind} from '../types';
-import {cycleProgress, frameProgress, motionCurves} from './motion';
+import {cycleProgress, frameProgress, motionCurves, revealTiming, unit} from './motion';
 
 // Change Stack hero: the site's exact segment starts, widths, stacking, and sRGB colors.
 // https://www.coderabbit.ai/change-stack — ChangeStackColorBar / CodeRabbitColorBar.
@@ -45,4 +45,27 @@ export function colorBarTransitionState(frame: number, fps: number, seconds: num
   const enter = colorBarEase(phase / colorBarTransitionTiming.reveal);
   const leave = colorBarEase((phase - colorBarTransitionTiming.exit) / (1 - colorBarTransitionTiming.exit));
   return {left: leave, right: 1 - enter, segments: expandedSegments(revealExpansion(phase, colorBarTransitionTiming.reveal))};
+}
+
+// Two beats per edge: the branded strip, then the selected lower-third colors.
+export const colorBarIntroTiming = (seconds: number, fps = 30) => revealTiming(seconds, fps, 2);
+
+/** The palette travels as one bar. Only the handoff to each final panel staggers;
+ * every row shares the same color positions and outer entrance/exit edges.
+ */
+export function colorBarIntroState(frame: number, fps: number, seconds: number, stagger = 0) {
+  const timing = colorBarIntroTiming(seconds, fps);
+  const delay = Math.min(stagger * fps / 30 * timing.factor, Math.min(timing.enter, timing.exit) * 0.3);
+  const exitStart = timing.last - timing.exit;
+  const entrance = unit(frame / Math.max(0.001, timing.enter));
+  const exit = unit((frame - exitStart) / Math.max(0.001, timing.exit));
+  const entering = frame < exitStart;
+  const enter = colorBarEase(entrance * 2);
+  const leave = colorBarEase(exit * 2 - 1);
+  const cardLeft = colorBarEase((frame - exitStart - delay) / Math.max(0.001, timing.exit / 2 - delay));
+  const cardRight = 1 - colorBarEase((frame - timing.enter / 2 - delay) / Math.max(0.001, timing.enter / 2 - delay));
+  return {
+    enter, leave, cardLeft, cardRight,
+    segments: expandedSegments(revealExpansion(entering ? entrance : exit, colorBarRevealTiming.expand)),
+  };
 }

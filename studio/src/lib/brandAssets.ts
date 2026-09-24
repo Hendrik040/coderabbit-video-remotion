@@ -5,6 +5,7 @@ import {cycleProgress, frameProgress, motionCurves} from './motion';
 
 export const brandAssetTemplates = {
   'name-intro': {code: 'LT-01', name: 'Name intro', family: 'Lower thirds', duration: 5, alpha: true, title: 'Name', body: 'Position', titleMax: 56, bodyMax: 72, description: 'A name panel with position and company together on a contrasting color strip.', usage: 'Introduce a speaker over footage. Choose the side that leaves their face clear.'},
+  'name-intro-wipe': {code: 'LT-02', name: 'Color bar intro', family: 'Lower thirds', duration: 5, alpha: true, title: 'Name', body: 'Position', titleMax: 56, bodyMax: 72, description: 'One continuous color bar reveals your name, then your details, and returns for a staggered exit.', usage: 'Introduce a speaker with the color bar reveal and exit cadence.'},
   'logo-reveal': {code: 'ID-01', name: 'Logo reveal', family: 'Reveals', duration: 3.2, alpha: true, title: 'Tagline', body: '', titleMax: 72, bodyMax: 0, description: 'A measured entrance for the full CodeRabbit lockup.', usage: 'Open a video, product launch, or presentation.'},
   'circle-wipe': {code: 'TR-01', name: 'Circle wipe', family: 'Transitions', duration: 1.8, alpha: true, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'Orange leads. A circular field covers the cut and clears.', usage: 'Place over an edit. Cut the underlying footage at the center marker.'},
   'stack-wipe': {code: 'TR-02', name: 'Stack wipe', family: 'Transitions', duration: 2, alpha: true, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'Six staggered rails sweep across the frame together.', usage: 'Place over an edit. Cut the underlying footage at the center marker.'},
@@ -21,6 +22,7 @@ export const brandAssetKinds = Object.keys(brandAssetTemplates) as BrandAssetKin
 // Retain renderers for saved projects, while removing retired assets from both pickers.
 export const availableBrandAssetKinds = brandAssetKinds.filter(kind => !['logo-reveal', 'circle-wipe', 'signal-loop', 'type-reveal', 'brand-signoff'].includes(kind));
 export const isBrandAsset = (kind: OverlayKind): kind is BrandAssetKind => kind in brandAssetTemplates;
+export const isNameIntro = (kind: OverlayKind): kind is 'name-intro' | 'name-intro-wipe' => kind === 'name-intro' || kind === 'name-intro-wipe';
 export const isTransition = (kind: OverlayKind) => kind === 'circle-wipe' || kind === 'stack-wipe' || kind === 'color-bar-wipe' || kind === 'pixel-glow-wipe';
 
 const base = {enabled: true, start: 0, binding: 'cue', placement: 'center', accent: '#FF570A', scale: 1, colorway: 'dark', direction: 'right'} as const;
@@ -32,7 +34,7 @@ export const brandAssetDefaults = Object.fromEntries(brandAssetKinds.map(kind =>
   ...(isColorBar(kind) ? {barHeight: 4, barPosition: 'bottom', barColors: [...colorBarColors]} : {}),
   ...(kind === 'color-bar-wipe' ? {barColors: [...colorBarColors]} : {}),
   ...(kind === 'pixel-glow-wipe' ? {accent: '#687FF5', intensity: 1, ...pixelWipeDefaults} : {}),
-  ...(kind === 'name-intro' ? {title: 'Your name', body: 'Position', company: 'CodeRabbit', placement: 'left', textColor: '#121014', detailBackground: '#25E2A8'} : {}),
+  ...(isNameIntro(kind) ? {title: 'Your name', body: 'Position', company: 'CodeRabbit', placement: 'left', textColor: '#121014', detailBackground: '#25E2A8'} : {}),
 }])) as Record<BrandAssetKind, Omit<Overlay, 'id'>>;
 
 export function assetProject(asset: Overlay, width = 1280): Project {

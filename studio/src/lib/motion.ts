@@ -36,11 +36,11 @@ export const motionCurves = {
 export const brandMotion = {enter: 0.6, exit: 0.4, stagger: 0.06, distance: 28, exitDistance: 12};
 export const staggerFrames = brandMotion.stagger * 30;
 
-export function revealTiming(seconds: number, fps = 30) {
+export function revealTiming(seconds: number, fps = 30, pace = 1) {
   const last = lastFrame(seconds, fps);
-  const factor = Math.min(1, last / (fps * (brandMotion.enter + brandMotion.exit)));
-  const enter = brandMotion.enter * fps * factor;
-  const exit = brandMotion.exit * fps * factor;
+  const factor = Math.min(1, last / (fps * (brandMotion.enter + brandMotion.exit) * pace));
+  const enter = brandMotion.enter * pace * fps * factor;
+  const exit = brandMotion.exit * pace * fps * factor;
   return {last, factor, enter, hold: factor < 1 ? 0 : Math.max(0, last - enter - exit), exit};
 }
 

@@ -1,22 +1,26 @@
 import {useRenderJob} from './hooks/useRenderJob';
-import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Player, type PlayerRef} from '@remotion/player';
 import {ArrowDownToLine, ArrowRight, ArrowUpRight, Check, Download, FolderOpen, Infinity as LoopIcon, Layers3, LoaderCircle, Plus, RotateCcw, SlidersHorizontal, X} from 'lucide-react';
 import {Scene} from './remotion/Scene';
 import {AssetControls} from './brand/AssetControls';
-import {colorBarRevealTiming, colorBarTransitionTiming, isColorBar} from './lib/colorBar';
+import {colorBarIntroTiming, colorBarRevealTiming, colorBarTransitionTiming, isColorBar} from './lib/colorBar';
 import {pixelWipeTiming} from './lib/pixelWipe';
-import {ChangeStackGlowThumbnail} from './brand/ChangeStackGlow';
-import {assetProject, availableBrandAssetKinds, brandAssetDefaults, brandAssetTemplates, cutFrame, isTransition} from './lib/brandAssets';
+import {AssetThumbnail} from './components/AssetThumbnail';
+import {LibrarySection} from './components/LibrarySection';
+import {matchingNameIntroPreset} from './lib/nameIntroPresets';
+import {groupLibraryKinds} from './lib/assetLibrary';
+import {assetProject, availableBrandAssetKinds, brandAssetDefaults, brandAssetTemplates, cutFrame, isNameIntro, isTransition} from './lib/brandAssets';
 import {assetType, heroDefaults} from './lib/looping';
 import {projectSchema} from './lib/schema';
 import {clamp} from './lib/gesture';
 import {revealTiming} from './lib/motion';
-import {usePreviewActivity, useReducedMotion} from './hooks/usePreviewActivity';
+import {useReducedMotion} from './hooks/usePreviewActivity';
 import {AssetTransport, timecode} from './components/AssetTransport';
 import {ExportDialog} from './components/ExportDialog';
 import type {AssetType, BrandAssetKind, Overlay} from './types';
 import './asset-studio.css';
+import './asset-library.css';
 
 type LibraryKind = BrandAssetKind | 'hero';
 const catalog = {...brandAssetTemplates, hero: {code: 'BG-02', name: 'Change Stack glow', family: 'Backgrounds', duration: 16, alpha: false, title: '', body: '', titleMax: 40, bodyMax: 0, description: 'The product hero’s drifting light and independently flickering pixels.', usage: 'A quiet background for product stories and supporting titles.'}};
@@ -30,33 +34,22 @@ const initialPresets = () => {
     for (const kind of libraryKinds) {
       if (!saved[kind] || saved[kind].kind !== kind) continue;
       const result = projectSchema.safeParse(assetProject({...presets[kind], ...saved[kind]}));
-      if (result.success) presets[kind] = result.data.overlays[0];
+      if (result.success) {
+        const restored = result.data.overlays[0];
+        presets[kind] = {...restored, id: kind, kind};
+        // Keep the original intro's content and seed the new card from the former wipe option.
+        if (kind === 'name-intro' && restored.kind === 'name-intro-wipe') {
+          presets['name-intro-wipe'] = {...restored, id: 'name-intro-wipe'};
+        }
+      }
     }
   } catch { /* Invalid presets leave the bundled assets available. */ }
   return presets;
 };
-/** Rest on a useful frame; pointer hover resumes the actual asset without remounting. */
-export const AssetThumbnail = memo(function AssetThumbnail({kind, animated = false, asset}: {kind: BrandAssetKind; animated?: boolean; asset?: Overlay}) {
-  const container = useRef<HTMLDivElement>(null);
-  const player = useRef<PlayerRef>(null);
-  const active = usePreviewActivity(container);
-  const project = useMemo(() => assetProject({...(asset ?? {id: kind, ...brandAssetDefaults[kind]}), ...(isColorBar(kind) ? {barHeight: 56, barPosition: 'center' as const} : {})}), [kind, asset]);
-  const inputProps = useMemo(() => ({project}), [project]);
-  const frames = Math.ceil(project.duration * 30);
-  useEffect(() => {
-    const p = player.current;
-    if (!p) return;
-    if (p.getCurrentFrame() >= frames) p.seekTo(frames - 1);
-    if (animated && active) p.play(); else p.pause();
-  }, [active, animated, frames]);
-  return <div ref={container} className="asset-thumb-player" aria-hidden="true"><Player ref={player} component={Scene} inputProps={inputProps} durationInFrames={frames} compositionWidth={1280} compositionHeight={720} fps={30} initialFrame={Math.floor(frames * (isTransition(kind) ? 0.24 : 0.48))} initiallyMuted loop controls={false} clickToPlay={false} style={{width: '100%', pointerEvents: 'none'}}/></div>;
-});
-
 export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComposition: () => Promise<void>; onAddToComposition: (asset: Overlay) => Promise<void>}) {
   const [presets, setPresets] = useState(initialPresets);
   const [selected, setSelected] = useState<LibraryKind>('name-intro');
-  const [group, setGroup] = useState<AssetType>('linear');
-  const [hovered, setHovered] = useState<LibraryKind | null>(null);
+  const [filter, setFilter] = useState<AssetType | 'all'>('all');
   const reducedMotion = useReducedMotion();
   const [showAlpha, setShowAlpha] = useState(false);
   const [format, setFormat] = useState<'mp4' | 'alpha'>('mp4');
@@ -71,11 +64,13 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
   const project = useMemo(() => assetProject(asset), [asset]);
   const inputProps = useMemo(() => ({project, transparent: showAlpha && meta.alpha}), [project, showAlpha, meta.alpha]);
   const frames = Math.ceil(project.duration * 30);
-  const timing = revealTiming(project.duration);
+  const timing = selected === 'name-intro-wipe' ? colorBarIntroTiming(project.duration) : revealTiming(project.duration);
   const transition = isTransition(selected);
   const particleTransition = selected === 'pixel-glow-wipe';
   const barTransition = selected === 'color-bar-transition';
-  const choose = (kind: LibraryKind) => {setSelected(kind); setGroup(assetType(kind)); setShowAlpha(false); if (!catalog[kind].alpha) setFormat('mp4');};
+  const choose = (kind: LibraryKind) => {setSelected(kind); setFilter(previous => previous === 'all' ? previous : assetType(kind)); setShowAlpha(false); if (!catalog[kind].alpha) setFormat('mp4');};
+  const libraryGroups = groupLibraryKinds(libraryKinds.filter(kind => filter === 'all' || assetType(kind) === filter));
+  const introPreset = isNameIntro(selected) ? matchingNameIntroPreset(asset) : undefined;
   const edit = (patch: Partial<Overlay>) => setPresets(previous => ({...previous, [selected]: {...previous[selected], ...patch}}));
   const seek = (next: number) => {player.current?.pause(); player.current?.seekTo(next);};
 
@@ -93,7 +88,7 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
   }
   function savePreset() {
     const url = URL.createObjectURL(new Blob([JSON.stringify(project, null, 2)], {type: 'application/json'}));
-    const a = document.createElement('a'); a.href = url; a.download = `coderabbit-${meta.code.toLowerCase()}-${selected}.json`; a.click();
+    const a = document.createElement('a'); a.href = url; a.download = `coderabbit-${meta.code.toLowerCase()}-${selected}${introPreset ? `-${introPreset.id}` : ''}.json`; a.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   async function openPreset(file?: File) {
@@ -112,18 +107,21 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
     <input ref={presetInput} type="file" accept="application/json,.json" hidden onChange={e => openPreset(e.target.files?.[0])}/>
     <header className="asset-header"><div className="asset-heading"><span className="asset-wordmark">Brand motion</span><span className="asset-header-divider"/><span className="asset-header-subtitle">CodeRabbit asset library</span></div><div className="asset-header-actions"><button className="button button-light" disabled={opening} onClick={() => openComposition()}><Layers3 size={14}/> Composition <ArrowUpRight size={13}/></button><button className="button button-dark" onClick={() => {player.current?.pause(); setExportOpen(true);}}>{activeExport ? <LoaderCircle className="spin" size={15}/> : <ArrowDownToLine size={15}/>} {activeExport ? `Exporting ${job?.progress ?? 0}%` : 'Export asset'}</button></div></header>
     <div className="asset-layout">
-      <aside className="asset-library"><div className="asset-library-heading"><span>Library</span><span>{libraryKinds.length} assets</span></div>
-        <div className="kit-switch" role="group" aria-label="Asset playback type">{(['linear', 'looping'] as const).map(type => <button key={type} aria-pressed={group === type} onClick={() => setGroup(type)}>{type === 'linear' ? 'Linear' : 'Looping'}<span>{libraryKinds.filter(kind => assetType(kind) === type).length}</span></button>)}</div>
-        <div className="asset-library-cards">{libraryKinds.filter(kind => assetType(kind) === group).map(kind => <button key={kind} className={`asset-card ${selected === kind ? 'is-selected' : ''}`} aria-label={`Preview ${catalog[kind].name}`} aria-pressed={selected === kind} onClick={() => choose(kind)} onPointerEnter={event => {if (event.pointerType === 'mouse' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) setHovered(kind);}} onPointerLeave={() => setHovered(null)}>
-          <div className="asset-card-preview">{kind === 'hero' ? <ChangeStackGlowThumbnail overlay={presets[kind]}/> : <AssetThumbnail kind={kind} asset={presets[kind]} animated={hovered === kind || assetType(kind) === 'looping'}/>}<span className="asset-card-code">{catalog[kind].code}</span></div>
-          <div className="asset-card-title"><strong>{catalog[kind].name}</strong>{assetType(kind) === 'looping' ? <LoopIcon size={12}/> : <span>{presets[kind].duration}s</span>}</div><span className="asset-card-family">{catalog[kind].family}</span>
-        </button>)}</div>
+      <aside className="asset-library" aria-label="Asset library"><div className="asset-library-heading"><span>Library</span><span>{libraryKinds.length} assets</span></div>
+        <div className="library-filter" role="group" aria-label="Asset playback type">{(['all', 'linear', 'looping'] as const).map(type => <button key={type} aria-pressed={filter === type} onClick={() => setFilter(type)}>{type === 'all' ? 'All' : type === 'linear' ? 'Linear' : 'Looping'}</button>)}</div>
+        <div className="asset-library-groups">{libraryGroups.map(group => <LibrarySection key={group.id} name={group.name} count={group.kinds.length} selected={group.kinds.includes(selected) ? selected : undefined}>
+          {group.kinds.map(kind => <button key={kind} className={`asset-card ${selected === kind ? 'is-selected' : ''}`} aria-label={`Preview ${catalog[kind].name}`} aria-pressed={selected === kind} onClick={() => choose(kind)}>
+            <div className="asset-card-preview"><AssetThumbnail kind={kind}/></div>
+            <div className="asset-card-label"><strong>{catalog[kind].name}</strong><span className="asset-card-meta"><span>{catalog[kind].code}</span><span>{assetType(kind) === 'looping' ? <><LoopIcon size={11} aria-hidden="true"/> Loop</> : <>{presets[kind].duration}s</>}</span></span></div>
+          </button>)}
+        </LibrarySection>)}</div>
         <div className="asset-library-bottom"><button className="text-button" onClick={() => presetInput.current?.click()}><FolderOpen size={14}/> Open preset</button><a href="https://www.coderabbit.ai/brand" target="_blank" rel="noreferrer" aria-label="CodeRabbit brand guidelines"><ArrowUpRight size={14}/></a></div>
       </aside>
       <main className="asset-main">
-        <div className="asset-title-row"><div><div className="asset-eyebrow">{meta.code}<span>/</span>{meta.family}</div><h1>{meta.name}</h1></div><span className="asset-type-tag">{assetType(selected) === 'looping' ? <LoopIcon size={13}/> : <ArrowRight size={13}/>} {assetType(selected)}<i/>{project.duration}s</span></div>
+        <div className="asset-title-row"><div><div className="asset-eyebrow">{meta.code}<span>/</span>{meta.family}</div><h1>{meta.name}</h1></div><div className="asset-title-actions"><span className="asset-type-tag">{assetType(selected) === 'looping' ? <LoopIcon size={13}/> : <ArrowRight size={13}/>} {assetType(selected)}<i/>{project.duration}s</span><button className="button button-light" disabled={opening} onClick={() => openComposition(project.overlays[0])}><Plus size={14}/> Add to composition</button></div></div>
         <p className="asset-description">{meta.description}</p>
-        <div className={`asset-stage ${showAlpha && meta.alpha ? 'asset-checkerboard' : ''}`}><Player key={selected} ref={player} component={Scene} inputProps={inputProps} durationInFrames={frames} compositionWidth={1280} compositionHeight={720} fps={30} autoPlay={!reducedMotion} initiallyMuted loop controls={false} clickToPlay={false} style={{width: '100%'}}/></div>
+        <div className="asset-preview-area"><div className={`asset-stage ${showAlpha && meta.alpha ? 'asset-checkerboard' : ''}`}><Player key={selected} ref={player} component={Scene} inputProps={inputProps} durationInFrames={frames} compositionWidth={1280} compositionHeight={720} fps={30} autoPlay={!reducedMotion} initiallyMuted loop controls={false} clickToPlay={false} style={{width: '100%'}}/></div></div>
+        <div className="asset-playback-dock" role="region" aria-label="Playback and timing">
         <AssetTransport key={selected} player={player} frames={frames} alpha={meta.alpha} showAlpha={showAlpha} onAlphaChange={setShowAlpha}/>
         <div className="asset-motion-strip" aria-label={particleTransition ? 'Reveal, full screen, fade out' : transition ? 'Cover, cut, clear' : assetType(selected) === 'looping' ? 'Seamless cycle' : barTransition ? 'Reveal, drift, exit' : isColorBar(selected) ? 'Expand, drift' : 'Reveal, hold, exit'}>
           {assetType(selected) === 'looping' ? <div className="asset-cycle"><LoopIcon size={15}/><span>One complete cycle</span><span>{project.duration}s</span></div>
@@ -132,7 +130,7 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
             : isColorBar(selected) ? <><span style={{flex: colorBarRevealTiming.expand}}>Expand</span><span style={{flex: 1 - colorBarRevealTiming.expand}}>Drift</span></>
             : <><span style={{flex: transition ? 36 : timing.enter}}> {transition ? 'Cover' : 'Reveal'}</span>{(transition || timing.hold > 0) && <button disabled={!transition} style={{flex: transition ? 28 : timing.hold}} onClick={() => seek(cutFrame(project.duration))}>{transition ? `Cut at ${timecode(cutFrame(project.duration))}` : 'Hold'}{transition && <i/>}</button>}<span style={{flex: transition ? 36 : timing.exit}}>{transition ? 'Clear' : 'Exit'}</span></>}
         </div>
-        <div className="asset-use-row"><div><span className="asset-eyebrow">Made to reuse</span><p>{meta.usage}</p></div><button className="button button-light" disabled={opening} onClick={() => openComposition(project.overlays[0])}><Plus size={14}/> Add to composition</button></div>
+        </div>
       </main>
       <aside className="asset-inspector"><div className="asset-inspector-heading"><span>Customize</span><SlidersHorizontal size={15}/></div><section className="asset-inspector-section"><AssetControls asset={asset} onChange={edit}/>{assetType(selected) === 'linear' && <label className="field-label">Duration<span className="input-unit"><input type="number" aria-label="Asset duration" min={0.6} max={12} step={0.1} value={asset.duration} onChange={e => edit({duration: clamp(Number(e.target.value), 0.6, 12)})}/><span>s</span></span></label>}<button className="text-button asset-reset" onClick={() => setPresets(previous => ({...previous, [selected]: {id: selected, ...defaults[selected]}}))}><RotateCcw size={12}/> Reset asset</button></section>
         <section className="asset-inspector-section"><div className="asset-section-label">Export</div><div className="asset-export-details"><span>{format === 'alpha' ? 'Transparent background' : 'Video'}</span><span>{resolution} × {resolution * 9 / 16}</span></div><button className="button button-light full-width asset-export-settings" onClick={() => {player.current?.pause(); setExportOpen(true);}}>Export options <ArrowUpRight size={13}/></button>{transition && <p className="asset-export-hint">{particleTransition ? 'Choose Transparent background to layer the fine pixels over your edit.' : 'Choose Transparent background to layer over your edit. The marked cut frame is fully covered.'}</p>}

@@ -2,7 +2,7 @@ import React, {type CSSProperties} from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {broadcastMotion} from '../lib/broadcast';
 import {staggerFrames} from '../lib/motion';
-import {assetPhase, circleWipeState, colorBarWipeState, motionEase, signalPhase, stackWipeState} from '../lib/brandAssets';
+import {assetPhase, circleWipeState, colorBarWipeState, isNameIntro, motionEase, signalPhase, stackWipeState} from '../lib/brandAssets';
 import {brand} from './Broadcast';
 import {isColorBar} from '../lib/colorBar';
 import {ColorBar} from './ColorBar';
@@ -18,7 +18,7 @@ function Lockup({width, light = false, style}: {width: number; light?: boolean; 
 }
 
 export function MotionAsset({overlay: o, frame, fps}: {overlay: Overlay; frame: number; fps: number}) {
-  if (o.kind === 'name-intro') return <NameIntro overlay={o} frame={frame} fps={fps}/>;
+  if (isNameIntro(o.kind)) return <NameIntro overlay={o} frame={frame} fps={fps}/>;
   if (isColorBar(o.kind)) return <ColorBar overlay={o} frame={frame} fps={fps}/>;
   if (o.kind === 'pixel-glow-wipe') return <PixelGlowWipe overlay={o} frame={frame} fps={fps}/>;
   const accentColor = o.accent;
