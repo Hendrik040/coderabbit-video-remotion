@@ -1,0 +1,61 @@
+.reviewChangeStackSvg {
+  display: block;
+  height: 2rem;
+  width: 12.625rem;
+}
+
+.reviewChangeStackPill {
+  display: inline-block;
+  height: 2rem;
+  width: 12.625rem;
+  border-radius: 0.4375rem;
+}
+
+.reviewChangeStackCard {
+  display: inline-flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  gap: calc(3.241 * var(--tb-u));
+  padding: calc(2.16 * var(--tb-u));
+  border: calc(0.54 * var(--tb-u)) solid #bfc5cf;
+  border-radius: calc(3.241 * var(--tb-u));
+  background: #f1f4fa;
+  color: #1e232a;
+}
+
+.reviewChangeStackCardDark {
+  background: #22262d;
+  color: #fafafa;
+  border-color: #3f444c;
+}
+
+.reviewChangeStackCardTile {
+  width: calc(9.722 * var(--tb-u));
+  height: calc(9.722 * var(--tb-u));
+  flex: none;
+}
+
+.reviewChangeStackCardLabel {
+  flex: none;
+  font-family: var(--font-cui-sans), sans-serif;
+  font-weight: 600;
+  font-size: calc(7.021 * var(--tb-u));
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.reviewChangeStackCardArrow {
+  position: relative;
+  width: calc(2.971 * var(--tb-u));
+  height: calc(2.971 * var(--tb-u));
+  flex: none;
+}
+
+.reviewChangeStackCardArrow::before {
+  position: absolute;
+  inset: -12.09%;
+  background: currentcolor;
+  content: '';
+  mask: url('../../../../../public/content/assets/home-redesign-figma/triage/change-stack-arrow.svg') center / 100% 100% no-repeat;
+}

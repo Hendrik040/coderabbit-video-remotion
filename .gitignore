@@ -25,3 +25,8 @@ npm-debug.log*
 # Environment
 .env
 .env.local
+
+# Local Motion Studio media, models, and render bundles
+.studio-data/
+public/models/
+public/wasm/

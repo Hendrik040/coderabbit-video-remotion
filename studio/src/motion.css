@@ -1,0 +1,52 @@
+/* UI feedback is brief; authored video motion is controlled exclusively by frames. */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --press-duration: 100ms;
+  --release-duration: 160ms;
+}
+
+button, a {
+  touch-action: manipulation;
+}
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.button, .icon-button, .asset-play, .asset-alpha-toggle {
+  transition: transform var(--release-duration) var(--ease-out), opacity var(--press-duration) ease;
+}
+.button:active:not(:disabled):not(:focus-visible),
+.icon-button:active:not(:disabled):not(:focus-visible),
+.asset-play:active:not(:focus-visible),
+.asset-alpha-toggle:active:not(:focus-visible) {
+  transform: scale(0.97);
+  transition-duration: var(--press-duration);
+}
+.asset-card:active:not(:disabled), .component-card:active:not(:disabled) {
+  border-color: #eee;
+}
+
+/* Hover must never recolor a preview or remain latched after a touch. */
+@media (hover: hover) and (pointer: fine) {
+  .button:hover:not(:disabled), .asset-play:hover, .asset-alpha-toggle:hover {
+    opacity: 0.85;
+  }
+  .icon-button:hover {background: #353535;}
+  .asset-card:hover, .component-card:hover {border-color: #aaa;}
+  .asset-card.is-selected:hover, .component-card.is-selected:hover {border-color: #eee;}
+  .palette-option:hover .palette-square {outline: 1px solid #939393; outline-offset: 2px;}
+}
+
+.asset-timecode, .timecode {font-variant-numeric: tabular-nums;}
+
+@media (prefers-reduced-motion: reduce) {
+  .button, .icon-button, .asset-play, .asset-alpha-toggle {
+    transition: opacity var(--press-duration) ease;
+  }
+  .button:active:not(:disabled), .icon-button:active:not(:disabled),
+  .asset-play:active, .asset-alpha-toggle:active {
+    transform: none;
+    opacity: 0.8;
+  }
+}

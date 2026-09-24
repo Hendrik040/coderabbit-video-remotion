@@ -1,0 +1,661 @@
+/*
+ * ═══════════════════════════════════════════════════════════════
+ * Semantic Color Tokens
+ *
+ * Maps raw scale steps (from scales.css) to meaningful names.
+ * All tokens are explicitly scoped to their Tailwind namespace:
+ *   --background-color-*  → generates bg-* only
+ *   --text-color-*        → generates text-* only
+ *   --border-color-*      → generates border-* only
+ *   --ring-color-*        → generates ring-* only
+ *
+ * Raw scales (--color-cui-mauve-*, --color-cui-red-*, etc.)
+ * remain in the --color-* namespace for direct use in gradients
+ * and other edge cases at the component level.
+ *
+ * All tokens are prefixed with `cui-` to avoid collisions
+ * when imported alongside other design systems.
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+:root {
+	/* ── Shadow border tint: black in light, white in dark ── */
+	--cui-border-tint: 0 0 0;
+	/* ── Button top highlight opacity ── */
+	--cui-button-highlight-alpha: 0.4;
+}
+
+[data-theme="dark"] {
+	color-scheme: dark;
+	--cui-border-tint: 1 0 0;
+	--cui-button-highlight-alpha: 0.12;
+}
+
+@theme {
+	/*
+	 * ═══════════════════════════════════════
+	 * TYPOGRAPHY — Geist (sans) + Hack (mono)
+	 *
+	 * Font families resolve through Tailwind's
+	 * font-cui-sans / font-cui-mono utilities.
+	 *
+	 * 4 sizes: sm (12px), base (14px default),
+	 * lg (18px headings), xl (24px page titles).
+	 * 2 weights: font-medium (default), font-semibold.
+	 *
+	 * All tokens prefixed with `cui-` to avoid
+	 * collisions with Tailwind built-ins.
+	 * ═══════════════════════════════════════
+	 */
+	--font-cui-sans:
+		"Geist Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-cui-mono:
+		"Hack", ui-monospace, "SFMono-Regular", "Menlo", "Monaco", "Consolas",
+		"Liberation Mono", "Courier New", monospace;
+
+	/* Size scale — 12 (sm) / 14 (base / body) / 18 (lg) / 24 (xl) */
+	--text-cui-sm: 0.75rem; /* 12px */
+	--text-cui-sm--line-height: 1rem; /* 16px */
+	--text-cui-base: 0.875rem; /* 14px — body default */
+	--text-cui-base--line-height: 1.25rem; /* 20px */
+	--text-cui-lg: 1.125rem; /* 18px */
+	--text-cui-lg--line-height: 1.75rem; /* 28px */
+	--text-cui-xl: 1.5rem; /* 24px */
+	--text-cui-xl--line-height: 2rem; /* 32px */
+
+	/*
+	 * ═══════════════════════════════════════
+	 * BACKGROUNDS — 3 spatial layers
+	 *
+	 * cui-base-0: page shell / surround (deepest)
+	 * cui-base-1: main content area
+	 * cui-base-2: elevated cards, panels, popovers
+	 * ═══════════════════════════════════════
+	 */
+	--background-color-cui-base-0: var(--color-cui-mauve-4);
+	--background-color-cui-base-1: var(--color-cui-mauve-2);
+	--background-color-cui-base-2: var(--color-cui-mauve-1);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * INTERACTIVE — Alpha-based hover/highlight
+	 *
+	 * Works on any background layer because it's
+	 * a semi-transparent overlay, not a fixed color.
+	 * ═══════════════════════════════════════
+	 */
+	--background-color-cui-subtle: oklch(var(--cui-border-tint) / 0.06);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * TEXT — 3 hierarchy levels
+	 * ═══════════════════════════════════════
+	 */
+	--text-color-cui-primary: var(--color-cui-mauve-12);
+	--text-color-cui-secondary: var(--color-cui-mauve-11);
+	--text-color-cui-tertiary: var(--color-cui-mauve-9);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * FILL — matching bg tokens for use with
+	 * SVG fill/stroke and divider backgrounds
+	 * ═══════════════════════════════════════
+	 */
+	--background-color-cui-neutral: var(--color-cui-mauve-5);
+	--background-color-cui-tertiary: var(--color-cui-mauve-9);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * BORDERS — 2 levels
+	 * ═══════════════════════════════════════
+	 */
+	--border-color-cui-neutral: var(--color-cui-mauve-5);
+	--border-color-cui-neutral-strong: var(--color-cui-mauve-7);
+
+	--ring-color-cui-neutral: var(--color-cui-mauve-5);
+	--ring-color-cui-focus: var(--color-cui-cr-orange-9);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * NEUTRAL — informational (mauve)
+	 * ═══════════════════════════════════════
+	 */
+	--background-color-cui-neutral-subtle: var(--color-cui-mauve-3);
+	--text-color-cui-neutral: var(--color-cui-mauve-11);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * ACCENT — CodeRabbit brand orange
+	 * ═══════════════════════════════════════
+	 */
+	--background-color-cui-accent: var(--color-cui-cr-orange-9);
+	--background-color-cui-accent-subtle: var(--color-cui-cr-orange-3);
+	--background-color-cui-accent-strong: var(--color-cui-cr-orange-10);
+	--background-color-cui-accent-on: oklch(0.99 0 0);
+	--text-color-cui-accent: var(--color-cui-cr-orange-11);
+	--text-color-cui-accent-on: oklch(0.99 0 0);
+	--border-color-cui-accent: var(--color-cui-cr-orange-8);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * DANGER — Radix red scale
+	 * ═══════════════════════════════════════
+	 */
+	--background-color-cui-danger: var(--color-cui-red-10);
+	--background-color-cui-danger-subtle: var(--color-cui-red-3);
+	--background-color-cui-danger-strong: var(--color-cui-red-11);
+	--background-color-cui-danger-on: oklch(0.99 0 0);
+	--text-color-cui-danger: var(--color-cui-red-11);
+	--text-color-cui-danger-on: oklch(0.99 0 0);
+	--border-color-cui-danger: var(--color-cui-red-11);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * WARN — Radix amber scale
+	 * ═══════════════════════════════════════
+	 */
+	--background-color-cui-warn: var(--color-cui-amber-9);
+	--background-color-cui-warn-subtle: var(--color-cui-amber-3);
+	--background-color-cui-warn-strong: var(--color-cui-amber-10);
+	--background-color-cui-warn-on: oklch(0.15 0 0);
+	--text-color-cui-warn: var(--color-cui-amber-11);
+	--text-color-cui-warn-on: oklch(0.15 0 0);
+	--border-color-cui-warn: var(--color-cui-amber-8);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * SUCCESS — secondary (mint) scale
+	 * ═══════════════════════════════════════
+	 */
+	--background-color-cui-success: var(--color-cui-secondary-9);
+	--background-color-cui-success-subtle: var(--color-cui-secondary-3);
+	--background-color-cui-success-strong: var(--color-cui-secondary-10);
+	--background-color-cui-success-on: oklch(0.99 0 0);
+	--text-color-cui-success: var(--color-cui-secondary-11);
+	--text-color-cui-success-on: oklch(0.99 0 0);
+	--border-color-cui-success: var(--color-cui-secondary-8);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * SHADOWS
+	 * ═══════════════════════════════════════
+	 */
+	--inset-shadow-cui-border: inset 0 0 0 1px
+		oklch(var(--cui-border-tint) / 0.06);
+	--inset-shadow-cui-button: inset 0 1px 0 0
+		oklch(1 0 0 / var(--cui-button-highlight-alpha));
+	--inset-shadow-cui-primary:
+		inset 0 1px 0 0 oklch(1 0 0 / 0.15), inset 0 -1px 0 0 oklch(0 0 0 / 0.15);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * INVERSE — Flipped contrast pair
+	 *
+	 * bg-cui-inverse:   near-black in light, near-white in dark
+	 * text-cui-inverse: near-white in light, near-black in dark
+	 *
+	 * Pulled slightly from the extremes so the inset-shadow-cui-primary
+	 * top highlight and bottom shadow are both visible.
+	 * ═══════════════════════════════════════
+	 */
+	--background-color-cui-inverse: oklch(0.28 0.005 55);
+	--text-color-cui-inverse: var(--color-cui-mauve-1);
+
+	/*
+	 * ═══════════════════════════════════════
+	 * SPECIAL
+	 * ═══════════════════════════════════════
+	 */
+	--background-color-cui-overlay: oklch(0 0 0 / 0.4);
+
+	/**
+	 * Easing Functions
+	 */
+	--ease-cui-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+	--ease-cui-in-cubic: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+	--ease-cui-in-quart: cubic-bezier(0.895, 0.03, 0.685, 0.22);
+	--ease-cui-in-quint: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+	--ease-cui-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035);
+	--ease-cui-in-circ: cubic-bezier(0.6, 0.04, 0.98, 0.335);
+
+	--ease-cui-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	--ease-cui-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+	--ease-cui-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+	--ease-cui-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+	--ease-cui-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+	--ease-cui-out-circ: cubic-bezier(0.075, 0.82, 0.165, 1);
+
+	--ease-cui-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+	--ease-cui-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+	--ease-cui-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+	--ease-cui-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1);
+	--ease-cui-in-out-expo: cubic-bezier(1, 0, 0, 1);
+	--ease-cui-in-out-circ: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+
+	/**
+	 * Animations
+	 */
+	--animate-cui-dot-cycle: cui-dot-cycle 1.2s steps(1) infinite;
+	--animate-cui-select-in: cui-select-in 200ms var(--ease-cui-out-expo);
+	--animate-cui-select-out: cui-select-out 150ms var(--ease-cui-in-quad);
+	--animate-cui-shimmer: cui-shimmer 2s infinite linear;
+	--animate-cui-shake: cui-shake 400ms var(--ease-cui-out-cubic);
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════
+ * DARK MODE SEMANTIC OVERRIDES
+ * ═══════════════════════════════════════════════════════════════
+ */
+[data-theme="dark"] {
+	/* Backgrounds: lighter = more elevated in dark mode too */
+	--background-color-cui-base-0: var(--color-cui-mauve-1);
+	--background-color-cui-base-1: var(--color-cui-mauve-2);
+	--background-color-cui-base-2: var(--color-cui-mauve-3);
+
+	/* Neutral strong: more visible border in dark mode */
+	--border-color-cui-neutral-strong: var(--color-cui-mauve-7);
+
+	/* Accent */
+	--background-color-cui-accent: var(--color-cui-cr-orange-9);
+	--background-color-cui-accent-strong: var(--color-cui-cr-orange-8);
+	--ring-color-cui-focus: var(--color-cui-cr-orange-9);
+
+	/* Danger */
+	--background-color-cui-danger: var(--color-cui-red-9);
+	--background-color-cui-danger-strong: var(--color-cui-red-8);
+	--border-color-cui-danger: var(--color-cui-red-7);
+
+	/* Warning */
+	--background-color-cui-warn: var(--color-cui-amber-9);
+	--background-color-cui-warn-strong: var(--color-cui-amber-10);
+
+	/* Inverse: pulled back from pure white so highlights/shadows are visible */
+	--background-color-cui-inverse: oklch(0.9 0.005 55);
+
+	/* Success */
+	--background-color-cui-success: var(--color-cui-secondary-9);
+	--background-color-cui-success-strong: var(--color-cui-secondary-10);
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════
+ * KEYFRAMES
+ * ═══════════════════════════════════════════════════════════════
+ */
+@keyframes braille-snake {
+	0% {
+		content: "⣾";
+	}
+	6.25% {
+		content: "⣽";
+	}
+	12.5% {
+		content: "⣻";
+	}
+	18.75% {
+		content: "⢿";
+	}
+	25% {
+		content: "⡿";
+	}
+	31.25% {
+		content: "⣟";
+	}
+	37.5% {
+		content: "⣯";
+	}
+	43.75% {
+		content: "⣷";
+	}
+	50% {
+		content: "⣾";
+	}
+	56.25% {
+		content: "⣽";
+	}
+	62.5% {
+		content: "⣻";
+	}
+	68.75% {
+		content: "⢿";
+	}
+	75% {
+		content: "⡿";
+	}
+	81.25% {
+		content: "⣟";
+	}
+	87.5% {
+		content: "⣯";
+	}
+	93.75% {
+		content: "⣷";
+	}
+	100% {
+		content: "⣾";
+	}
+}
+
+@keyframes cui-chat-shimmer {
+	from {
+		background-position: 100% 0;
+	}
+	to {
+		background-position: -100% 0;
+	}
+}
+
+@keyframes cui-dot-cycle {
+	0% {
+		content: ".";
+	}
+	33% {
+		content: "..";
+	}
+	66% {
+		content: "...";
+	}
+	100% {
+		content: ".";
+	}
+}
+
+@keyframes cui-select-in {
+	from {
+		opacity: 0;
+		transform: scale(0.7);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes cui-select-out {
+	from {
+		opacity: 1;
+		transform: scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: scale(0.7);
+	}
+}
+
+@keyframes cui-shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+@keyframes slide-in-from-right {
+	from {
+		opacity: 0;
+		transform: translateX(6px);
+	}
+}
+
+@keyframes slide-in-from-left {
+	from {
+		opacity: 0;
+		transform: translateX(-6px);
+	}
+}
+
+@keyframes slide-in-from-bottom {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+}
+
+@keyframes slide-in-from-top {
+	from {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+}
+
+@keyframes slide-out-to-right {
+	to {
+		opacity: 0;
+		transform: translateX(6px);
+	}
+}
+
+@keyframes slide-out-to-left {
+	to {
+		opacity: 0;
+		transform: translateX(-6px);
+	}
+}
+
+@keyframes slide-out-to-bottom {
+	to {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+}
+
+@keyframes slide-out-to-top {
+	to {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+}
+
+@keyframes check-pop {
+	from {
+		opacity: 0;
+		transform: scale(0.8);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes cui-shake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	20% {
+		transform: translateX(-6px);
+	}
+	40% {
+		transform: translateX(5px);
+	}
+	60% {
+		transform: translateX(-3px);
+	}
+	80% {
+		transform: translateX(2px);
+	}
+}
+
+@keyframes check-out {
+	from {
+		opacity: 1;
+		transform: scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: scale(0.8);
+	}
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════
+ * TOAST — Stacking, animation, and swipe styles
+ *
+ * Matches Sonner's DOM structure: <section> (ARIA) > <ol> (fixed
+ * positioned toaster) > <li> (absolute positioned toasts).
+ *
+ * All dynamic values flow through CSS custom properties set by JS:
+ *   ol:  --gap, --front-toast-height, --toast-width
+ *   li:  --index, --toasts-before, --z-index, --offset,
+ *        --initial-height, --swipe-amount
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/* ── Toast base ── */
+.cui-toast {
+	z-index: var(--z-index);
+	transition:
+		transform 400ms,
+		opacity 400ms,
+		height 400ms;
+}
+
+/* Content fades in/out for collapsed non-front toasts */
+.cui-toast > * {
+	transition: opacity 400ms;
+}
+
+/* ── Lift direction ── */
+.cui-toast[data-y-position="bottom"] {
+	--lift: -1;
+}
+.cui-toast[data-y-position="top"] {
+	--lift: 1;
+}
+
+/* ── Initial state: off-screen ── */
+.cui-toast:not([data-mounted="true"]) {
+	opacity: 0;
+}
+.cui-toast[data-y-position="bottom"]:not([data-mounted="true"]) {
+	transform: translateY(100%);
+}
+.cui-toast[data-y-position="top"]:not([data-mounted="true"]) {
+	transform: translateY(-100%);
+}
+
+/* ── Mounted: animate in ── */
+.cui-toast[data-mounted="true"] {
+	opacity: 1;
+}
+
+/* ── Collapsed stack (not expanded) ── */
+.cui-toast[data-expanded="false"][data-front="true"][data-mounted="true"] {
+	transform: translateY(0);
+}
+.cui-toast[data-expanded="false"][data-front="false"][data-mounted="true"] {
+	height: var(--front-toast-height);
+	overflow: hidden;
+	transform: translateY(calc(var(--lift) * var(--gap) * var(--toasts-before)))
+		scale(calc(1 - var(--toasts-before) * 0.03));
+}
+.cui-toast[data-expanded="false"][data-front="false"][data-mounted="true"] > * {
+	opacity: 0;
+}
+
+/* ── Expanded stack (hover) ── */
+.cui-toast[data-expanded="true"][data-mounted="true"] {
+	height: var(--initial-height);
+	transform: translateY(calc(var(--lift) * var(--offset)));
+}
+.cui-toast[data-expanded="true"][data-mounted="true"] > * {
+	opacity: 1;
+}
+
+/* ── Gap bridge (prevents mouseout between toasts) ── */
+.cui-toast[data-expanded="true"]::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	width: 100%;
+	height: calc(var(--gap) + 1px);
+}
+.cui-toast[data-y-position="bottom"][data-expanded="true"]::after {
+	bottom: 100%;
+}
+.cui-toast[data-y-position="top"][data-expanded="true"]::after {
+	top: 100%;
+}
+
+/* ── Hidden toasts beyond visible limit ── */
+.cui-toast[data-visible="false"] {
+	opacity: 0 !important;
+	pointer-events: none !important;
+}
+
+/* ── Removed: exit animation ── */
+.cui-toast[data-removed="true"][data-front="true"][data-swipe-out="false"] {
+	transform: translateY(calc(var(--lift) * -100%));
+	opacity: 0;
+}
+.cui-toast[data-removed="true"][data-front="false"][data-swipe-out="false"][data-expanded="true"] {
+	transform: translateY(
+		calc(var(--lift) * var(--offset) + var(--lift) * -100%)
+	);
+	opacity: 0;
+}
+.cui-toast[data-removed="true"][data-front="false"][data-swipe-out="false"][data-expanded="false"] {
+	transform: translateY(40%);
+	opacity: 0;
+	transition:
+		transform 500ms,
+		opacity 200ms;
+}
+
+/* ── Swiping (drag in progress) ── */
+.cui-toast[data-swiping="true"] {
+	transform: translateY(calc(var(--lift) * var(--offset)))
+		translateX(var(--swipe-amount, 0px));
+	transition: none;
+	user-select: none;
+}
+
+/* ── Swipe out ── */
+.cui-toast[data-swipe-out="true"] {
+	animation: cui-toast-swipe-out 200ms ease-out forwards;
+}
+
+@keyframes cui-toast-swipe-out {
+	from {
+		transform: translateY(calc(var(--lift) * var(--offset)))
+			translateX(var(--swipe-amount, 0px));
+		opacity: 1;
+	}
+	to {
+		transform: translateY(calc(var(--lift) * var(--offset)))
+			translateX(
+				calc(var(--swipe-amount, 0px) + 100% * sign(var(--swipe-amount, 1px)))
+			);
+		opacity: 0;
+	}
+}
+
+/* ── Promise toast: icon crossfade on state change ── */
+.cui-toast[data-promise-state="success"] .cui-toast-icon > *,
+.cui-toast[data-promise-state="error"] .cui-toast-icon > * {
+	animation: cui-toast-icon-in 300ms ease forwards;
+}
+
+@keyframes cui-toast-icon-in {
+	from {
+		opacity: 0;
+		transform: scale(0.6);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion) {
+	.cui-toast,
+	.cui-toast > *,
+	.cui-toast .cui-toast-icon > * {
+		transition: none !important;
+		animation: none !important;
+	}
+}

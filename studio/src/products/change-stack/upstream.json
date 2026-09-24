@@ -1,0 +1,27 @@
+{
+  "website": {
+    "repository": "coderabbitai/website",
+    "commit": "f2fcb300a03e26ed81d14712b214a4698e79b864",
+    "directory": "apps/front/app/components/Common/Heroes/Home"
+  },
+  "carrotUi": {
+    "repository": "coderabbitai/carrot-ui",
+    "tag": "v0.25.0"
+  },
+  "originalSha256": {
+    "ReviewStackScreen.tsx": "aa4d65418674aad36300c7f9eb4094e31994ffd86c57d510c7484c8a1e580e55",
+    "ReviewStackOverview.tsx": "80aab7a4b02d3e3e7b2d36eaf27874cd6fbfb3035f216c8c650031f95a2a4c33",
+    "ReviewStackOverview.module.css": "b8557cddb1e4d94ce5438db60dfcd0128bfd1f58c88745323fa576adffe92951",
+    "ReviewStackImpactViews.tsx": "fa54c32873c9e265849774aaa256f4d0bfbfc2ba7a0c2426a36b6e41c8b35bb7",
+    "ReviewStackImpactViews.module.css": "4b9ed0a6ecf7c6fdf0cf956ac07d75f2f3e85bddc08b7bffbd4e95d31cd6dd52",
+    "ReviewStackProductIcons.tsx": "ab65133f0d418d85b3bef71175ab2f73864da021557ad1e5e16dea1e83e60dcf",
+    "reviewStackOverviewData.ts": "afbbfab3eb95baa210eaba2eb80e56a9f6515d54cc45866739cacab5b0e90737",
+    "reviewStackMockData.json": "2fdf3646a60940634cdb707a3a6f4852ae8b3e78ab7008069ce222452bb218ed",
+    "HomeHero.module.css": "0115acc16a22e0fd28c9a4da5c9d3f83253fca45acc8629a985f2fd976c132ed",
+    "CarrotPressable.tsx": "afbff71c03d21c3db854007d14f8cd96ed45acf6c25428ac43d3249420c9866a",
+    "CarrotBadge.tsx": "e965fa42507fb98845eb0be9a15246b8b2ef55609dd89ee624b2bf85d16f005c",
+    "carrotCn.ts": "8c40c6696bc6362e7e8e6b84806a5cbf56ec31c080d7d14785d6ebf26819cbac",
+    "carrotTheme.css": "1951f25610b74c175066529f3f4f64681a02f7e74fd413ae61d2e4ad44faa8c2",
+    "carrotScales.css": "58b98110bddbccaecbc876224644c5e7ff56523909452980b0596a3a12570e9a"
+  }
+}

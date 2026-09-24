@@ -1,0 +1,643 @@
+/* Generated subset of the original HomeHero.module.css. */
+.heroRoot {
+  --home-hero-screen-resting-radius: 0.625rem;
+  --home-hero-studio-corner-radius: 0.5rem;
+  --hero-sequence-screen-x: 0rem;
+  --hero-sequence-screen-y: 0rem;
+  --hero-review-stack-layout-scale: 0.875;
+  --hero-sequence-screen-transform: translate3d(var(--hero-sequence-screen-x), var(--hero-sequence-screen-y), 0)
+    scale(1, 1);
+  --hero-sequence-screen-button-surface-opacity: 0;
+  --hero-sequence-screen-button-fill-scale: 0;
+  --hero-sequence-screen-button-content-layer-transform: translate3d(
+    var(--hero-sequence-screen-x),
+    var(--hero-sequence-screen-y),
+    0
+  );
+  --hero-sequence-screen-button-content-layer-scale: 1;
+  --hero-sequence-screen-button-content-clip-right: 100%;
+  --hero-sequence-screen-button-content-edge-width: 28%;
+  --hero-sequence-screen-button-content-edge-x: 0%;
+  --hero-sequence-screen-button-content-x: -0.75rem;
+  --hero-sequence-screen-dim-opacity: 0;
+  --hero-sequence-screen-live-opacity: 1;
+  --hero-sequence-screen-poster-opacity: 0;
+  --hero-sequence-screen-light-opacity: 1;
+  --hero-sequence-screen-radius-x: var(--home-hero-screen-resting-radius);
+  --hero-sequence-screen-radius-y: var(--home-hero-screen-resting-radius);
+  --hero-sequence-shadow-opacity: 1;
+  --hero-sequence-shadow-scale-x: 1;
+  --hero-sequence-shadow-scale-y: 1;
+  --hero-sequence-studio-opacity: 1;
+  --home-hero-studio-extra-bottom: 36rem;
+  --home-hero-studio-extra-bottom-half: 18rem;
+  --home-hero-studio-max-width: 120rem;
+  --home-hero-studio-max-height: 67.5rem;
+  --home-hero-studio-max-height-half: 33.75rem;
+  --home-hero-static-stage-bottom-gap: 7rem;
+  --home-hero-static-large-cards-top-padding: 7rem;
+  --home-hero-static-large-screen-width: 96rem;
+  --home-hero-static-large-studio-inline-inset: 1rem;
+  --home-hero-studio-top-blend-height: clamp(18rem, 32vh, 26rem);
+  --home-hero-page-bg-rgb: 18 16 20;
+  --home-hero-page-bg: rgb(var(--home-hero-page-bg-rgb));
+  --home-hero-studio-top-blend: linear-gradient(
+    180deg,
+    var(--home-hero-page-bg) 0%,
+    var(--home-hero-page-bg) 14%,
+    rgb(var(--home-hero-page-bg-rgb) / 80%) 36%,
+    rgb(var(--home-hero-page-bg-rgb) / 45%) 68%,
+    rgb(var(--home-hero-page-bg-rgb) / 0%) 100%
+  );
+  --home-hero-screen-bg: var(--color-cui-mauve-1);
+  --home-hero-review-screen-visibility: visible;
+  --home-hero-stage-floor: rgb(var(--home-hero-studio-floor-color) / var(--home-hero-studio-floor-opacity));
+  --home-hero-card-bg: var(--color-cui-mauve-1);
+  --home-hero-card-header-bg: var(--color-cui-mauve-2);
+  --home-hero-card-border: var(--color-cui-mauve-6);
+  --home-hero-panel-border: rgb(60 56 65 / 66%);
+  --home-hero-panel-border-soft: rgb(60 56 65 / 46%);
+  --home-hero-panel-top-glint: rgb(239 237 240 / 3.5%);
+  --home-hero-button-bg-rgb: 43 40 47;
+  --home-hero-button-bg: rgb(var(--home-hero-button-bg-rgb));
+  --home-hero-button-border: var(--color-cui-mauve-6);
+  --home-hero-rabbit: #f04006;
+  --home-hero-rabbit-border: rgb(245 106 61 / 40%);
+  --home-hero-rabbit-mark: #fdfcfd;
+  --home-hero-button-text: #fafafa;
+  --home-hero-screen-text: rgb(232 226 234);
+  --home-hero-text: #f4f1f5;
+  --home-hero-muted: var(--color-cui-mauve-11);
+  --home-hero-faint: #8e8895;
+  --home-hero-author-bg: #5b4a74;
+  --home-hero-author-text: #17131b;
+  --home-hero-author-border: rgb(111 91 140 / 50%);
+  --home-hero-danger: #ff1d1d;
+  --home-hero-diff-delete-bg: #44171b;
+  --home-hero-diff-delete-text: #ff6256;
+  --home-hero-diff-add-bg: #122b26;
+  --home-hero-diff-add-text: #2de3a1;
+  --github-canvas-default: var(--color-cui-mauve-1);
+  --github-canvas-subtle: var(--color-cui-mauve-2);
+  --github-border-default: var(--color-cui-mauve-6);
+  --github-fg-default: var(--color-cui-mauve-12);
+  --github-fg-muted: var(--color-cui-mauve-11);
+  --github-fg-subtle: var(--color-cui-mauve-9);
+  --github-accent-fg: var(--home-hero-github-accent);
+  --github-success-fg: var(--home-hero-github-success);
+  --github-success-muted: rgb(46 160 67 / 15%);
+  --github-danger-fg: var(--home-hero-github-danger);
+  --github-danger-muted: rgb(248 81 73 / 15%);
+  --github-attention-fg: var(--home-hero-github-attention);
+  --home-hero-prioritize-light: #d08700;
+  --home-hero-understand-light: #838bff;
+  --home-hero-secure-light: #54aeff;
+  --home-hero-rim-core: rgb(239 237 240 / calc(26% * var(--hero-sequence-screen-light-opacity)));
+  --home-hero-rim-strong: rgb(239 237 240 / calc(11% * var(--hero-sequence-screen-light-opacity)));
+  --home-hero-rim-soft: rgb(239 237 240 / calc(7% * var(--hero-sequence-screen-light-opacity)));
+  --home-hero-rim-falloff: rgb(181 178 185 / calc(4% * var(--hero-sequence-screen-light-opacity)));
+  --home-hero-rim-extent-x: 30%;
+  --home-hero-rim-extent-y: 50%;
+  --home-hero-rim-tail: rgb(239 237 240 / calc(4.8% * var(--hero-sequence-screen-light-opacity)));
+  --home-hero-rim-tail-soft: rgb(181 178 185 / calc(3.2% * var(--hero-sequence-screen-light-opacity)));
+  --home-hero-rim-tail-start: 24%;
+  --home-hero-inner-rim-core: rgb(239 237 240 / 12%);
+  --home-hero-inner-rim-strong: rgb(239 237 240 / 5.5%);
+  --home-hero-inner-rim-soft: rgb(239 237 240 / 3.2%);
+  --home-hero-inner-rim-falloff: rgb(181 178 185 / 2%);
+  --home-hero-sidebar-glint-core-color: 239 237 240;
+  --home-hero-sidebar-glint-core-opacity: 0.5%;
+  --home-hero-sidebar-glint-core-x: 97%;
+  --home-hero-sidebar-glint-core-y: 62%;
+  --home-hero-sidebar-glint-soft-color: 239 237 240;
+  --home-hero-sidebar-glint-soft-opacity: 2%;
+  --home-hero-sidebar-glint-soft-stop: 46%;
+  --home-hero-sidebar-glint-fade-stop: 90%;
+  --home-hero-sidebar-glint-warm-color: 239 237 240;
+  --home-hero-sidebar-glint-warm-opacity: 2.3%;
+  --home-hero-sidebar-glint-warm-x: 100%;
+  --home-hero-sidebar-glint-warm-y: 54%;
+  --home-hero-sidebar-glint-warm-fade-stop: 86%;
+  --home-hero-sidebar-glint-wash-opacity: 2.2%;
+  --home-hero-sidebar-glint-wash-stop: 36%;
+  --home-hero-right-sidebar-bg: var(--color-cui-mauve-1);
+  --home-hero-right-dark-core-color: 18 16 20;
+  --home-hero-right-dark-core-opacity: 5%;
+  --home-hero-right-dark-core-x: 180%;
+  --home-hero-right-dark-core-y: 130%;
+  --home-hero-right-dark-soft-color: 18 16 20;
+  --home-hero-right-dark-soft-opacity: 0%;
+  --home-hero-right-dark-soft-stop: 48%;
+  --home-hero-right-dark-fade-stop: 90%;
+  --home-hero-right-dark-edge-opacity: 50%;
+  --home-hero-right-dark-edge-stop: 46%;
+  --home-hero-studio-key-color: 239 237 240;
+  --home-hero-studio-key-opacity: 0%;
+  --home-hero-studio-key-soft-opacity: 0%;
+  --home-hero-studio-key-x: 78%;
+  --home-hero-studio-key-y: 46vh;
+  --home-hero-studio-key-stop: 78%;
+  --home-hero-studio-floor-glow-color: 181 178 185;
+  --home-hero-studio-floor-glow-opacity: 26%;
+  --home-hero-studio-floor-glow-stop: 82%;
+  --home-hero-studio-vignette-color: 18 16 20;
+  --home-hero-studio-vignette-opacity: 50%;
+  --home-hero-studio-vignette-x: 72%;
+  --home-hero-studio-vignette-y: 72vh;
+  --home-hero-studio-top-stop: 22vh;
+  --home-hero-studio-mid-color: 60 56 65;
+  --home-hero-studio-mid-opacity: 90%;
+  --home-hero-studio-mid-stop: 60vh;
+  --home-hero-studio-floor-color: 98 94 104;
+  --home-hero-studio-floor-opacity: 82%;
+  --home-hero-studio-edge-color: 18 16 20;
+  --home-hero-studio-edge-strong-opacity: 98%;
+  --home-hero-studio-edge-strong-stop: 42%;
+  --home-hero-studio-edge-soft-opacity: 68%;
+  --home-hero-studio-edge-soft-stop: 76%;
+  --home-hero-studio-background:
+    radial-gradient(
+      var(--home-hero-studio-key-x) var(--home-hero-studio-key-y) at 50% 10vh,
+      rgb(var(--home-hero-studio-key-color) / var(--home-hero-studio-key-opacity)) 0%,
+      rgb(var(--home-hero-studio-key-color) / var(--home-hero-studio-key-soft-opacity)) 34%,
+      rgb(var(--home-hero-studio-key-color) / 0%) var(--home-hero-studio-key-stop)
+    ),
+    radial-gradient(
+      82% 28vh at 50% 92vh,
+      rgb(var(--home-hero-studio-floor-glow-color) / var(--home-hero-studio-floor-glow-opacity)) 0%,
+      rgb(var(--home-hero-studio-floor-glow-color) / 0%) var(--home-hero-studio-floor-glow-stop)
+    ),
+    radial-gradient(
+      var(--home-hero-studio-vignette-x) var(--home-hero-studio-vignette-y) at 50% 100vh,
+      rgb(var(--home-hero-studio-vignette-color) / 0%) 0%,
+      rgb(var(--home-hero-studio-vignette-color) / var(--home-hero-studio-vignette-opacity)) 100%
+    ),
+    linear-gradient(
+      180deg,
+      var(--home-hero-screen-bg) 0%,
+      var(--home-hero-screen-bg) var(--home-hero-studio-top-stop),
+      rgb(var(--home-hero-studio-mid-color) / var(--home-hero-studio-mid-opacity)) var(--home-hero-studio-mid-stop),
+      var(--home-hero-stage-floor) 100vh,
+      var(--home-hero-stage-floor) 100%
+    );
+  --home-hero-shadow-color: 18 16 20;
+  --home-hero-shadow-core-opacity: 0%;
+  --home-hero-shadow-center-mid-opacity: 0%;
+  --home-hero-shadow-falloff-opacity: 0%;
+  --home-hero-shadow-side-core-opacity: 33%;
+  --home-hero-shadow-side-falloff-opacity: 28%;
+  --home-hero-shadow-core: rgb(var(--home-hero-shadow-color) / var(--home-hero-shadow-core-opacity));
+  --home-hero-shadow-center-mid: rgb(var(--home-hero-shadow-color) / var(--home-hero-shadow-center-mid-opacity));
+  --home-hero-shadow-falloff: rgb(var(--home-hero-shadow-color) / var(--home-hero-shadow-falloff-opacity));
+  --home-hero-shadow-side-core: rgb(var(--home-hero-shadow-color) / var(--home-hero-shadow-side-core-opacity));
+  --home-hero-shadow-side-falloff: rgb(var(--home-hero-shadow-color) / var(--home-hero-shadow-side-falloff-opacity));
+  --home-hero-shadow-inline-outset: -7%;
+  --home-hero-shadow-bottom-offset: -3.5%;
+  --home-hero-shadow-y: 20%;
+  --home-hero-shadow-static-bottom-lift: 0.25rem;
+  --home-hero-shadow-height: 14.2%;
+  --home-hero-shadow-skew: -24deg;
+  --home-hero-shadow-body-inset-x: -1.4%;
+  --home-hero-shadow-body-top: 20%;
+  --home-hero-shadow-side-width: 14%;
+  --home-hero-shadow-side-height: 70%;
+  --home-hero-shadow-side-core-stop: 87%;
+  --home-hero-shadow-side-fade-stop: 100%;
+  --home-hero-shadow-body-blur: 0.5rem;
+  --home-hero-rail-gradient: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--home-hero-panel-border) 16%,
+    var(--home-hero-panel-border) 58%,
+    rgb(60 56 65 / 0%) 100%
+  );
+}
+
+.reviewStackChrome::before,
+.reviewStackChrome::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: var(--hero-sequence-screen-light-opacity);
+  -webkit-mask:
+    linear-gradient(rgb(0 0 0) 0 0) content-box,
+    linear-gradient(rgb(0 0 0) 0 0);
+  mask:
+    linear-gradient(rgb(0 0 0) 0 0) content-box,
+    linear-gradient(rgb(0 0 0) 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.reviewStackChrome::before {
+  padding: 0.0625rem;
+  background:
+    radial-gradient(
+        100% 100% at 0 0,
+        var(--home-hero-rim-core) 0%,
+        var(--home-hero-rim-core) 4%,
+        var(--home-hero-rim-strong) 12%,
+        var(--home-hero-rim-soft) 42%,
+        var(--home-hero-rim-falloff) 68%,
+        transparent 94%
+      )
+      left top / var(--home-hero-rim-extent-x) var(--home-hero-rim-extent-y) no-repeat,
+    conic-gradient(
+        from 0deg at 0 0,
+        transparent 0deg,
+        transparent 102deg,
+        var(--home-hero-rim-soft) 114deg,
+        var(--home-hero-rim-core) 135deg,
+        var(--home-hero-rim-strong) 146deg,
+        var(--home-hero-rim-soft) 168deg,
+        transparent 196deg,
+        transparent 360deg
+      )
+      left top / var(--home-hero-rim-extent-x) var(--home-hero-rim-extent-y) no-repeat,
+    linear-gradient(
+        135deg,
+        transparent 0%,
+        transparent var(--home-hero-rim-tail-start),
+        var(--home-hero-rim-tail-soft) 36%,
+        var(--home-hero-rim-tail) 66%,
+        var(--home-hero-rim-tail-soft) 87%,
+        transparent 102%
+      )
+      left top / 104% 104% no-repeat,
+    radial-gradient(
+        52% 44% at 101% 101%,
+        var(--home-hero-rim-tail) 0%,
+        var(--home-hero-rim-tail-soft) 34%,
+        transparent 72%
+      )
+      left top / 106% 106% no-repeat;
+}
+
+.reviewStackChrome::after {
+  padding: 0.125rem;
+  background:
+    radial-gradient(100% 100% at 0 0, var(--home-hero-rim-soft) 0%, var(--home-hero-rim-falloff) 58%, transparent 94%)
+      left top / var(--home-hero-rim-extent-x) var(--home-hero-rim-extent-y) no-repeat,
+    linear-gradient(
+        135deg,
+        transparent 0%,
+        transparent var(--home-hero-rim-tail-start),
+        var(--home-hero-rim-tail-soft) 40%,
+        var(--home-hero-rim-tail-soft) 84%,
+        transparent 102%
+      )
+      left top / 104% 104% no-repeat,
+    radial-gradient(52% 44% at 101% 101%, var(--home-hero-rim-tail-soft) 0%, transparent 72%) left top / 106% 106%
+      no-repeat;
+  filter: blur(0.375rem);
+}
+
+.reviewStackScreen {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  color: var(--home-hero-screen-text);
+}
+
+.reviewStackToolbar {
+  display: flex;
+  grid-column: 1 / -1;
+  min-width: 0;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.375rem 0.5rem;
+  border-bottom: 0.0625rem solid var(--border-color-cui-neutral);
+  background: var(--background-color-cui-base-0);
+}
+
+.reviewStackChrome {
+  position: relative;
+  border: 0.0625rem solid rgb(255 255 255 / calc(5% * var(--hero-sequence-screen-light-opacity)));
+  border-radius: 0.625rem;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(239 237 240 / calc(1.8% * var(--hero-sequence-screen-light-opacity))) 0%,
+      rgb(239 237 240 / 0%) 10%
+    ),
+    var(--home-hero-screen-bg);
+  box-shadow:
+    inset 0 0.0625rem 0 rgb(255 255 255 / calc(4.5% * var(--hero-sequence-screen-light-opacity))),
+    inset -0.0625rem 0 0 rgb(255 255 255 / calc(1.8% * var(--hero-sequence-screen-light-opacity))),
+    inset 0 -0.0625rem 0 rgb(0 0 0 / 36%);
+}
+
+.reviewStackChrome::before {
+  left: 0;
+  z-index: 50;
+}
+
+.reviewStackChrome::after {
+  left: 0;
+  z-index: 49;
+}
+
+.reviewStackChrome > * {
+  position: relative;
+  z-index: 1;
+}
+
+.reviewStackChromeSquareBottomLeft {
+  border-bottom-left-radius: 0;
+}
+
+.reviewStackSidebar {
+  background:
+    radial-gradient(
+      var(--home-hero-sidebar-glint-core-x) var(--home-hero-sidebar-glint-core-y) at 0 0,
+      rgb(
+          var(--home-hero-sidebar-glint-core-color) /
+            calc(var(--home-hero-sidebar-glint-core-opacity) * var(--hero-sequence-screen-light-opacity))
+        )
+        0%,
+      rgb(
+          var(--home-hero-sidebar-glint-soft-color) /
+            calc(var(--home-hero-sidebar-glint-soft-opacity) * var(--hero-sequence-screen-light-opacity))
+        )
+        var(--home-hero-sidebar-glint-soft-stop),
+      rgb(18 16 20 / 0%) var(--home-hero-sidebar-glint-fade-stop)
+    ),
+    radial-gradient(
+      var(--home-hero-sidebar-glint-warm-x) var(--home-hero-sidebar-glint-warm-y) at 0 0,
+      rgb(
+          var(--home-hero-sidebar-glint-warm-color) /
+            calc(var(--home-hero-sidebar-glint-warm-opacity) * var(--hero-sequence-screen-light-opacity))
+        )
+        0%,
+      rgb(18 16 20 / 0%) var(--home-hero-sidebar-glint-warm-fade-stop)
+    ),
+    linear-gradient(
+      180deg,
+      rgb(239 237 240 / calc(var(--home-hero-sidebar-glint-wash-opacity) * var(--hero-sequence-screen-light-opacity)))
+        0%,
+      rgb(239 237 240 / 0%) var(--home-hero-sidebar-glint-wash-stop)
+    ),
+    var(--home-hero-screen-bg);
+}
+
+.reviewStackNoTopLeftLighting .reviewStackSidebar {
+  background:
+    linear-gradient(
+      180deg,
+      rgb(239 237 240 / calc(var(--home-hero-sidebar-glint-wash-opacity) * var(--hero-sequence-screen-light-opacity)))
+        0%,
+      rgb(239 237 240 / 0%) var(--home-hero-sidebar-glint-wash-stop)
+    ),
+    var(--home-hero-screen-bg);
+}
+
+.reviewStackRightSidebar {
+  background:
+    radial-gradient(
+      var(--home-hero-right-dark-core-x) var(--home-hero-right-dark-core-y) at 100% 100%,
+      rgb(
+          var(--home-hero-right-dark-core-color) /
+            calc(var(--home-hero-right-dark-core-opacity) * var(--hero-sequence-screen-light-opacity))
+        )
+        0%,
+      rgb(
+          var(--home-hero-right-dark-soft-color) /
+            calc(var(--home-hero-right-dark-soft-opacity) * var(--hero-sequence-screen-light-opacity))
+        )
+        var(--home-hero-right-dark-soft-stop),
+      rgb(18 16 20 / 0%) var(--home-hero-right-dark-fade-stop)
+    ),
+    linear-gradient(
+      0deg,
+      rgb(
+          var(--home-hero-right-dark-core-color) /
+            calc(var(--home-hero-right-dark-edge-opacity) * var(--hero-sequence-screen-light-opacity))
+        )
+        0%,
+      rgb(var(--home-hero-right-dark-core-color) / 0%) var(--home-hero-right-dark-edge-stop)
+    ),
+    var(--home-hero-right-sidebar-bg);
+}
+
+.reviewStackRightFeed {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.reviewStackRightFeedScrollable {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgb(170 163 174 / 34%) transparent;
+  scrollbar-width: thin;
+}
+
+.reviewStackRightFeedScrollable::-webkit-scrollbar {
+  width: 0.375rem;
+}
+
+.reviewStackRightFeedScrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.reviewStackRightFeedScrollable::-webkit-scrollbar-thumb {
+  border-radius: 9999rem;
+  background: rgb(170 163 174 / 28%);
+}
+
+.reviewStackRightFeedScrollable::-webkit-scrollbar-thumb:hover {
+  background: rgb(170 163 174 / 42%);
+}
+
+.layerRowHoverTarget {
+  position: relative;
+}
+
+.layerRowHoverTarget:not(.layerRowPinnedTarget):hover,
+.layerRowHoverTarget:not(.layerRowPinnedTarget):has(> button:focus-visible),
+.layerRowPinnedTarget[data-open='true'] {
+  z-index: 60;
+}
+
+.layerHoverCard {
+  --layer-hover-card-scale: 1;
+
+  position: absolute;
+  top: -0.25rem;
+  left: calc(100% + 0.5rem);
+  z-index: 70;
+  width: 24rem;
+  max-width: calc(100vw - 20rem);
+  visibility: hidden;
+  pointer-events: none;
+  border: 0.0625rem solid var(--home-hero-card-border);
+  border-radius: 0.5rem;
+  background: var(--home-hero-card-bg);
+  padding: 1rem;
+  box-shadow:
+    0 1rem 2.5rem rgb(0 0 0 / 58%),
+    0 0.25rem 0.75rem rgb(0 0 0 / 44%);
+  opacity: 0;
+  transform: translate3d(-0.375rem, 0, 0) scale(var(--layer-hover-card-scale));
+  transform-origin: top left;
+  transition:
+    opacity 120ms ease-out 80ms,
+    transform 120ms ease-out 80ms,
+    visibility 120ms 80ms;
+}
+
+.layerHoverCardLarge {
+  --layer-hover-card-scale: 1.2;
+}
+
+.layerRowHoverTarget:not(.layerRowPinnedTarget) .layerHoverCard {
+  top: 0;
+  bottom: auto;
+  transform-origin: top left;
+}
+
+.layerHoverDescription {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.layerRowHoverTarget:not(.layerRowPinnedTarget):hover .layerHoverCard,
+.layerRowHoverTarget:not(.layerRowPinnedTarget):has(> button:focus-visible) .layerHoverCard,
+.layerRowPinnedTarget[data-open='true'] .layerHoverCard {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(var(--layer-hover-card-scale));
+  transition-delay: 120ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layerHoverCard {
+    transition: none;
+  }
+}
+
+.reviewStackCenterColumn {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: transparent;
+}
+
+.reviewStackCenterColumn > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 64rem) and (max-height: 67.5rem) and (prefers-reduced-motion: no-preference) {
+
+  .scrollSequence[data-sequence-capture='lightless'] .reviewStackSidebar,
+  .scrollSequence[data-sequence-capture='lightless'] .reviewStackCenterColumn,
+  .scrollSequence[data-sequence-capture='lightless'] .reviewStackRightSidebar {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  .scrollSequence .reviewStackSidebar,
+  .scrollSequence .reviewStackCenterColumn,
+  .scrollSequence .reviewStackRightSidebar {
+    animation: home-hero-screen-column-landing-reveal 620ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+  }
+
+  .scrollSequence .reviewStackSidebar {
+    animation-delay: 150ms;
+  }
+
+  .scrollSequence .reviewStackCenterColumn {
+    animation-delay: 200ms;
+  }
+
+  .scrollSequence .reviewStackRightSidebar {
+    animation-delay: 250ms;
+  }
+
+  .scrollSequence[data-review-stack-entry='settled'] .reviewStackSidebar,
+  .scrollSequence[data-review-stack-entry='settled'] .reviewStackCenterColumn,
+  .scrollSequence[data-review-stack-entry='settled'] .reviewStackRightSidebar {
+    animation: none;
+  }
+}
+
+.commentCard {
+  position: relative;
+  min-width: 0;
+  flex: 1 1 0%;
+  border: 0.0625rem solid var(--home-hero-panel-border);
+  border-radius: 0.375rem;
+  background:
+    linear-gradient(180deg, var(--home-hero-panel-top-glint) 0%, rgb(239 237 240 / 0%) 16%), var(--home-hero-card-bg);
+  box-shadow:
+    0 1rem 3.5rem rgb(0 0 0 / 30%),
+    inset 0 0.0625rem 0 rgb(255 255 255 / 2%);
+  color: var(--home-hero-muted);
+}
+
+.githubReviewComment .commentCard {
+  border-color: var(--github-border-default);
+  background: var(--github-canvas-default);
+  box-shadow: none;
+  color: var(--github-fg-default);
+}
+
+.staticCommentPreview .githubReviewComment .commentCard {
+  box-shadow:
+    0 0.75rem 2rem rgb(var(--home-hero-shadow-color) / 72%),
+    0 1.75rem 4.5rem rgb(var(--home-hero-shadow-color) / 52%),
+    inset 0 0.0625rem 0 rgb(255 255 255 / 2%);
+}
+
+.githubReviewComment .commentHeader {
+  border-color: var(--github-border-default);
+  background: var(--github-canvas-subtle);
+}
+
+.githubReviewComment .commentBadge {
+  border-color: var(--github-border-default);
+  color: var(--github-fg-muted);
+}
+
+.commentHeader {
+  display: flex;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 0.0625rem solid var(--home-hero-panel-border-soft);
+  background:
+    linear-gradient(180deg, var(--home-hero-panel-top-glint) 0%, rgb(239 237 240 / 0%) 100%),
+    var(--home-hero-card-header-bg);
+  padding-inline: 1rem;
+}
+
+.commentBadge {
+  border: 0.0625rem solid var(--home-hero-panel-border-soft);
+  border-radius: 9999rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--home-hero-faint);
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.commentBody {
+  display: flex;
+  height: 19.5rem;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  padding: 1.25rem;
+}
+
+@media (min-width: 80rem) {
+  .commentBody {
+    padding: 1.5rem;
+  }
+}

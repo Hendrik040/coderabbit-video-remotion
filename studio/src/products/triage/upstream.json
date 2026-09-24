@@ -1,0 +1,58 @@
+{
+  "website": {
+    "repository": "coderabbitai/website",
+    "commit": "f2fcb300a03e26ed81d14712b214a4698e79b864",
+    "directory": "apps/front/app/components/Temp/ResourceBoard"
+  },
+  "carrotUi": {
+    "repository": "coderabbitai/carrot-ui",
+    "tag": "v0.25.0"
+  },
+  "originalSha256": {
+    "TriagePriorityPill.module.css": "10b039e9e72a13565179a6381b75f2a830450146da04c9c748b578303601071b",
+    "ReviewerIcons.tsx": "ba33f9852cdfb208522ad3d372dcc766091901384a20d86efafecc0417e8dc1f",
+    "FollowSettingsPopover.tsx": "8a1954c41848bc51e573022ea949e99ea5e3aa725eae705837ad6705fef899e0",
+    "ResourceBoardCard.tsx": "033de8e1554ee5d321c18165c1743bb5c5e6c768f3a54764b31c325305828052",
+    "ResourceBoardColumn.tsx": "c8eeef411dbf326fdd694b4e21eb797ff979c653d7b8474c0bdfd12a1e8c6a22",
+    "ResourceBoard.tsx": "f833e784a5cade11a674f2319616c886d1d49dca4ba6dab6f8a177873d676c40",
+    "ProductReviewerPopover.tsx": "d509b893580d6e43729ae9dc90d9db0e9a93b5778c89ffe1adecfb5528909c5c",
+    "triageProductBoardData.ts": "fbf6155c71b09228b8619c84459ea242f29892dec403837daf8d08af73b8f2f4",
+    "followDigest.ts": "c597d912723f380d04f78e1a55a47f67df55ae530c7491f2b2e7b297302f38c8",
+    "TriageScreen.tsx": "5f13ca544548ef6c5f7f811f957cd962261fd73bd43c8fe36eb74f7d11d6e90d",
+    "triageViews.ts": "34768b8e8dda116edfd2d91b9cef9ce1a741cdb729806abe206577f4cb9ae690",
+    "types.ts": "04dff64a93151aedf755c2a340940da09bc766d36fc41e0d1821723309e90ab6",
+    "ResourceBoard.module.css": "5ede3b39669589c0b0b4a1234806f85ca40f820e23daefee2862b5fd2c194e80",
+    "triageFocus.ts": "25f5116dfbd72ce7d4427d5220089d01584defeab0c15c1696ce95cd60604cd3",
+    "TriageScreen.module.css": "7dfa9e435718dede8540f5f739bf40382a084512e0e5bb26f3b3746cb515b530",
+    "ReviewerPopover.tsx": "14d297c9d36c35bb7c5e5e0f51995320763f0f2078efa3c768487d62bb434f98",
+    "index.ts": "6232fb49397a9c6f20698049c2b4f87f5534133bb35794bfa2671d6b0bcd64a5",
+    "triagePriorities.ts": "5b4af3e2a926fff9a3104152507ac484e2dcfa9f6489eb0360debf9bcd208a45",
+    "triageProductMockPayload.json": "a691b3d896542c6b90d4b792fdb2248f4ad680edc406e4f70809f1e2ea2c2c8e",
+    "ReviewChangeStackPill.tsx": "93cde40f591aca0380bb78c66a79270fc5a7b3f543e7c7197c079935f7cd51d6",
+    "ReviewChangeStackPill.module.css": "d861661588618a715904dafc888f09ddd029f13d01d7ab6e1a965214947fe84c",
+    "triageBoardData.ts": "ab3f4068c263f58f9341564235fbd86adf94dcfa7a7f0521e8dfc2095d75b65f",
+    "en.json": "c26de2d1db63ac8fdb91b6a6744f2f3e770d44a93dd9131d8df765b8047e2ac6"
+  },
+  "originalCarrotSha256": {
+    "popover.tsx": "375e729eafa7cd5a23d54b9140343a871d3fcc44af529c91618ad79b9e603e2c",
+    "tooltip.tsx": "f2e82a3b875e110fbfe57f41eecca01644baba95d8f1d993b959d798b18c1ea4",
+    "menu.tsx": "9b0d709bbafb946d15cb822449201ca8b075e6fbf8c22086fdc80aab9ca7152c",
+    "button.tsx": "b4e6b1e93d288761711e177e229866d630e952e699e0f85ed78bac6c4defe14d",
+    "checkbox.tsx": "269b33ce8e69a602b5b8a1d0174d381d8120505c01690a85326a0628de0b1646",
+    "spinner.tsx": "e930e1b64edc77b989d11763c4a1061b1fd54edd86483f00d5c068c6de9a8207",
+    "select.tsx": "dd0db55eedc812773161455ee2467ec39eae552dc4c515946adf937e62cd8a94",
+    "pixel-spinner.tsx": "fe70092761f9df4f20721f62ebb49ab8b9f9d6c52959f6f550f45afc91c8df53",
+    "form.tsx": "9c622d15b6d63e11cd4259b8826f333496b7ddeb9ff604cef5239b6bf0d83726"
+  },
+  "originalAssetsSha256": {
+    "public/redesign/triage-amara-okafor.jpg": "384b47fbefc0f9374fa20abe2bdf018e57973ec640afcc3352c4cfdd563d1570",
+    "public/redesign/slack-priya-shah.jpg": "e0667d60d03d1bb99f353bb3cafb71ac3f12d82918cdd4148434d152068f74a0",
+    "public/redesign/triage-aarav-mehta.jpg": "20cd7ee89f58fba281c831128e092212248f10c871d218e127898c840ef319e6",
+    "public/redesign/slack-mara-chen.jpg": "743f5ff074503a60c1ccbf6d3771e697e92c4beddbff81e8a58b4fd3483ab851",
+    "public/redesign/triage-casey-reed.jpg": "210b0f9af82fb9265615f53db15c6b78675e222bb2bd868d5b5cef6637087743",
+    "public/redesign/slack-theo-martin.jpg": "2d4f48530becdabc1ee2078ed7817d70d67f7175de4938010d039ebb9780d2e7",
+    "public/content/assets/home-redesign-figma/triage/change-stack-tile.svg": "cd5b05677ec6296256c4b083695d9aeab922b8be05220f57eb6e9888e72bf642",
+    "public/content/assets/home-redesign-figma/triage/change-stack-arrow.svg": "3c0b1b240c2b3023a454143dadd5116eb63ad3d05ab95a1d340685716d10810d",
+    "public/assets/data-source-logos/github.svg": "e2a2944c42ba422c361e9263b1682e85f55cd905544096d2ade051a87e6858fc"
+  }
+}

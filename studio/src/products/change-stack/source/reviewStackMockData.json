@@ -1,0 +1,752 @@
+{
+  "review": {
+    "title": "Add teammate invitations with roles",
+    "label": "Fixture",
+    "status": "Open",
+    "stack": "Invitation data model, API emails, and members UI",
+    "repo": "acme/web-app",
+    "pr": "#482",
+    "files": "9 files",
+    "sectionTitle": "Add the invitation data model",
+    "sectionDescription": "Introduce the `Invitation` record and `MemberRole` enum, and the migration that creates the invitations table. This is the foundation the API and UI build on."
+  },
+  "layers": [
+    {
+      "id": "overview",
+      "number": "01",
+      "title": "Overview",
+      "description": "Not mergeable · 1 blocker",
+      "dependsOn": [],
+      "counts": []
+    },
+    {
+      "id": "blast-radius",
+      "number": "02",
+      "title": "Blast radius",
+      "description": "Cross-package review surface",
+      "dependsOn": [],
+      "counts": []
+    },
+    {
+      "id": "architecture-impact",
+      "number": "03",
+      "title": "Architecture impact",
+      "description": "Review stack service boundaries",
+      "dependsOn": [],
+      "counts": []
+    },
+    {
+      "id": "schemas",
+      "number": "04",
+      "title": "Add the invitation data model",
+      "description": "Introduce the `Invitation` record and `MemberRole` enum, and the migration that creates the invitations table. This is the foundation the API and UI build on.",
+      "dependsOn": [],
+      "counts": [
+        { "kind": "files", "value": "2" }
+      ]
+    },
+    {
+      "id": "storage",
+      "number": "05",
+      "title": "Add the invitation API and emails",
+      "description": "Endpoints to create, list, and accept invitations; token generation; the invitation email; and the admin-only permission gate.",
+      "dependsOn": ["schemas"],
+      "counts": [
+        { "kind": "files", "value": "3" },
+        { "kind": "risk", "value": "1" },
+        { "kind": "review", "value": "1" }
+      ]
+    },
+    {
+      "id": "artifact-builder",
+      "number": "06",
+      "title": "Build the invite & members UI",
+      "description": "The Members settings page, the invite dialog, the data hook that talks to the API, and a reusable role picker.",
+      "dependsOn": ["storage"],
+      "counts": [
+        { "kind": "files", "value": "4" }
+      ]
+    },
+    {
+      "id": "prompts",
+      "number": "07",
+      "title": "Prompts and orchestration",
+      "description": "Agent prompts and task orchestration",
+      "dependsOn": [],
+      "counts": [
+        { "kind": "files", "value": "4" },
+        { "kind": "checks", "value": "7" },
+        { "kind": "comments", "value": "4" }
+      ]
+    },
+    {
+      "id": "backend",
+      "number": "08",
+      "title": "Backend router and integrations",
+      "description": "API route contracts and integration points",
+      "dependsOn": [],
+      "counts": [
+        { "kind": "files", "value": "10" },
+        { "kind": "review", "value": "5" },
+        { "kind": "checks", "value": "3" }
+      ]
+    },
+    {
+      "id": "ui-routing",
+      "number": "09",
+      "title": "UI, routing and clients",
+      "description": "Client shell and route wiring",
+      "dependsOn": [],
+      "counts": [
+        { "kind": "files", "value": "10" },
+        { "kind": "review", "value": "3" },
+        { "kind": "checks", "value": "6" }
+      ]
+    },
+    {
+      "id": "workflow",
+      "number": "10",
+      "title": "Review workflow integration",
+      "description": "Review queue and finish state",
+      "dependsOn": [],
+      "counts": [
+        { "kind": "files", "value": "2" }
+      ]
+    },
+    {
+      "id": "comments",
+      "number": "11",
+      "title": "Comments parsing and state",
+      "description": "Unified comment fields and tags",
+      "dependsOn": [],
+      "counts": [
+        { "kind": "files", "value": "3" },
+        { "kind": "risk", "value": "2" },
+        { "kind": "review", "value": "2" },
+        { "kind": "checks", "value": "7" },
+        { "kind": "comments", "value": "2" }
+      ]
+    }
+  ],
+  "layerFiles": {
+    "schemas": [
+      {
+        "id": "schema-prisma",
+        "path": "prisma/schema.prisma",
+        "shortPath": "schema.prisma",
+        "delta": "+26",
+        "reviewState": "Mark viewed",
+        "unmodifiedLabel": "29 unmodified lines",
+        "expanded": true,
+        "splitRows": [
+          {
+            "type": "context",
+            "leftLine": "30",
+            "leftCode": "  slug      String   @unique",
+            "rightLine": "30",
+            "rightCode": "  slug      String   @unique"
+          },
+          {
+            "type": "context",
+            "leftLine": "31",
+            "leftCode": "  createdAt DateTime @default(now())",
+            "rightLine": "31",
+            "rightCode": "  createdAt DateTime @default(now())"
+          },
+          {
+            "type": "context",
+            "leftLine": "32",
+            "leftCode": "}",
+            "rightLine": "32",
+            "rightCode": "}"
+          },
+          {
+            "type": "context",
+            "leftLine": "33",
+            "leftCode": "",
+            "rightLine": "33",
+            "rightCode": ""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "34",
+            "rightCode": "model Invitation {"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "35",
+            "rightCode": "  id        String           @id @default(cuid())"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "36",
+            "rightCode": "  email     String"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "37",
+            "rightCode": "  role      MemberRole       @default(MEMBER)"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "38",
+            "rightCode": "  token     String           @unique"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "39",
+            "rightCode": "  status    InvitationStatus @default(PENDING)"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "40",
+            "rightCode": "  orgId     String"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "41",
+            "rightCode": "  org       Organization     @relation(fields: [orgId], references: [id])"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "42",
+            "rightCode": "  invitedBy String"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "43",
+            "rightCode": "  expiresAt DateTime"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "44",
+            "rightCode": "  createdAt DateTime         @default(now())"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "45",
+            "rightCode": ""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "46",
+            "rightCode": "  @@index([orgId, status])"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "47",
+            "rightCode": "}"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "48",
+            "rightCode": ""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "49",
+            "rightCode": "enum MemberRole {"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "50",
+            "rightCode": "  ADMIN"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "51",
+            "rightCode": "  MEMBER"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "52",
+            "rightCode": "  VIEWER"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "53",
+            "rightCode": "}"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "54",
+            "rightCode": ""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "55",
+            "rightCode": "enum InvitationStatus {"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "56",
+            "rightCode": "  PENDING"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "57",
+            "rightCode": "  ACCEPTED"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "58",
+            "rightCode": "  REVOKED"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "59",
+            "rightCode": "}"
+          }
+        ],
+        "comments": []
+      },
+      {
+        "id": "invitation-migration",
+        "path": "prisma/migrations/20260624_add_invitations/migration.sql",
+        "shortPath": "migration.sql",
+        "delta": "+21",
+        "reviewState": "Mark viewed",
+        "unmodifiedLabel": "",
+        "expanded": false,
+        "splitRows": [],
+        "comments": []
+      }
+    ],
+    "storage": [
+      {
+        "id": "permissions-ts",
+        "path": "src/server/auth/permissions.ts",
+        "shortPath": "permissions.ts",
+        "delta": "-3 +11",
+        "reviewState": "Mark viewed",
+        "unmodifiedLabel": "20 unmodified lines",
+        "expanded": true,
+        "splitRows": [
+          {
+            "type": "context",
+            "leftLine": "21",
+            "leftCode": "  return member.role === \"ADMIN\"",
+            "rightLine": "21",
+            "rightCode": "  return member.role === \"ADMIN\""
+          },
+          {
+            "type": "context",
+            "leftLine": "22",
+            "leftCode": "}",
+            "rightLine": "22",
+            "rightCode": "}"
+          },
+          {
+            "type": "context",
+            "leftLine": "23",
+            "leftCode": "",
+            "rightLine": "23",
+            "rightCode": ""
+          },
+          {
+            "type": "change",
+            "leftLine": "24",
+            "leftCode": "export function canRemoveMember(member: Member): boolean {",
+            "rightLine": "24",
+            "rightCode": "export function canRemoveMember(member: Member): boolean {"
+          },
+          {
+            "type": "change",
+            "leftLine": "25",
+            "leftCode": "  return member.role === \"ADMIN\"",
+            "rightLine": "25",
+            "rightCode": "  return member.role === \"ADMIN\""
+          },
+          {
+            "type": "change",
+            "leftLine": "26",
+            "leftCode": "}",
+            "rightLine": "26",
+            "rightCode": "}"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "27",
+            "rightCode": ""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "28",
+            "rightCode": "/**"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "29",
+            "rightCode": " * Whether the member may create or revoke teammate"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "30",
+            "rightCode": " * invitations."
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "31",
+            "rightCode": " * Restricted to org admins."
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "32",
+            "rightCode": " */"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "33",
+            "rightCode": "export function canInviteMembers(member: Member): boolean {"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "34",
+            "rightCode": "  return member.role === \"ADMIN\""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "35",
+            "rightCode": "}"
+          }
+        ],
+        "comments": []
+      },
+      {
+        "id": "invitation-service-ts",
+        "path": "src/server/invitations/invitationService.ts",
+        "shortPath": "invitationService.ts",
+        "delta": "+54",
+        "reviewState": "Mark viewed",
+        "unmodifiedLabel": "",
+        "expanded": false,
+        "splitRows": [],
+        "comments": []
+      },
+      {
+        "id": "invitation-router-ts",
+        "path": "src/server/invitations/invitationRouter.ts",
+        "shortPath": "invitationRouter.ts",
+        "delta": "+40",
+        "reviewState": "Mark viewed",
+        "unmodifiedLabel": "",
+        "expanded": false,
+        "splitRows": [],
+        "comments": []
+      }
+    ],
+    "artifact-builder": [
+      {
+        "id": "use-invitations-ts",
+        "path": "src/pages/settings/useInvitations.ts",
+        "shortPath": "useInvitations.ts",
+        "delta": "+38",
+        "reviewState": "Mark viewed",
+        "unmodifiedLabel": "",
+        "expanded": true,
+        "splitRows": [
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "1",
+            "rightCode": "import { useQuery, useMutation, useQueryClient } from \"@tanstack/react-query\""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "2",
+            "rightCode": "import { trpc } from \"@/trpc\""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "3",
+            "rightCode": ""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "4",
+            "rightCode": "export function useInvitations() {"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "5",
+            "rightCode": "  const queryClient = useQueryClient()"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "6",
+            "rightCode": "  const list = useQuery([\"invitations\"], () => trpc.invitation.list.query())"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "7",
+            "rightCode": ""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "8",
+            "rightCode": "  const createMutation = useMutation(trpc.invitation.create.mutate, {"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "9",
+            "rightCode": "    onSuccess: () => queryClient.invalidateQueries([\"invitations\"]),"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "10",
+            "rightCode": "  })"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "11",
+            "rightCode": "  const revokeMutation = useMutation(trpc.invitation.revoke.mutate, {"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "12",
+            "rightCode": "    onMutate: async id => {"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "13",
+            "rightCode": "      await queryClient.cancelQueries([\"invitations\"])"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "14",
+            "rightCode": "      const previous = queryClient.getQueryData([\"invitations\"])"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "15",
+            "rightCode": "      queryClient.setQueryData([\"invitations\"], (old: Invitation[] = []) =>"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "16",
+            "rightCode": "        old.filter(invite => invite.id !== id),"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "17",
+            "rightCode": "      )"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "18",
+            "rightCode": "      return { previous }"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "19",
+            "rightCode": "    },"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "20",
+            "rightCode": "  })"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "21",
+            "rightCode": ""
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "22",
+            "rightCode": "  return {"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "23",
+            "rightCode": "    invitations: list.data ?? [],"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "24",
+            "rightCode": "    invite: createMutation.mutateAsync,"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "25",
+            "rightCode": "    isInviting: createMutation.isLoading,"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "26",
+            "rightCode": "    revoke: revokeMutation.mutate,"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "27",
+            "rightCode": "  }"
+          },
+          {
+            "type": "insert",
+            "leftLine": "",
+            "leftCode": "",
+            "rightLine": "28",
+            "rightCode": "}"
+          }
+        ],
+        "comments": []
+      },
+      {
+        "id": "members-page-tsx",
+        "path": "src/pages/settings/MembersPage.tsx",
+        "shortPath": "MembersPage.tsx",
+        "delta": "+91",
+        "reviewState": "Mark viewed",
+        "unmodifiedLabel": "",
+        "expanded": false,
+        "splitRows": [],
+        "comments": []
+      },
+      {
+        "id": "invite-member-dialog-tsx",
+        "path": "src/pages/settings/InviteMemberDialog.tsx",
+        "shortPath": "InviteMemberDialog.tsx",
+        "delta": "+72",
+        "reviewState": "Mark viewed",
+        "unmodifiedLabel": "",
+        "expanded": false,
+        "splitRows": [],
+        "comments": []
+      },
+      {
+        "id": "role-select-tsx",
+        "path": "src/pages/settings/RoleSelect.tsx",
+        "shortPath": "RoleSelect.tsx",
+        "delta": "+24",
+        "reviewState": "Mark viewed",
+        "unmodifiedLabel": "",
+        "expanded": false,
+        "splitRows": [],
+        "comments": []
+      }
+    ]
+  }
+}

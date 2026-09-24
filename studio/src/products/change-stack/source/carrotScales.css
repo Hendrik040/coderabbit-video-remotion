@@ -1,0 +1,270 @@
+/*
+ * ═══════════════════════════════════════════════════════════════
+ * Color Scales
+ *
+ * All custom 12-step scales using Radix-style 1-12 numbering.
+ * Each scale provides light and dark mode values.
+ *
+ * Radix semantic step conventions:
+ *   1-2:   Backgrounds
+ *   3-5:   Component backgrounds (default, hover, active)
+ *   6-8:   Borders (subtle, default, strong)
+ *   9-10:  Solid fills (default, hover)
+ *   11:    Low-contrast text
+ *   12:    High-contrast text
+ *
+ * The mauve scale is custom OKLCH and inverts between modes.
+ * Red, amber, and green are based on Radix Colors.
+ * CR Orange is the CodeRabbit brand palette.
+ *
+ * All scales are prefixed with `cui-` to avoid collisions
+ * when imported alongside other design systems.
+ *
+ * Scales use --color-cui-* namespace so Tailwind v4
+ * auto-generates utilities (bg-cui-mauve-6, text-cui-red-12,
+ * etc.). Prefer semantic tokens (bg-cui-base-1, text-cui-primary)
+ * in components.
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/* ── Mauve ──
+ * Purplish-gray neutral in OKLCH (hue 305, chroma 0.002–0.017).
+ * Matches mono's --cr-color-grey-* palette.
+ * Inverts between modes. Steps cluster tighter near backgrounds.
+ */
+:root {
+	--color-cui-mauve-1: oklch(0.994 0.002 305);
+	--color-cui-mauve-2: oklch(0.982 0.0035 305);
+	--color-cui-mauve-3: oklch(0.956 0.0056 305);
+	--color-cui-mauve-4: oklch(0.931 0.0084 305);
+	--color-cui-mauve-5: oklch(0.91 0.0098 305);
+	--color-cui-mauve-6: oklch(0.885 0.0112 305);
+	--color-cui-mauve-7: oklch(0.851 0.0126 305);
+	--color-cui-mauve-8: oklch(0.791 0.014 305);
+	--color-cui-mauve-9: oklch(0.641 0.0154 305);
+	--color-cui-mauve-10: oklch(0.605 0.0161 305);
+	--color-cui-mauve-11: oklch(0.498 0.0154 305);
+	--color-cui-mauve-12: oklch(0.243 0.0098 305);
+}
+
+[data-theme="dark"] {
+	--color-cui-mauve-1: oklch(0.177 0.0084 305);
+	--color-cui-mauve-2: oklch(0.213 0.0098 305);
+	--color-cui-mauve-3: oklch(0.252 0.0112 305);
+	--color-cui-mauve-4: oklch(0.284 0.0126 305);
+	--color-cui-mauve-5: oklch(0.312 0.014 305);
+	--color-cui-mauve-6: oklch(0.348 0.0154 305);
+	--color-cui-mauve-7: oklch(0.401 0.0161 305);
+	--color-cui-mauve-8: oklch(0.489 0.0168 305);
+	--color-cui-mauve-9: oklch(0.534 0.0161 305);
+	--color-cui-mauve-10: oklch(0.582 0.0154 305);
+	--color-cui-mauve-11: oklch(0.767 0.0105 305);
+	--color-cui-mauve-12: oklch(0.949 0.0035 305);
+}
+
+/* ── CodeRabbit Orange ──
+ * Custom brand palette. Inverts between modes following
+ * the same pattern as Radix scales.
+ */
+:root {
+	--color-cui-cr-orange-1: #fefcfb;
+	--color-cui-cr-orange-2: #fff7ed;
+	--color-cui-cr-orange-3: #ffead5;
+	--color-cui-cr-orange-4: #ffdcc3;
+	--color-cui-cr-orange-5: #ffc4a0;
+	--color-cui-cr-orange-6: #ffab7a;
+	--color-cui-cr-orange-7: #f48e5a;
+	--color-cui-cr-orange-8: #e57340;
+	--color-cui-cr-orange-9: #ff570a;
+	--color-cui-cr-orange-10: #ef4f00;
+	--color-cui-cr-orange-11: #cc4e00;
+	--color-cui-cr-orange-12: #582d1d;
+}
+
+[data-theme="dark"] {
+	--color-cui-cr-orange-1: #17120e;
+	--color-cui-cr-orange-2: #1e150f;
+	--color-cui-cr-orange-3: #331e0b;
+	--color-cui-cr-orange-4: #462100;
+	--color-cui-cr-orange-5: #562800;
+	--color-cui-cr-orange-6: #66350c;
+	--color-cui-cr-orange-7: #7e451d;
+	--color-cui-cr-orange-8: #a35829;
+	--color-cui-cr-orange-9: #ff570a;
+	--color-cui-cr-orange-10: #ff801f;
+	--color-cui-cr-orange-11: #ffa057;
+	--color-cui-cr-orange-12: #ffe0c2;
+}
+
+/* ── Red ──
+ * Based on Radix Colors ruby scale.
+ * Used for danger and error states. Ruby's rose lean keeps it
+ * clearly differentiated from the CR orange brand primary.
+ */
+:root {
+	--color-cui-red-1: #fffcfd;
+	--color-cui-red-2: #fff7f8;
+	--color-cui-red-3: #feeaed;
+	--color-cui-red-4: #ffdce1;
+	--color-cui-red-5: #ffced6;
+	--color-cui-red-6: #f8bfc8;
+	--color-cui-red-7: #efacb8;
+	--color-cui-red-8: #e592a3;
+	--color-cui-red-9: #e54666;
+	--color-cui-red-10: #dc3b5d;
+	--color-cui-red-11: #ca244d;
+	--color-cui-red-12: #64172b;
+}
+
+[data-theme="dark"] {
+	--color-cui-red-1: #191113;
+	--color-cui-red-2: #1e1517;
+	--color-cui-red-3: #3a141e;
+	--color-cui-red-4: #4e1325;
+	--color-cui-red-5: #5e1a2e;
+	--color-cui-red-6: #6f2539;
+	--color-cui-red-7: #883447;
+	--color-cui-red-8: #b3445a;
+	--color-cui-red-9: #e54666;
+	--color-cui-red-10: #ec5a72;
+	--color-cui-red-11: #ff949d;
+	--color-cui-red-12: #fed2e1;
+}
+
+/* ── Amber ──
+ * Based on Radix Colors amber scale.
+ * Used for warning and caution states.
+ */
+:root {
+	--color-cui-amber-1: #fefdfb;
+	--color-cui-amber-2: #fefbe9;
+	--color-cui-amber-3: #fff7c2;
+	--color-cui-amber-4: #ffee9c;
+	--color-cui-amber-5: #fbe577;
+	--color-cui-amber-6: #f3d673;
+	--color-cui-amber-7: #e9c162;
+	--color-cui-amber-8: #e2a336;
+	--color-cui-amber-9: #ffc53d;
+	--color-cui-amber-10: #ffba18;
+	--color-cui-amber-11: #ab6400;
+	--color-cui-amber-12: #4f3422;
+}
+
+[data-theme="dark"] {
+	--color-cui-amber-1: #16120c;
+	--color-cui-amber-2: #1d180f;
+	--color-cui-amber-3: #302008;
+	--color-cui-amber-4: #3f2700;
+	--color-cui-amber-5: #4d3000;
+	--color-cui-amber-6: #5c3d05;
+	--color-cui-amber-7: #714f19;
+	--color-cui-amber-8: #8f6424;
+	--color-cui-amber-9: #ffc53d;
+	--color-cui-amber-10: #ffd60a;
+	--color-cui-amber-11: #ffca16;
+	--color-cui-amber-12: #ffe7b3;
+}
+
+/* ── Secondary ──
+ * Mint / aquamarine scale anchored at step 9 = #25E2A8.
+ * OKLCH-based for smooth perceptual interpolation.
+ * Hue 163, anchor lightness 0.815, chroma 0.155.
+ */
+:root {
+	--color-cui-secondary-1: oklch(0.992 0.005 163);
+	--color-cui-secondary-2: oklch(0.975 0.015 163);
+	--color-cui-secondary-3: oklch(0.95 0.035 163);
+	--color-cui-secondary-4: oklch(0.92 0.055 163);
+	--color-cui-secondary-5: oklch(0.89 0.075 163);
+	--color-cui-secondary-6: oklch(0.87 0.095 163);
+	--color-cui-secondary-7: oklch(0.85 0.115 163);
+	--color-cui-secondary-8: oklch(0.84 0.135 163);
+	--color-cui-secondary-9: oklch(0.815 0.155 163); /* #25E2A8 */
+	--color-cui-secondary-10: oklch(0.78 0.155 163);
+	--color-cui-secondary-11: oklch(0.55 0.13 163);
+	--color-cui-secondary-12: oklch(0.28 0.06 163);
+}
+
+[data-theme="dark"] {
+	--color-cui-secondary-1: oklch(0.17 0.015 163);
+	--color-cui-secondary-2: oklch(0.2 0.025 163);
+	--color-cui-secondary-3: oklch(0.24 0.045 163);
+	--color-cui-secondary-4: oklch(0.28 0.06 163);
+	--color-cui-secondary-5: oklch(0.32 0.075 163);
+	--color-cui-secondary-6: oklch(0.38 0.09 163);
+	--color-cui-secondary-7: oklch(0.46 0.105 163);
+	--color-cui-secondary-8: oklch(0.58 0.125 163);
+	--color-cui-secondary-9: oklch(0.815 0.155 163); /* #25E2A8 */
+	--color-cui-secondary-10: oklch(0.85 0.145 163);
+	--color-cui-secondary-11: oklch(0.9 0.13 163);
+	--color-cui-secondary-12: oklch(0.95 0.04 163);
+}
+
+/* ── Tertiary ──
+ * Periwinkle / indigo scale anchored at step 9 = #838BFF.
+ * OKLCH-based for smooth perceptual interpolation.
+ * Hue 272, anchor lightness 0.638, chroma 0.177.
+ */
+:root {
+	--color-cui-tertiary-1: oklch(0.992 0.005 272);
+	--color-cui-tertiary-2: oklch(0.978 0.015 272);
+	--color-cui-tertiary-3: oklch(0.955 0.035 272);
+	--color-cui-tertiary-4: oklch(0.93 0.055 272);
+	--color-cui-tertiary-5: oklch(0.9 0.085 272);
+	--color-cui-tertiary-6: oklch(0.86 0.115 272);
+	--color-cui-tertiary-7: oklch(0.81 0.145 272);
+	--color-cui-tertiary-8: oklch(0.74 0.17 272);
+	--color-cui-tertiary-9: oklch(0.638 0.177 272); /* #838BFF */
+	--color-cui-tertiary-10: oklch(0.6 0.18 272);
+	--color-cui-tertiary-11: oklch(0.5 0.18 272);
+	--color-cui-tertiary-12: oklch(0.26 0.08 272);
+}
+
+[data-theme="dark"] {
+	--color-cui-tertiary-1: oklch(0.17 0.015 272);
+	--color-cui-tertiary-2: oklch(0.2 0.025 272);
+	--color-cui-tertiary-3: oklch(0.24 0.05 272);
+	--color-cui-tertiary-4: oklch(0.28 0.075 272);
+	--color-cui-tertiary-5: oklch(0.32 0.09 272);
+	--color-cui-tertiary-6: oklch(0.37 0.11 272);
+	--color-cui-tertiary-7: oklch(0.44 0.135 272);
+	--color-cui-tertiary-8: oklch(0.53 0.16 272);
+	--color-cui-tertiary-9: oklch(0.638 0.177 272); /* #838BFF */
+	--color-cui-tertiary-10: oklch(0.685 0.175 272);
+	--color-cui-tertiary-11: oklch(0.78 0.155 272);
+	--color-cui-tertiary-12: oklch(0.93 0.045 272);
+}
+
+/* ── Green ──
+ * Based on Radix Colors green scale.
+ * Used for success and positive states.
+ */
+:root {
+	--color-cui-green-1: #fbfefc;
+	--color-cui-green-2: #f4fbf6;
+	--color-cui-green-3: #e6f6eb;
+	--color-cui-green-4: #d6f1df;
+	--color-cui-green-5: #c4e8d1;
+	--color-cui-green-6: #adddc0;
+	--color-cui-green-7: #8eceaa;
+	--color-cui-green-8: #5bb98b;
+	--color-cui-green-9: #30a46c;
+	--color-cui-green-10: #2b9a66;
+	--color-cui-green-11: #218358;
+	--color-cui-green-12: #193b2d;
+}
+
+[data-theme="dark"] {
+	--color-cui-green-1: #0e1512;
+	--color-cui-green-2: #121b17;
+	--color-cui-green-3: #132d21;
+	--color-cui-green-4: #113b29;
+	--color-cui-green-5: #174933;
+	--color-cui-green-6: #20573e;
+	--color-cui-green-7: #28684a;
+	--color-cui-green-8: #2f7c57;
+	--color-cui-green-9: #30a46c;
+	--color-cui-green-10: #33b074;
+	--color-cui-green-11: #3dd68c;
+	--color-cui-green-12: #b1f1cb;
+}
