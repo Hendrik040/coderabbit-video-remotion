@@ -1,3 +1,4 @@
+import {TRACKING_FPS} from './limits';
 import type {Sample} from '../types';
 import {deriveCues, smoothSamples} from './gesture';
 
@@ -6,6 +7,7 @@ export async function analyzeVideo(src: string, duration: number, onProgress: (v
   const video = document.createElement('video');
   video.muted = true; video.preload = 'auto'; video.crossOrigin = 'anonymous';
   const waitVideo = (event: string) => new Promise<void>((resolve, reject) => {
+    if (signal.aborted) {reject(new DOMException('Analysis cancelled.', 'AbortError')); return;}
     const timeout = window.setTimeout(() => done(new Error('The video decoder timed out. Try an MP4/H.264 clip.')), 20000);
     const success = () => done();
     const error = () => done(new Error('Could not decode this video. Try an MP4/H.264 clip.'));
@@ -26,10 +28,10 @@ export async function analyzeVideo(src: string, duration: number, onProgress: (v
     const loaded = waitVideo('loadeddata'); video.src = src; await loaded;
     await request({type: 'init', baseUrl: window.location.origin});
     const samples: Sample[] = [];
-    const total = Math.ceil(duration * 12);
+    const total = Math.ceil(duration * TRACKING_FPS);
     for (let i = 0; i < total; i++) {
       if (signal.aborted) throw new DOMException('Analysis cancelled.', 'AbortError');
-      const time = Math.min(i / 12, video.duration - 0.001);
+      const time = Math.min(i / TRACKING_FPS, video.duration - 0.001);
       if (Math.abs(video.currentTime - time) > 0.0001) {const sought = waitVideo('seeked'); video.currentTime = time; await sought;}
       const bitmap = await createImageBitmap(video, {resizeWidth: Math.min(640, video.videoWidth), resizeQuality: 'low'});
       const response = await request({type: 'frame', time, bitmap}, [bitmap]);

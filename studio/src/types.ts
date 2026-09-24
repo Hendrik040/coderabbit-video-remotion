@@ -12,7 +12,7 @@ export type Overlay = {
   id: string; kind: OverlayKind; enabled: boolean; title: string; body: string;
   start: number; duration: number; binding: Binding; placement: Placement; accent: string; scale: number;
   kicker?: string;
-  company?: string; textColor?: string;
+  company?: string; textColor?: string; detailBackground?: string;
   loopDuration?: number; intensity?: number; opacity?: number;
   lighting?: Partial<GlowLighting>; vignette?: Partial<GlowVignette>;
   colorway?: 'dark' | 'light'; direction?: 'left' | 'right';

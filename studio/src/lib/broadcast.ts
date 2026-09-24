@@ -1,3 +1,4 @@
+import {assetType} from './assetType';
 import type {BroadcastKind, Overlay, OverlayKind, Project} from '../types';
 
 // Stable template names and content contracts are shared by the library and inspector.
@@ -32,8 +33,9 @@ export function broadcastProject(): Project {
 
 export function retimeOverlays(overlays: Overlay[], oldDuration: number, newDuration: number): Overlay[] {
   return overlays.map(o => {
-    const start = Math.max(0, Math.min(newDuration - 0.1, o.start / oldDuration * newDuration));
-    const duration = Math.min(newDuration - start, Math.max(0.1, o.duration / oldDuration * newDuration));
+    const start = Math.max(0, Math.min(newDuration - 0.1, o.start));
+    const fullLengthLoop = assetType(o.kind) === 'looping' && o.start === 0 && Math.abs(o.duration - oldDuration) < 0.1;
+    const duration = Math.max(0.1, Math.min(newDuration - start, fullLengthLoop ? newDuration : o.duration));
     return {...o, start, duration};
   });
 }

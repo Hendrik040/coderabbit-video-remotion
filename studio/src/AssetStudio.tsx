@@ -1,3 +1,4 @@
+import {useRenderJob} from './hooks/useRenderJob';
 import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
 import {Player, type PlayerRef} from '@remotion/player';
 import {ArrowDownToLine, ArrowRight, ArrowUpRight, Check, Download, FolderOpen, Infinity as LoopIcon, Layers3, LoaderCircle, Plus, RotateCcw, SlidersHorizontal, X} from 'lucide-react';
@@ -13,6 +14,7 @@ import {clamp} from './lib/gesture';
 import {revealTiming} from './lib/motion';
 import {usePreviewActivity, useReducedMotion} from './hooks/usePreviewActivity';
 import {AssetTransport, timecode} from './components/AssetTransport';
+import {ExportDialog} from './components/ExportDialog';
 import type {AssetType, BrandAssetKind, Overlay} from './types';
 import './asset-studio.css';
 
@@ -33,8 +35,6 @@ const initialPresets = () => {
   } catch { /* Invalid presets leave the bundled assets available. */ }
   return presets;
 };
-type AssetJob = {id: string; status: string; progress: number; url?: string; filename?: string; error?: string; assetName: string};
-
 /** Rest on a useful frame; pointer hover resumes the actual asset without remounting. */
 export const AssetThumbnail = memo(function AssetThumbnail({kind, animated = false, asset}: {kind: BrandAssetKind; animated?: boolean; asset?: Overlay}) {
   const container = useRef<HTMLDivElement>(null);
@@ -52,7 +52,7 @@ export const AssetThumbnail = memo(function AssetThumbnail({kind, animated = fal
   return <div ref={container} className="asset-thumb-player" aria-hidden="true"><Player ref={player} component={Scene} inputProps={inputProps} durationInFrames={frames} compositionWidth={1280} compositionHeight={720} fps={30} initialFrame={Math.floor(frames * (isTransition(kind) ? 0.24 : 0.48))} initiallyMuted loop controls={false} clickToPlay={false} style={{width: '100%', pointerEvents: 'none'}}/></div>;
 });
 
-export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComposition: () => void; onAddToComposition: (asset: Overlay) => void}) {
+export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComposition: () => Promise<void>; onAddToComposition: (asset: Overlay) => Promise<void>}) {
   const [presets, setPresets] = useState(initialPresets);
   const [selected, setSelected] = useState<LibraryKind>('name-intro');
   const [group, setGroup] = useState<AssetType>('linear');
@@ -60,8 +60,10 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
   const reducedMotion = useReducedMotion();
   const [showAlpha, setShowAlpha] = useState(false);
   const [format, setFormat] = useState<'mp4' | 'alpha'>('mp4');
+  const [exportOpen, setExportOpen] = useState(false);
   const [resolution, setResolution] = useState(1280);
-  const [job, setJob] = useState<AssetJob | null>(null);
+  const {job, activeExport, recovering, connection, start: render, cancel: cancelExport} = useRenderJob();
+  const [opening, setOpening] = useState(false);
   const [error, setError] = useState('');
   const player = useRef<PlayerRef>(null);
   const presetInput = useRef<HTMLInputElement>(null);
@@ -73,35 +75,21 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
   const transition = isTransition(selected);
   const particleTransition = selected === 'pixel-glow-wipe';
   const barTransition = selected === 'color-bar-transition';
-  const activeExport = !!job && !['done', 'error'].includes(job.status);
   const choose = (kind: LibraryKind) => {setSelected(kind); setGroup(assetType(kind)); setShowAlpha(false); if (!catalog[kind].alpha) setFormat('mp4');};
   const edit = (patch: Partial<Overlay>) => setPresets(previous => ({...previous, [selected]: {...previous[selected], ...patch}}));
   const seek = (next: number) => {player.current?.pause(); player.current?.seekTo(next);};
 
   useEffect(() => {try {localStorage.setItem(storageKey, JSON.stringify(presets));} catch {setError('Could not save edits on this device. Use Save preset to keep this asset.');}}, [presets]);
-  useEffect(() => {
-    if (!job?.id || ['done', 'error'].includes(job.status)) return;
-    const timer = window.setInterval(async () => {
-      try {
-        const res = await fetch(`/api/render/${job.id}`);
-        if (!res.ok) throw new Error('Could not read the export status.');
-        const next = await res.json();
-        setJob(previous => previous?.id === job.id ? {...previous, ...next} : previous);
-      } catch (e) {setJob(previous => previous ? {...previous, status: 'error', error: e instanceof Error ? e.message : 'Export connection lost.'} : previous);}
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [job?.id, job?.status]);
-
+  async function openComposition(asset?: Overlay) {
+    if (opening) return;
+    setOpening(true);
+    try {if (asset) await onAddToComposition(asset); else await onOpenComposition();}
+    catch (error) {setError(error instanceof Error ? error.message : 'Could not open the composition.');}
+    finally {setOpening(false);}
+  }
   async function exportAsset() {
-    if (activeExport) return;
-    const assetName = `${meta.code} · ${meta.name}`;
-    setJob({id: '', status: 'starting', progress: 0, assetName});
-    try {
-      const response = await fetch('/api/render', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({project: assetProject(asset, resolution), format})});
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error ?? 'Export failed.');
-      setJob({...result, assetName});
-    } catch (e) {setJob({id: '', status: 'error', progress: 0, assetName, error: e instanceof Error ? e.message : 'Export failed.'});}
+    player.current?.pause();
+    await render(assetProject(asset, resolution), format);
   }
   function savePreset() {
     const url = URL.createObjectURL(new Blob([JSON.stringify(project, null, 2)], {type: 'application/json'}));
@@ -122,7 +110,7 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
 
   return <div className="asset-studio">
     <input ref={presetInput} type="file" accept="application/json,.json" hidden onChange={e => openPreset(e.target.files?.[0])}/>
-    <header className="asset-header"><div className="asset-heading"><span className="asset-wordmark">Brand motion</span><span className="asset-header-divider"/><span className="asset-header-subtitle">CodeRabbit asset library</span></div><div className="asset-header-actions"><button className="button button-light" disabled={activeExport} onClick={onOpenComposition}><Layers3 size={14}/> Composition <ArrowUpRight size={13}/></button><button className="button button-dark" disabled={activeExport} onClick={exportAsset}>{activeExport ? <LoaderCircle className="spin" size={15}/> : <ArrowDownToLine size={15}/>} {activeExport ? `Exporting ${job.progress}%` : 'Export asset'}</button></div></header>
+    <header className="asset-header"><div className="asset-heading"><span className="asset-wordmark">Brand motion</span><span className="asset-header-divider"/><span className="asset-header-subtitle">CodeRabbit asset library</span></div><div className="asset-header-actions"><button className="button button-light" disabled={opening} onClick={() => openComposition()}><Layers3 size={14}/> Composition <ArrowUpRight size={13}/></button><button className="button button-dark" onClick={() => {player.current?.pause(); setExportOpen(true);}}>{activeExport ? <LoaderCircle className="spin" size={15}/> : <ArrowDownToLine size={15}/>} {activeExport ? `Exporting ${job?.progress ?? 0}%` : 'Export asset'}</button></div></header>
     <div className="asset-layout">
       <aside className="asset-library"><div className="asset-library-heading"><span>Library</span><span>{libraryKinds.length} assets</span></div>
         <div className="kit-switch" role="group" aria-label="Asset playback type">{(['linear', 'looping'] as const).map(type => <button key={type} aria-pressed={group === type} onClick={() => setGroup(type)}>{type === 'linear' ? 'Linear' : 'Looping'}<span>{libraryKinds.filter(kind => assetType(kind) === type).length}</span></button>)}</div>
@@ -144,15 +132,16 @@ export function AssetStudio({onOpenComposition, onAddToComposition}: {onOpenComp
             : isColorBar(selected) ? <><span style={{flex: colorBarRevealTiming.expand}}>Expand</span><span style={{flex: 1 - colorBarRevealTiming.expand}}>Drift</span></>
             : <><span style={{flex: transition ? 36 : timing.enter}}> {transition ? 'Cover' : 'Reveal'}</span>{(transition || timing.hold > 0) && <button disabled={!transition} style={{flex: transition ? 28 : timing.hold}} onClick={() => seek(cutFrame(project.duration))}>{transition ? `Cut at ${timecode(cutFrame(project.duration))}` : 'Hold'}{transition && <i/>}</button>}<span style={{flex: transition ? 36 : timing.exit}}>{transition ? 'Clear' : 'Exit'}</span></>}
         </div>
-        <div className="asset-use-row"><div><span className="asset-eyebrow">Made to reuse</span><p>{meta.usage}</p></div><button className="button button-light" disabled={activeExport} onClick={() => {try {onAddToComposition(project.overlays[0]);} catch (e) {setError(e instanceof Error ? e.message : 'Could not add the asset.');}}}><Plus size={14}/> Add to composition</button></div>
+        <div className="asset-use-row"><div><span className="asset-eyebrow">Made to reuse</span><p>{meta.usage}</p></div><button className="button button-light" disabled={opening} onClick={() => openComposition(project.overlays[0])}><Plus size={14}/> Add to composition</button></div>
       </main>
       <aside className="asset-inspector"><div className="asset-inspector-heading"><span>Customize</span><SlidersHorizontal size={15}/></div><section className="asset-inspector-section"><AssetControls asset={asset} onChange={edit}/>{assetType(selected) === 'linear' && <label className="field-label">Duration<span className="input-unit"><input type="number" aria-label="Asset duration" min={0.6} max={12} step={0.1} value={asset.duration} onChange={e => edit({duration: clamp(Number(e.target.value), 0.6, 12)})}/><span>s</span></span></label>}<button className="text-button asset-reset" onClick={() => setPresets(previous => ({...previous, [selected]: {id: selected, ...defaults[selected]}}))}><RotateCcw size={12}/> Reset asset</button></section>
-        <section className="asset-inspector-section"><div className="asset-section-label">Export</div><label className="field-label">Format<select aria-label="Asset export format" disabled={activeExport} value={format} onChange={e => setFormat(e.target.value as 'mp4' | 'alpha')}><option value="mp4">MP4 · Finished video</option>{meta.alpha && <option value="alpha">ProRes 4444 · Transparent</option>}</select></label><label className="field-label">Resolution<select aria-label="Asset export resolution" disabled={activeExport} value={resolution} onChange={e => setResolution(Number(e.target.value))}><option value={1280}>1280 × 720</option><option value={1920}>1920 × 1080</option></select></label><div className="asset-export-details"><span>30 fps</span><span>{meta.alpha ? 'Alpha available' : 'Full-frame background'}</span></div>{transition && <p className="asset-export-hint">{particleTransition ? "Use ProRes to layer the fine pixels over your edit." : "Use ProRes over your edit. The marked cut frame is fully covered."}</p>}
-          {job && <div className={`asset-job ${job.status === 'error' ? 'asset-job-error' : ''}`} role={job.status === 'error' ? 'alert' : 'status'}><span>{job.assetName}</span>{activeExport ? <><progress max={100} value={job.progress}/><p>{job.status === 'rendering' ? `Rendering ${job.progress}%` : 'Preparing export…'}</p></> : job.status === 'done' ? <a className="button button-dark full-width" href={job.url} download><Download size={13}/> Download asset <Check size={13}/></a> : <p>{job.error}</p>}</div>}
+        <section className="asset-inspector-section"><div className="asset-section-label">Export</div><div className="asset-export-details"><span>{format === 'alpha' ? 'Transparent background' : 'Video'}</span><span>{resolution} × {resolution * 9 / 16}</span></div><button className="button button-light full-width asset-export-settings" onClick={() => {player.current?.pause(); setExportOpen(true);}}>Export options <ArrowUpRight size={13}/></button>{transition && <p className="asset-export-hint">{particleTransition ? 'Choose Transparent background to layer the fine pixels over your edit.' : 'Choose Transparent background to layer over your edit. The marked cut frame is fully covered.'}</p>}
+          {connection && <p className="hint" role="status">{connection}</p>}{job && <div className={`asset-job ${job.status === 'error' ? 'asset-job-error' : ''}`} role={job.status === 'error' ? 'alert' : 'status'}><span>{job.assetName}</span>{activeExport ? <><progress max={100} value={job.progress}/><p>{job.status === 'cancelling' ? 'Cancelling export…' : job.status === 'rendering' ? `Rendering ${job.progress}%` : 'Preparing export…'}</p><button className="button button-light full-width" disabled={job.status === 'cancelling' || job.status === 'starting'} onClick={cancelExport}>Cancel export</button></> : job.status === 'done' ? <a className="button button-dark full-width" href={job.url} download><Download size={13}/> Download asset <Check size={13}/></a> : <p>{job.status === "cancelled" ? "Export cancelled." : job.error}</p>}</div>}
         </section>
         <div className="asset-inspector-bottom"><button className="button button-light full-width" onClick={savePreset}><Download size={14}/> Save preset</button></div>
       </aside>
     </div>
+    {exportOpen && <ExportDialog project={assetProject(asset, resolution)} format={format} onFormatChange={setFormat} onResolutionChange={setResolution} alphaAvailable={meta.alpha} onClose={() => setExportOpen(false)} onExport={exportAsset} onCancel={cancelExport} job={job} active={activeExport} recovering={recovering} connection={connection}/>}
     {error && <div className="toast toast-error" role="alert"><span>{error}</span><button className="icon-button" aria-label="Dismiss message" onClick={() => setError('')}><X size={16}/></button></div>}
   </div>;
 }

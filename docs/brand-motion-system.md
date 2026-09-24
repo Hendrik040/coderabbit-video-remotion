@@ -23,7 +23,7 @@ Selecting a swatch updates the asset preview, preset, composition layer, and exp
 | TR-02 | Stack wipe | 2s | Cover a cut with six staggered rails | Yes |
 | TR-03 | Color bar wipe | 2s | Ten brand-color bands enter left and exit right | Yes |
 | TR-04 | Change Stack pixel wipe | 2.4s | Fixed pixels reveal, fill the frame, then fade from the left | Yes |
-| LT-01 | Name intro | 5s | Name, position, and company on a solid lower-third panel | Yes |
+| LT-01 | Name intro | 5s | Name panel with an inline position / company strip | Yes |
 | BG-02 | Change Stack glow | 16s | Product hero light and pixel field | Full-frame plate |
 | AC-01 | Color bar reveal | 4s | Hero expansion that continues into a gentle drift | Yes |
 | AC-02 | Color bar loop | 8s | Expansion, hold, return, and seamless rest | Yes |
@@ -31,7 +31,7 @@ Selecting a swatch updates the asset preview, preset, composition layer, and exp
 
 The library contains six linear assets and two loops. Logo reveal, Circle wipe, Signal loop, Type reveal, and Brand sign-off have been removed from both pickers. Their renderers remain compatible with previously saved compositions.
 
-**Name intro** places a solid panel 64px from the bottom and the chosen left/right edge on the 1280 × 720 canvas. Name, position, and company have separate fields; long copy wraps within the panel. Background and text colors are independent, with the complete brand palettes and custom six-digit hex values. Placement also mirrors text alignment and the reveal edge. The panel reveals from that edge over 600 ms, holds still for reading, and clears toward the same edge over 400 ms; name, position, and company share 60 ms text staggering. Short durations compress that timing. Preview, saved presets, composition layers, and transparent exports use the same renderer.
+**Name intro** places a solid panel 64px from the bottom and the chosen left/right edge on the 1280 × 720 canvas. Name, position, and company have separate fields. Position and company share one line, separated by a middle dot, on a second rectangle that defaults to brand mint green. The name can wrap; each detail truncates independently if needed to keep both on one line. Name fill, details fill, and shared text color are independently editable with the complete brand palettes and custom six-digit hex values. Placement also mirrors text alignment and the reveal edge. The panel reveals from that edge over 600 ms, holds still for reading, and clears toward the same edge over 400 ms; the details rectangle and its text follow the name with 60 ms staggering. Short durations compress that timing. Preview, saved presets, composition layers, and transparent exports use the same renderer.
 
 **Linear** assets render one entrance/hold/exit or transition. **Looping** assets export one complete cycle. Linear thumbnails resume on mouse hover, while loop thumbnails run when visible. All thumbnails pause offscreen, in hidden tabs, and when reduced motion is preferred. Keyboard focus does not trigger decorative playback. Reduced motion starts the main preview paused; Play and Replay still let the user inspect the authored animation. These preferences never modify an export. Editing duration preserves pause state and clamps the playhead if the clip becomes shorter. The phase strip uses the same timing as the renderer.
 

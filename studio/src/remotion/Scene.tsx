@@ -9,7 +9,7 @@ import {broadcastMotion, isBroadcast} from '../lib/broadcast';
 import '@fontsource/ibm-plex-mono/500.css';
 import {TerminalWindow, terminalDuration} from '../../../src/brand/TerminalWindow';
 import {AgentFlow} from '../../../src/brand/AgentFlow';
-import {AbsoluteFill, Html5Video, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, OffthreadVideo, useCurrentFrame, useVideoConfig} from 'remotion';
 import {clamp, sampleAt} from '../lib/gesture';
 import {gestureLabel, type Overlay, type Sample, type SceneProps} from '../types';
 
@@ -89,7 +89,7 @@ export const Scene: React.FC<SceneProps> = ({project, transparent = false}) => {
   const backgrounds = activeLoopAssets(project.overlays, frame, fps).filter(overlay => !isColorBar(overlay.kind));
   const lightAsset = project.brandAsset && project.overlays[0]?.colorway === 'light';
   return <AbsoluteFill style={{background: transparent ? 'transparent' : lightAsset ? '#EEEDEF' : '#121113', fontFamily: sans, overflow: 'hidden'}}>
-    {!transparent && project.mediaUrl && <Html5Video src={project.mediaUrl} muted={project.mute} style={{width: '100%', height: '100%', objectFit: 'contain'}}/>}
+    {!transparent && project.mediaUrl && <OffthreadVideo src={project.mediaUrl} muted={project.mute} style={{width: '100%', height: '100%', objectFit: 'contain'}}/>}
     <div style={{position: 'absolute', width: 1280, height: 720, transform: `scale(${width / 1280}, ${height / 720})`, transformOrigin: '0 0'}}>
       {!transparent && !project.brandAsset && !backgrounds.length && project.sampleMode && project.broadcast && <BroadcastBackdrop showSlate={!project.overlays.some(o => o.enabled && ['ident', 'headline', 'triage', 'stack'].includes(o.kind) && time >= o.start && time < o.start + o.duration)}/>}
       {!transparent && !project.brandAsset && !backgrounds.length && project.sampleMode && !project.broadcast && <>

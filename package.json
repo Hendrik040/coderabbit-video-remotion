@@ -19,7 +19,7 @@
     "studio:build": "tsc --noEmit -p studio/tsconfig.json && vite build --config studio/vite.config.ts",
     "studio:serve": "node studio/server/index.mjs --production",
     "studio:setup": "node studio/scripts/setup-models.mjs",
-    "test:studio": "node --import tsx --test studio/src/lib/*.test.ts",
+    "test:studio": "node --import tsx --test studio/src/lib/*.test.ts studio/server/*.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

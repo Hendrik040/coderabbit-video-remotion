@@ -5,7 +5,8 @@ import {changeStackPixelGrid} from './pixelGrid';
 import {cycleProgress, motionCurves, unit} from './motion';
 import type {AssetType, Overlay, OverlayKind, Project} from '../types';
 
-export const assetType = (kind: OverlayKind): AssetType => kind === 'hero' || kind === 'signal-loop' || kind === 'color-bar-loop' ? 'looping' : 'linear';
+import {assetType} from './assetType';
+export {assetType} from './assetType';
 export const assetCollections: Record<AssetType, OverlayKind[]> = {
   linear: [...availableBrandAssetKinds.filter(kind => assetType(kind) === 'linear'), ...broadcastKinds, 'terminal', 'agentflow', 'code', 'diagram', 'callout'],
   looping: ['hero', 'color-bar-loop'],

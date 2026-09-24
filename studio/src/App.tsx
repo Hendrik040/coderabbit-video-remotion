@@ -1,8 +1,11 @@
-import React, {memo, useEffect, useMemo, useRef, useState} from 'react';
+import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Player, type PlayerRef} from '@remotion/player';
-import {ArrowDownToLine, ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, Infinity as LoopIcon, Code2, Terminal, Workflow, Download, Eye, EyeOff, FileVideo, Film, FolderOpen, GitBranch, Hand, Layers3, Link2, LoaderCircle, MessageSquare, MousePointer2, MoveHorizontal, Pause, Play, Plus, ScanLine, Settings2, ShieldCheck, Sparkle, Trash2, Undo2, Upload, Volume2, VolumeX, X} from 'lucide-react';
+import {ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, Infinity as LoopIcon, Code2, Terminal, Workflow, Download, Eye, EyeOff, FileVideo, Film, FolderOpen, GitBranch, Hand, Layers3, Link2, LoaderCircle, MessageSquare, MousePointer2, MoveHorizontal, Pause, Play, Plus, ScanLine, Settings2, ShieldCheck, Sparkle, Trash2, Undo2, Upload, Volume2, VolumeX, X} from 'lucide-react';
 import {Scene} from './remotion/Scene';
 import {AssetStudio, AssetThumbnail} from './AssetStudio';
+import {TimelineCues} from './components/TimelineCues';
+import {TimeSeek} from './components/TimeSeek';
+import {ExportDialog} from './components/ExportDialog';
 import {AssetControls} from './brand/AssetControls';
 import {PalettePicker} from './brand/PalettePicker';
 import {appendBrandAsset, assetProject, brandAssetDefaults, brandAssetKinds, brandAssetTemplates, isBrandAsset} from './lib/brandAssets';
@@ -13,13 +16,16 @@ import {demoProject, overlayDefaults} from './lib/demo';
 import {analyzeVideo} from './lib/analyze';
 import {clamp, sampleAt} from './lib/gesture';
 import {projectSchema} from './lib/schema';
+import {MAX_PROJECT_BYTES, VIDEO_LIMIT_LABEL} from './lib/limits';
+import {readVideoDuration, uploadVideo} from './lib/media';
+import {loadComposition, saveComposition} from './lib/projectStorage';
+import {useRenderJob} from './hooks/useRenderJob';
 import {gestureLabel, type AssetType, type Binding, type Overlay, type OverlayKind, type Project} from './types';
 
 const brandNames = Object.fromEntries(brandAssetKinds.map(kind => [kind, brandAssetTemplates[kind].name])) as Record<import('./types').BrandAssetKind, string>;
 const kindNames: Record<OverlayKind, string> = {...brandNames, ...Object.fromEntries(broadcastKinds.map(k => [k, broadcastTemplates[k].name])) as Record<OverlayKind, string>,hero: 'Change Stack glow', terminal: 'Terminal', agentflow: 'Agent workflow', code: 'Code panel', diagram: 'API flow', callout: 'Callout'};
 const kindIcons = {'name-intro': MessageSquare, 'color-bar-reveal': MoveHorizontal, 'color-bar-transition': MoveHorizontal, 'color-bar-loop': LoopIcon,'logo-reveal': Sparkle, 'circle-wipe': MoveHorizontal, 'stack-wipe': Layers3, 'color-bar-wipe': Layers3, 'pixel-glow-wipe': ScanLine, 'type-reveal': Code2, 'brand-signoff': Film, 'signal-loop': LoopIcon,hero: LoopIcon, ident: Film, presenter: MessageSquare, headline: Code2, triage: Layers3, stack: GitBranch, ticker: MoveHorizontal, bug: ShieldCheck,terminal: Terminal, agentflow: Workflow, code: Code2, diagram: GitBranch, callout: MessageSquare};
 const formatTime = (seconds: number) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(Math.floor(seconds) % 60).toString().padStart(2, '0')}.${Math.floor((seconds % 1) * 10)}`;
-type Job = {id: string; status: string; progress: number; url?: string; error?: string; filename?: string};
 
 const Miniature = memo(function Miniature({kind}: {kind: OverlayKind}) {
   if (isBrandAsset(kind)) return <div className="miniature"><AssetThumbnail kind={kind} animated={assetType(kind) === 'looping'}/></div>;
@@ -30,24 +36,22 @@ const Miniature = memo(function Miniature({kind}: {kind: OverlayKind}) {
   </div>;
 });
 
-function readComposition(): Project {
-  try {const saved = localStorage.getItem('coderabbit-motion-project'); if (saved) return projectSchema.parse(JSON.parse(saved));} catch { /* Keep the asset studio available if a saved project is invalid. */ }
-  return {...assetProject({id: 'name-intro', ...brandAssetDefaults['name-intro']}), name: 'CodeRabbit brand composition', duration: 12};
-}
+const newComposition = (): Project => ({...assetProject({id: 'name-intro', ...brandAssetDefaults['name-intro']}), name: 'CodeRabbit brand composition', duration: 12});
 export function App() {
   const [view, setView] = useState<'assets' | 'composition'>('assets');
   const [addedId, setAddedId] = useState<string>();
-  if (view === 'assets') return <AssetStudio onOpenComposition={() => {setAddedId(undefined); setView('composition');}} onAddToComposition={asset => {
+  const [composition, setComposition] = useState<Project>(newComposition);
+  if (view === 'assets') return <AssetStudio onOpenComposition={async () => {setComposition(await loadComposition() ?? newComposition()); setAddedId(undefined); setView('composition');}} onAddToComposition={async asset => {
     const id = crypto.randomUUID();
-    const next = appendBrandAsset(readComposition(), asset, id);
-    localStorage.setItem('coderabbit-motion-project', JSON.stringify(next));
+    const next = appendBrandAsset(await loadComposition() ?? newComposition(), asset, id);
+    await saveComposition(next); setComposition(next);
     setAddedId(id); setView('composition');
   }}/>;
-  return <CompositionEditor initialSelectedId={addedId} onOpenAssets={() => setView('assets')}/>;
+  return <CompositionEditor initialProject={composition} initialSelectedId={addedId} onOpenAssets={() => setView('assets')}/>;
 }
 
-function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId?: string; onOpenAssets: () => void}) {
-  const [project, setProject] = useState<Project>(readComposition);
+function CompositionEditor({initialProject, initialSelectedId, onOpenAssets}: {initialProject: Project; initialSelectedId?: string; onOpenAssets: () => void}) {
+  const [project, setProject] = useState<Project>(initialProject);
   const [selectedId, setSelectedId] = useState(() => initialSelectedId ?? project.overlays[0]?.id ?? '');
   const [frame, setFrame] = useState(() => project.sampleMode ? Math.min(project.broadcast ? 36 : 78, Math.ceil(project.duration * project.fps) - 1) : 0);
   const [playing, setPlaying] = useState(false);
@@ -59,7 +63,7 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
   const [notice, setNotice] = useState('');
   const [exportOpen, setExportOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState<'mp4' | 'alpha'>('mp4');
-  const [job, setJob] = useState<Job | null>(null);
+  const {job, activeExport, recovering, connection, start: render, cancel: cancelExport} = useRenderJob();
   const [historyLength, setHistoryLength] = useState(0);
   const player = useRef<PlayerRef>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -69,17 +73,16 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
   const sceneProps = useMemo(() => ({project}), [project]);
   projectRef.current = project;
   const abort = useRef<AbortController | null>(null);
+  const importAbort = useRef<AbortController | null>(null);
   const selected = project.overlays.find(o => o.id === selectedId);
   const brandTemplate = selected && isBrandAsset(selected.kind) ? brandAssetTemplates[selected.kind] : undefined;
   const template = selected && isBroadcast(selected.kind) ? broadcastTemplates[selected.kind] : undefined;
-  const onlyLooping = project.overlays.some(o => o.enabled) && project.overlays.filter(o => o.enabled).every(o => assetType(o.kind) === 'looping');
+  const onlyLooping = !project.mediaUrl && project.overlays.some(o => o.enabled) && project.overlays.filter(o => o.enabled).every(o => assetType(o.kind) === 'looping');
   const isLooping = selected ? assetType(selected.kind) === 'looping' : false;
   const addKind = selected && assetCollections[libraryGroup].includes(selected.kind) ? selected.kind : assetCollections[libraryGroup][0];
   const time = frame / project.fps;
   const currentHand = sampleAt(project.samples, time);
-  const activeExport = job && !['done', 'error'].includes(job.status);
-
-  useEffect(() => {try {localStorage.setItem('coderabbit-motion-project', JSON.stringify(project));} catch {setError('Autosave unavailable. Use Save project to keep your edits.');}}, [project]);
+  useEffect(() => {void saveComposition(project).catch(() => setError('Autosave unavailable. Use Save project to keep your edits.'));}, [project]);
 
   function commit(update: Project | ((previous: Project) => Project)) {
     const previous = projectRef.current;
@@ -90,7 +93,8 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
     setProject(next);
   }
   function updateOverlay(patch: Partial<Overlay>) {commit(p => ({...p, overlays: p.overlays.map(o => o.id === selectedId ? {...o, ...patch} : o)}));}
-  function seek(seconds: number) {const f = Math.round(clamp(seconds, 0, project.duration - 1 / 30) * project.fps); player.current?.seekTo(f); setFrame(f);}
+  const seek = useCallback((seconds: number) => {const f = Math.round(clamp(seconds, 0, project.duration - 1 / project.fps) * project.fps); player.current?.seekTo(f); setFrame(f);}, [project.duration, project.fps]);
+  const cueOptions = useMemo(() => project.cues.map(cue => <option key={cue.id} value={cue.id}>{gestureLabel[cue.gesture]} · {formatTime(cue.time)}</option>), [project.cues]);
   function selectOverlay(overlay: Overlay) {setSelectedId(overlay.id); setLibraryGroup(assetType(overlay.kind)); player.current?.pause(); seek(Math.min(overlay.start + 0.7, project.duration - 0.1));}
   function addOverlay(kind: OverlayKind) {
     if (project.overlays.length >= 12) {setError('This demo supports up to 12 overlays.'); return;}
@@ -116,34 +120,22 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
     return () => {p.removeEventListener('frameupdate', onFrame); p.removeEventListener('play', play); p.removeEventListener('pause', pause); p.removeEventListener('ended', pause);};
   }, [project.mediaUrl, project.duration]);
   useEffect(() => {if (!notice) return; const id = window.setTimeout(() => setNotice(''), 5500); return () => clearTimeout(id);}, [notice]);
-  useEffect(() => () => abort.current?.abort(), []);
-  useEffect(() => {
-    if (!job?.id || ['done', 'error'].includes(job.status)) return;
-    const interval = window.setInterval(async () => {
-      try {const res = await fetch(`/api/render/${job.id}`); if (!res.ok) throw new Error('Could not read export status.'); const next = await res.json(); setJob(next);}
-      catch (e) {setJob(j => j ? {...j, status: 'error', error: e instanceof Error ? e.message : 'Export connection lost.'} : j);}
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [job?.id, job?.status]);
+  useEffect(() => () => {abort.current?.abort(); importAbort.current?.abort();}, []);
 
   async function importVideo(file?: File) {
     if (!file) return;
-    abort.current?.abort(); setBusy('Importing your video…'); setError(''); player.current?.pause();
+    abort.current?.abort(); importAbort.current?.abort();
+    const controller = new AbortController(); importAbort.current = controller;
+    setBusy('Reading your video…'); setError(''); player.current?.pause();
     try {
-      if (file.size > 300 * 1024 * 1024) throw new Error('Choose a video smaller than 300 MB.');
-      const objectUrl = URL.createObjectURL(file);
-      const duration = await new Promise<number>((resolve, reject) => {
-        const v = document.createElement('video');
-        const cleanup = () => {clearTimeout(timeout); URL.revokeObjectURL(objectUrl); v.removeAttribute('src'); v.load();};
-        const timeout = window.setTimeout(() => {cleanup(); reject(new Error('Unable to read this video. Try MP4/H.264.'));}, 15000);
-        v.onloadedmetadata = () => {const d = v.duration; cleanup(); resolve(d);}; v.onerror = () => {cleanup(); reject(new Error('This browser cannot decode that video. Try MP4/H.264.'));}; v.src = objectUrl;
-      });
-      if (!Number.isFinite(duration) || duration < 0.1 || duration > 60) throw new Error('For this demo, use a clip between 0.1 and 60 seconds.');
-      const data = new FormData(); data.append('video', file);
-      const response = await fetch('/api/upload', {method: 'POST', body: data}); const result = await response.json(); if (!response.ok) throw new Error(result.error);
+      await readVideoDuration(file, controller.signal);
+      setBusy('Importing video… 0%');
+      const result = await uploadVideo(file, controller.signal, progress => setBusy(progress < 1 ? `Importing video… ${Math.round(progress * 100)}%` : 'Checking video…'));
+      controller.signal.throwIfAborted();
+      const duration = result.duration;
       commit(p => ({...p, mediaUrl: result.url, mediaName: file.name, duration, sampleMode: false, samples: [], cues: [], overlays: retimeOverlays(p.overlays, p.duration, duration)}));
-      setFrame(0); setPlaying(false); setLibraryTab('footage'); setNotice('Video imported. Your layer timing and overlaps were scaled to the clip.');
-    } catch (e) {setError(e instanceof Error ? e.message : 'Import failed.');}
+      setFrame(0); setPlaying(false); setLibraryTab('footage'); setNotice('Video imported. Graphic timing is preserved; full-length loops fit the footage.');
+    } catch (e) {if (!(e instanceof DOMException && e.name === 'AbortError')) setError(e instanceof Error ? e.message : 'Import failed.');}
     finally {setBusy(''); if (fileInput.current) fileInput.current.value = '';}
   }
 
@@ -151,7 +143,9 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
     if (!project.mediaUrl || analysisProgress !== null) return;
     player.current?.pause(); setError(''); setAnalysisProgress(0); abort.current = new AbortController();
     try {
-      const result = await analyzeVideo(project.mediaUrl, project.duration, setAnalysisProgress, abort.current.signal);
+      const signal = abort.current.signal;
+      const result = await analyzeVideo(project.mediaUrl, project.duration, setAnalysisProgress, signal);
+      signal.throwIfAborted();
       commit(p => ({...p, ...result}));
       setNotice(result.cues.length ? `${result.cues.length} gesture cues found. Select an overlay and set its start from a cue.` : 'Analysis complete. No gesture cues found; try a clearer hand pose or set timing manually.');
     } catch (e) {if (!(e instanceof DOMException && e.name === 'AbortError')) setError(e instanceof Error ? e.message : 'Analysis failed.');}
@@ -159,16 +153,14 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
   }
 
   async function startExport() {
-    setError(''); setJob({id: '', status: 'starting', progress: 0});
-    try {const response = await fetch('/api/render', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({project, format: exportFormat})}); const result = await response.json(); if (!response.ok) throw new Error(result.error); setJob(result);}
-    catch (e) {setJob({id: '', status: 'error', progress: 0, error: e instanceof Error ? e.message : 'Export failed.'});}
+    setError(''); player.current?.pause(); await render(project, exportFormat);
   }
   function saveProject() {
     const blob = new Blob([JSON.stringify(project, null, 2)], {type: 'application/json'}); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'coderabbit-motion-project.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); setNotice('Project saved, including cue timings, components, and tracking. Source video stays in the local media folder.');
   }
   async function openProject(file?: File) {
     if (!file) return;
-    try {if (file.size > 3 * 1024 * 1024) throw new Error('This project file is too large.'); const parsed = projectSchema.parse(JSON.parse(await file.text())); if (parsed.mediaUrl) {const response = await fetch(parsed.mediaUrl, {method: 'HEAD'}); if (!response.ok) throw new Error('This project’s source video is missing from local storage. Import the source clip again.');} abort.current?.abort(); player.current?.pause(); commit(parsed); setSelectedId(parsed.overlays[0]?.id ?? ''); setFrame(0); requestAnimationFrame(() => player.current?.seekTo(0)); setNotice('Project opened.');}
+    try {if (file.size > MAX_PROJECT_BYTES) throw new Error('Choose a project file up to 32 MB.'); const parsed = projectSchema.parse(JSON.parse(await file.text())); if (parsed.mediaUrl) {const response = await fetch(parsed.mediaUrl, {method: 'HEAD'}); if (!response.ok) throw new Error('This project’s source video is missing from local storage. Import the source clip again.');} abort.current?.abort(); player.current?.pause(); commit(parsed); setSelectedId(parsed.overlays[0]?.id ?? ''); setFrame(0); requestAnimationFrame(() => player.current?.seekTo(0)); setNotice('Project opened.');}
     catch (e) {setError(e instanceof Error ? e.message : 'Invalid Motion Studio project.');}
     finally {if (projectInput.current) projectInput.current.value = '';}
   }
@@ -177,11 +169,11 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
     <input type="file" ref={fileInput} accept="video/mp4,video/quicktime,video/webm,.m4v" hidden onChange={e => importVideo(e.target.files?.[0])}/>
     <input type="file" ref={projectInput} accept="application/json,.json" hidden onChange={e => openProject(e.target.files?.[0])}/>
     <header className="app-header">
-      <button className="button button-light composition-library-link" onClick={onOpenAssets}><ArrowLeft size={14}/> Asset library</button>
+      <button className="button button-light composition-library-link" disabled={!!busy || analysisProgress !== null} onClick={onOpenAssets}><ArrowLeft size={14}/> Asset library</button>
       <div className="header-actions">
-        <button className="icon-button undo" aria-label="Undo last edit" disabled={!historyLength} onClick={() => {const previous = history.current.pop(); if (previous) {projectRef.current = previous; setProject(previous); setHistoryLength(history.current.length); if (!previous.overlays.some(o => o.id === selectedId)) setSelectedId(previous.overlays[0]?.id ?? '');}}}><Undo2 size={17}/></button>
+        <button className="icon-button undo" aria-label="Undo last edit" disabled={!historyLength || !!busy || analysisProgress !== null} onClick={() => {const previous = history.current.pop(); if (previous) {projectRef.current = previous; setProject(previous); setHistoryLength(history.current.length); if (!previous.overlays.some(o => o.id === selectedId)) setSelectedId(previous.overlays[0]?.id ?? '');}}}><Undo2 size={17}/></button>
         <button className="button button-light" disabled={!!busy || analysisProgress !== null} onClick={() => fileInput.current?.click()}><Upload size={15}/> Import video</button>
-        <button className="button button-dark" onClick={() => setExportOpen(true)}><ArrowUpRight size={17}/>{activeExport ? `Exporting ${job.progress}%` : 'Export video'}</button>
+        <button className="button button-dark" onClick={() => setExportOpen(true)}><ArrowUpRight size={17}/>{activeExport ? `Exporting ${job?.progress ?? 0}%` : 'Export video'}</button>
       </div>
     </header>
 
@@ -196,35 +188,36 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
           </button>;})}</div>
           <button className="button button-light add-layer" onClick={() => addOverlay(addKind)}><Plus size={14}/> Add {kindNames[addKind].toLowerCase()}</button>
         </> : <div className="footage-content">
-          <div className="source-card"><Film size={27}/><strong>{project.mediaName}</strong><span>{project.duration.toFixed(1)}s · 30 fps · 720p canvas</span><span className="source-mode">{project.broadcast && project.sampleMode ? 'Broadcast sample' : project.sampleMode ? 'Simulated sample' : 'Local video'}</span></div>
+          <div className="source-card"><Film size={27}/><strong>{project.mediaName}</strong><span>{formatTime(project.duration)} · 30 fps · 720p canvas</span><span className="source-mode">{project.broadcast && project.sampleMode ? 'Broadcast sample' : project.sampleMode ? 'Simulated sample' : 'Local video'}</span></div>
           <button className="button button-light full-width" disabled={!!busy || analysisProgress !== null} onClick={() => fileInput.current?.click()}><FolderOpen size={15}/> Choose a video</button>
-          <p className="hint">MP4, MOV, or WebM. Up to 60 seconds and 300 MB. Landscape works best.</p>
-          {!project.sampleMode && <button className="button button-primary full-width" disabled={analysisProgress !== null} onClick={analyze}><ScanLine size={16}/>{analysisProgress !== null ? 'Analyzing…' : 'Analyze gestures'}</button>}
+          <p className="hint">MP4, MOV, M4V, or WebM. {VIDEO_LIMIT_LABEL}. H.264 video with AAC audio works best.</p>
+          {!project.sampleMode && <button className="button button-primary full-width" disabled={!!busy || analysisProgress !== null} onClick={analyze}><ScanLine size={16}/>{analysisProgress !== null ? 'Analyzing…' : 'Analyze gestures'}</button>}
+          {!project.sampleMode && project.samples.length > 0 && analysisProgress === null && <p className="hint">Gestures analyzed · {project.cues.length} cues</p>}
           {analysisProgress !== null && <div className="analysis-state"><progress value={analysisProgress} max={1}/><div><span>{Math.round(analysisProgress * 100)}% analyzed</span><button className="text-button" onClick={() => abort.current?.abort()}>Cancel</button></div></div>}
           <div className="privacy-note"><ShieldCheck size={16}/><p>Your video stays on this computer. Tracking runs locally.</p></div>
         </div>}
-        <div className="library-bottom"><button className="text-button" onClick={saveProject}><Download size={14}/> Save project</button><button className="icon-button" aria-label="Open a saved Motion Studio project" onClick={() => projectInput.current?.click()}><FolderOpen size={16}/></button></div>
+        <div className="library-bottom"><button className="text-button" onClick={saveProject}><Download size={14}/> Save project</button><button className="icon-button" aria-label="Open a saved Motion Studio project" disabled={!!busy || analysisProgress !== null} onClick={() => projectInput.current?.click()}><FolderOpen size={16}/></button></div>
       </aside>
 
       <main className="editor-main">
-        <div className="editor-topbar"><div className="editor-title"><span className="section-eyebrow">PREVIEW</span><span>{onlyLooping ? 'Background loop.' : project.name}</span></div><div className="stage-actions"><select aria-label="Load studio preset" value="" onChange={e => {if (e.target.value) resetSample(e.target.value as "broadcast" | "walkthrough" | "technical" | "loop");}}><option value="">Load a preset</option><option value="broadcast">Broadcast rundown</option><option value="loop">Change Stack glow loop</option><option value="walkthrough">Developer walkthrough</option><option value="technical">Code & API explainer</option></select><button className={`tracking-toggle ${project.showTracking ? 'is-on' : ''}`} aria-pressed={project.showTracking} onClick={() => commit(p => ({...p, showTracking: !p.showTracking}))}><ScanLine size={15}/><span>Tracking</span><i/></button></div></div>
+        <div className="editor-topbar"><div className="editor-title"><span className="section-eyebrow">PREVIEW</span><span>{onlyLooping ? 'Background loop.' : project.name}</span></div><div className="stage-actions"><select aria-label="Load studio preset" disabled={!!busy || analysisProgress !== null} value="" onChange={e => {if (e.target.value) resetSample(e.target.value as "broadcast" | "walkthrough" | "technical" | "loop");}}><option value="">Load a preset</option><option value="broadcast">Broadcast rundown</option><option value="loop">Change Stack glow loop</option><option value="walkthrough">Developer walkthrough</option><option value="technical">Code & API explainer</option></select><button className={`tracking-toggle ${project.showTracking ? 'is-on' : ''}`} aria-pressed={project.showTracking} onClick={() => commit(p => ({...p, showTracking: !p.showTracking}))}><ScanLine size={15}/><span>Tracking</span><i/></button></div></div>
         <div className="preview-space">
           <div className="preview-meta"><span><i/>{onlyLooping ? 'LOOPING ASSET / SEAMLESS' : project.brandAsset ? 'BRAND ASSETS / COMPOSITION' : project.broadcast && project.sampleMode ? 'BROADCAST / SAMPLE RUNDOWN' : project.sampleMode ? 'SAMPLE / SIMULATED MOTION' : project.mediaName}</span><span>1280 × 720 <span className="meta-separator">/</span> 30 FPS</span></div>
           <div className="player-frame">
             <Player key={`${project.mediaUrl}-${project.duration}`} ref={player} component={Scene} inputProps={sceneProps} durationInFrames={Math.max(1, Math.ceil(project.duration * project.fps))} compositionWidth={project.width} compositionHeight={project.height} fps={project.fps} initialFrame={Math.min(frame, Math.ceil(project.duration * project.fps) - 1)} style={{width: '100%'}} controls={false} clickToPlay={false} loop={onlyLooping} moveToBeginningWhenEnded={false}/>
-            {busy && <div className="preview-busy"><LoaderCircle className="spin" size={24}/><span>{busy}</span></div>}
+            {busy && <div className="preview-busy"><LoaderCircle className="spin" size={24}/><span role="status">{busy}</span><button className="button button-light" onClick={() => importAbort.current?.abort()}>Cancel import</button></div>}
           </div>
           <div className="transport">
             <div className="transport-left"><button className="icon-button" aria-label={project.mute ? 'Unmute video' : 'Mute video'} onClick={() => commit(p => ({...p, mute: !p.mute}))}>{project.mute ? <VolumeX size={17}/> : <Volume2 size={17}/>}</button><span className="timecode">{formatTime(time)} <span>/ {formatTime(project.duration)}</span></span></div>
             <div className="playback-controls"><button className="icon-button" aria-label="Back one second" onClick={() => seek(time - 1)}><ArrowLeft size={15}/></button><button className="play-button" aria-label={playing ? 'Pause preview' : 'Play preview'} onClick={() => playing ? player.current?.pause() : player.current?.play()}>{playing ? <Pause size={16} fill="currentColor"/> : <Play size={16} fill="currentColor"/>}</button><button className="icon-button" aria-label="Forward one second" onClick={() => seek(time + 1)}><ArrowRight size={15}/></button></div>
-            <div className="gesture-readout"><span className={currentHand?.visible ? 'status-dot' : 'status-dot inactive'}/>{onlyLooping ? 'LOOP / 30 FPS' : project.broadcast ? 'BROADCAST / 30 FPS' : currentHand?.visible ? gestureLabel[currentHand.gesture] === 'No gesture' ? 'Hand tracked' : gestureLabel[currentHand.gesture] : 'No hand tracked'}</div>
+            <TimeSeek onSeek={seconds => {player.current?.pause(); seek(seconds);}}/><div className="gesture-readout"><span className={currentHand?.visible ? 'status-dot' : 'status-dot inactive'}/>{onlyLooping ? 'LOOP / 30 FPS' : project.broadcast ? 'BROADCAST / 30 FPS' : currentHand?.visible ? gestureLabel[currentHand.gesture] === 'No gesture' ? 'Hand tracked' : gestureLabel[currentHand.gesture] : 'No hand tracked'}</div>
           </div>
         </div>
         <section className="timeline-section" aria-label="Gesture and overlay timeline">
           <div className="timeline-heading"><span className="timeline-count">{project.cues.length} cues <span>·</span> {project.overlays.length} layers</span></div>
-          <div className="timeline-ruler"><span className="track-label">SECONDS</span><div className="ruler-scale">{Array.from({length: 7}, (_, i) => <span key={i} style={{left: `${i / 6 * 100}%`}}>{(project.duration * i / 6).toFixed(project.duration < 6 ? 1 : 0).padStart(2, '0')}</span>)}</div></div>
+          <div className="timeline-ruler"><span className="track-label">{project.duration >= 60 ? "MIN:SEC" : "SECONDS"}</span><div className="ruler-scale">{Array.from({length: 7}, (_, i) => <span key={i} style={{left: `${i / 6 * 100}%`}}>{project.duration >= 60 ? formatTime(project.duration * i / 6).split('.')[0] : (project.duration * i / 6).toFixed(project.duration < 6 ? 1 : 0).padStart(2, '0')}</span>)}</div></div>
           <div className="timeline-tracks">
-            {(!project.broadcast || project.cues.length > 0) && <div className="track-row gesture-row"><div className="track-label"><Hand size={14}/> Gestures</div><div className="track-lane cue-lane">{project.cues.map(cue => <button key={cue.id} aria-label={`Seek to ${gestureLabel[cue.gesture]} at ${cue.time.toFixed(1)} seconds`} className="cue-marker" style={{left: `${cue.time / project.duration * 100}%`}} onClick={() => seek(cue.time)}><span>◆</span><em>{gestureLabel[cue.gesture]}</em></button>)}{!project.cues.length && <span className="empty-track">Analyze footage to detect cues</span>}</div></div>}
+            {(!project.broadcast || project.cues.length > 0) && <div className="track-row gesture-row"><div className="track-label"><Hand size={14}/> Gestures</div><div className="track-lane cue-lane"><TimelineCues cues={project.cues} duration={project.duration} onSeek={seek}/></div></div>}
             {project.overlays.map(overlay => {const Icon = kindIcons[overlay.kind]; return <div className={`track-row ${selectedId === overlay.id ? 'selected-track' : ''}`} key={overlay.id}><button className="track-label" onClick={() => selectOverlay(overlay)}><Icon size={14}/><span>{kindNames[overlay.kind]}</span></button><div className="track-lane"><button className={`overlay-clip clip-${overlay.kind} ${overlay.enabled ? '' : 'disabled-clip'}`} aria-label={`Select ${kindNames[overlay.kind]} timeline layer`} onClick={() => selectOverlay(overlay)} style={{left: `${overlay.start / project.duration * 100}%`, width: `${Math.min(overlay.duration, project.duration - overlay.start) / project.duration * 100}%`}}>{assetType(overlay.kind) === 'looping' ? <LoopIcon size={11}/> : <Link2 size={11}/>}<span>{overlay.title}</span></button></div></div>;})}
             <div className="playhead-container"><div className="playhead" style={{left: `${time / project.duration * 100}%`}}><span/></div></div>
           </div>
@@ -238,7 +231,7 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
           <div className="selected-component"><div className={`selected-icon icon-${selected.kind}`}>{React.createElement(kindIcons[selected.kind], {size: 21})}</div><div><strong>{kindNames[selected.kind]}</strong><span>{brandTemplate ? `${brandTemplate.code} / ${brandTemplate.family}` : isLooping ? 'BG-02 / Looping background' : template ? `${template.code} / Linear asset` : 'Linear asset'}</span></div><button className="icon-button" aria-label={selected.enabled ? 'Hide selected overlay' : 'Show selected overlay'} onClick={() => updateOverlay({enabled: !selected.enabled})}>{selected.enabled ? <Eye size={16}/> : <EyeOff size={16}/>}</button></div>
           <section className="inspector-section"><h2><Hand size={14}/> {isLooping ? 'Loop timing' : template || brandTemplate ? 'Asset timing' : 'Gesture binding'}</h2>{isLooping ? <p className="binding-explanation">Repeats seamlessly for the layer’s full duration. No entrance or exit fade.</p> : brandTemplate ? <p className="binding-explanation">{brandTemplate.description}</p> : template ? <p className="binding-explanation">18 frames in. Readable hold. 12 frames out. Short clips compress the motion automatically.</p> : <><label className="field-label">Behavior<select aria-label="Overlay behavior" value={selected.binding} onChange={e => updateOverlay({binding: e.target.value as Binding})}><option value="cue">Reveal on cue</option><option value="progress">Hand position → progress</option><option value="follow">Follow hand</option></select></label>
             <p className="binding-explanation">{selected.binding === 'cue' ? 'Choose a cue below or set the start time. The component holds its position.' : selected.binding === 'progress' ? 'Horizontal hand movement controls the animation progress.' : 'The component follows the hand with an offset and stays inside the frame.'}</p></>}
-            {!isLooping && !brandTemplate && <label className="field-label">Set start from a cue<select aria-label="Bind overlay to gesture cue" value="" onChange={e => {const cue = project.cues.find(c => c.id === e.target.value); if (cue) {const start = clamp(cue.time, 0, project.duration - 0.1); updateOverlay({start, duration: Math.min(selected.duration, project.duration - start)}); seek(start + 0.5);}}}><option value="">Choose a detected cue</option>{project.cues.map(cue => <option key={cue.id} value={cue.id}>{gestureLabel[cue.gesture]} · {cue.time.toFixed(1)}s</option>)}</select></label>}
+            {!isLooping && !brandTemplate && <label className="field-label">Set start from a cue<select aria-label="Bind overlay to gesture cue" value="" onChange={e => {const cue = project.cues.find(c => c.id === e.target.value); if (cue) {const start = clamp(cue.time, 0, project.duration - 0.1); updateOverlay({start, duration: Math.min(selected.duration, project.duration - start)}); seek(start + 0.5);}}}><option value="">Choose a detected cue</option>{cueOptions}</select></label>}
             <div className="two-fields"><label className="field-label">Start <span className="input-unit"><input aria-label="Overlay start time" type="number" min={0} max={project.duration - 0.1} step={0.1} value={Number(selected.start.toFixed(2))} onChange={e => {const start = clamp(Number(e.target.value), 0, project.duration - 0.1); updateOverlay({start, duration: Math.min(selected.duration, project.duration - start)});}}/><span>s</span></span></label><label className="field-label">Duration <span className="input-unit"><input aria-label="Overlay duration" type="number" min={0.1} max={Math.max(0.1, project.duration - selected.start)} step={0.1} value={Number(selected.duration.toFixed(2))} onChange={e => updateOverlay({duration: clamp(Number(e.target.value), 0.1, Math.max(0.1, project.duration - selected.start))})}/><span>s</span></span></label></div>
           </section>
           {brandTemplate ? <section className="inspector-section"><h2><Settings2 size={14}/> Customize asset</h2><AssetControls asset={selected} onChange={updateOverlay}/></section> : isLooping ? <section className="inspector-section"><h2><LoopIcon size={14}/> Loop controls</h2><AssetControls asset={selected} onChange={updateOverlay}/></section> : <section className="inspector-section"><h2><Code2 size={14}/> Content</h2><label className="field-label">{template ? template.title : selected.kind === 'code' ? 'Filename' : selected.kind === 'terminal' ? 'Window title' : 'Heading'}<input aria-label="Component title" maxLength={template?.titleMax ?? 150} value={selected.title} onChange={e => updateOverlay({title: e.target.value})}/></label><label className="field-label">{template ? template.body : selected.kind === 'terminal' ? 'Commands, one per line' : selected.kind === 'code' ? 'Code' : (['diagram', 'agentflow'].includes(selected.kind)) ? 'Nodes, separated by commas' : 'Description'}<textarea aria-label="Component content" className={(['code', 'terminal'].includes(selected.kind)) ? 'code-input' : ''} rows={(['code', 'terminal'].includes(selected.kind)) ? 5 : 3} maxLength={template?.bodyMax ?? 3000} value={selected.body} onChange={e => updateOverlay({body: e.target.value})}/></label>{template && selected.kind !== 'bug' && <label className="field-label">{template.kicker}<input aria-label="Segment label" maxLength={40} value={selected.kicker ?? ''} onChange={e => updateOverlay({kicker: e.target.value})}/></label>}{template && <p className="hint">{template.description} Text stays within its template; keep each item concise.</p>}</section>}
@@ -249,14 +242,6 @@ function CompositionEditor({initialSelectedId, onOpenAssets}: {initialSelectedId
     </div>
     {(error || notice) && <div className={`toast ${error ? 'toast-error' : ''}`} role={error ? 'alert' : 'status'}><span>{error || notice}</span><button className="icon-button" aria-label="Dismiss message" onClick={() => {setError(''); setNotice('');}}><X size={16}/></button></div>}
 
-    {exportOpen && <div className="modal-backdrop" onMouseDown={e => {if (e.target === e.currentTarget) setExportOpen(false);}}><section className="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-title"><div className="modal-heading"><span className="export-icon"><ArrowUpRight size={24}/></span><button className="icon-button" aria-label="Close export dialog" onClick={() => setExportOpen(false)}><X size={19}/></button></div><h1 id="export-title">Ready for the final cut.</h1><p>Render your components exactly as they appear on the timeline.</p>
-      <div className="export-formats"><button disabled={!!activeExport} aria-pressed={exportFormat === 'mp4'} onClick={() => setExportFormat('mp4')}><Film size={21}/><strong>Finished video</strong><span>MP4 · H.264 · {project.mute ? 'audio muted' : 'with source audio'}</span></button><button disabled={!!activeExport} aria-pressed={exportFormat === 'alpha'} onClick={() => setExportFormat('alpha')}><Layers3 size={21}/><strong>Transparent overlay</strong><span>ProRes 4444 · alpha · silent</span></button></div>
-      <div className="export-summary"><span>1280 × 720</span><span>30 fps</span><span>{project.duration.toFixed(1)} seconds</span><span>{project.overlays.filter(o => o.enabled).length} components</span></div>
-      {activeExport && <div className="export-progress" role="status"><progress max={100} value={job.progress}/><span><LoaderCircle size={15} className="spin"/>{job.status === 'bundling' || job.status === 'starting' ? 'Preparing the composition…' : `Rendering frames… ${job.progress}%`}</span></div>}
-      {job?.status === 'error' && <p className="export-error" role="alert">{job.error}</p>}
-      {job?.status === 'done' && <a className="button button-primary full-width" href={job.url} download><ArrowDownToLine size={16}/> Download {job.filename?.endsWith('.mov') ? 'transparent overlay' : 'video'}</a>}
-      {!activeExport && <button className={`button ${job?.status === 'done' ? 'button-light' : 'button-dark'} full-width`} onClick={startExport}><ArrowUpRight size={17}/>{job?.status === 'done' ? 'Render again' : 'Render video'}</button>}
-      <div className="export-footnote"><ShieldCheck size={13}/> Rendered locally on your computer.</div>
-    </section></div>}
+    {exportOpen && <ExportDialog project={project} format={exportFormat} onFormatChange={setExportFormat} onClose={() => setExportOpen(false)} onExport={startExport} onCancel={cancelExport} job={job} active={activeExport} recovering={recovering} connection={connection} disabled={!!busy || analysisProgress !== null}/>}
   </div>;
 }
