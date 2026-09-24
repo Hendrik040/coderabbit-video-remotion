@@ -1,7 +1,9 @@
 import type {OverlayKind} from '../types';
+import {productAssetKinds} from './productAssets';
 
 // Group by the job an asset does. Playback type remains a separate filter.
 const groups: {id: string; name: string; kinds: OverlayKind[]}[] = [
+  {id: 'products', name: 'Products', kinds: productAssetKinds},
   {id: 'names', name: 'Name intros', kinds: ['name-intro', 'name-intro-wipe', 'presenter']},
   {id: 'transitions', name: 'Screen transitions', kinds: ['stack-wipe', 'color-bar-wipe', 'pixel-glow-wipe']},
   {id: 'bars', name: 'Color bars', kinds: ['color-bar-reveal', 'color-bar-transition', 'color-bar-loop']},

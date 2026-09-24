@@ -8,7 +8,9 @@ import {isColorBar} from '../lib/colorBar';
 import {ColorBar} from './ColorBar';
 import {PixelGlowWipe} from './PixelGlowWipe';
 import {NameIntro} from './NameIntro';
-import type {Overlay} from '../types';
+import {ChangeStack} from '../products/ChangeStack';
+import {Triage} from '../products/Triage';
+import type {Overlay, ProductEditHandler} from '../types';
 
 const font = 'Geist, sans-serif';
 const copy: CSSProperties = {fontFamily: font, fontWeight: 400, fontSize: 27, lineHeight: 1.4, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'};
@@ -17,7 +19,9 @@ function Lockup({width, light = false, style}: {width: number; light?: boolean; 
   return <Img src={staticFile(`brand/${light ? 'orange' : 'white'}-typemark.svg`)} style={{width, height: width * logoRatio, display: 'block', objectFit: 'contain', ...style}}/>;
 }
 
-export function MotionAsset({overlay: o, frame, fps}: {overlay: Overlay; frame: number; fps: number}) {
+export function MotionAsset({overlay: o, frame, fps, onProductEdit, reduceMotion}: {overlay: Overlay; frame: number; fps: number; onProductEdit?: ProductEditHandler; reduceMotion?: boolean}) {
+  if (o.kind === 'change-stack') return <ChangeStack overlay={o} frame={frame} fps={fps} onEdit={onProductEdit} reduceMotion={reduceMotion}/>;
+  if (o.kind === 'triage-board') return <Triage overlay={o} frame={frame} fps={fps} onEdit={onProductEdit} reduceMotion={reduceMotion}/>;
   if (isNameIntro(o.kind)) return <NameIntro overlay={o} frame={frame} fps={fps}/>;
   if (isColorBar(o.kind)) return <ColorBar overlay={o} frame={frame} fps={fps}/>;
   if (o.kind === 'pixel-glow-wipe') return <PixelGlowWipe overlay={o} frame={frame} fps={fps}/>;

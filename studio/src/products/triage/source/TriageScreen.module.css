@@ -1,0 +1,13 @@
+.frame {
+  overflow: hidden;
+}
+
+.frame:has([aria-label='Show reviewer details']:hover),
+.frame:has([aria-label='Show reviewer details']:focus-visible),
+.frame:has([aria-label='Show reviewer details'][aria-expanded='true']),
+.frame:has([aria-label='Reviewers']:hover),
+.frame:has([aria-label='Reviewers']:focus-within) {
+  position: relative;
+  z-index: 9990;
+  overflow: visible;
+}

@@ -1,4 +1,5 @@
 import React, {memo, useId} from 'react';
+import {staticFile} from 'remotion';
 import type {BrandAssetKind} from '../types';
 
 const shades = ['#353535', '#626262', '#b5b5b5', '#777', '#292929', '#909090', '#474747', '#d8d8d8', '#a6a6a6', '#eee'];
@@ -21,6 +22,8 @@ export const AssetThumbnail = memo(function AssetThumbnail({kind}: {kind: BrandA
   const introWipe = kind === 'name-intro-wipe';
   return <svg className="asset-thumbnail" viewBox="0 0 160 100" aria-hidden="true" focusable="false">
     <rect width="160" height="100" fill="#111"/>
+    {kind === 'triage-board' && <image href={staticFile('products/triage.png')} x="3" y="7" width="154" height="87"/>}
+    {kind === 'change-stack' && <image href={staticFile('products/change-stack.png')} x="3" y="7" width="154" height="87"/>}
     {(kind === 'name-intro' || introWipe) && <>
       <path d="M14 21H146M14 21V79M146 21V79" fill="none" stroke="#272727" strokeDasharray="2 4"/>
       {introWipe && <path d="M23 31H55m-5-4 5 4-5 4M103 31H135m-5-4 5 4-5 4" fill="none" stroke="#aaa" strokeWidth="1.5"/>}

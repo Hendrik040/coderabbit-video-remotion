@@ -1,0 +1,541 @@
+.canvas {
+  --graph-evidence-border: var(--color-cui-tertiary-8);
+  --graph-evidence-text: var(--color-cui-tertiary-11);
+  --graph-changed-surface: var(--color-cui-tertiary-3);
+  --graph-added-surface: color-mix(
+    in srgb,
+    var(--background-color-cui-success-subtle) 80%,
+    var(--background-color-cui-base-0)
+  );
+  --graph-edge: var(--border-color-cui-neutral-strong);
+
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: 0.625rem solid var(--background-color-cui-base-1);
+  border-radius: 0.5rem;
+  background: var(--background-color-cui-base-0);
+  color: var(--text-color-cui-primary);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.graph {
+  position: absolute;
+  inset: 0;
+}
+
+.overlay {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 20rem;
+}
+.canvas[data-view='blast-radius'] .overlay {
+  width: 26rem;
+}
+.summary,
+.viewControls,
+.controls {
+  border: 0.0625rem solid var(--border-color-cui-neutral);
+  border-radius: 0.5rem;
+  background: var(--background-color-cui-base-2);
+}
+.summary {
+  padding: 0.75rem;
+}
+.exampleLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.6875rem;
+}
+.summaryCounts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.6875rem;
+}
+.summaryActions + .summaryCounts {
+  border-top: 0.0625rem solid var(--border-color-cui-neutral);
+  padding-top: 0.625rem;
+}
+.summaryCounts > span + span:not(.badge)::before {
+  content: '|';
+  margin-right: 0.375rem;
+  opacity: 0.4;
+}
+.summaryCounts > span {
+  white-space: nowrap;
+}
+.summaryActions {
+  display: flex;
+  gap: 0.375rem;
+  margin-bottom: 0.625rem;
+}
+.summaryActions > * {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  border: 0.0625rem solid var(--border-color-cui-neutral);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+}
+.summaryActions svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.viewControls {
+  margin-top: 0.5rem;
+  padding: 0.625rem;
+}
+.tabs {
+  display: flex;
+  padding: 0.1875rem;
+  border: 0.0625rem solid var(--border-color-cui-neutral);
+  border-radius: 0.5rem;
+  background: var(--background-color-cui-base-0);
+}
+.tab {
+  flex: 1;
+  padding: 0.4375rem 0.375rem;
+  border-radius: 0.375rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  text-align: center;
+}
+.selectedTab {
+  background: var(--background-color-cui-base-2);
+  color: var(--text-color-cui-primary);
+}
+.legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 0.375rem 0.25rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.75rem;
+}
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.legend i {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: var(--border-color-cui-neutral-strong);
+}
+.legend i[data-status='Changed'] {
+  background: var(--graph-evidence-text);
+}
+.legend i[data-status='New'] {
+  background: var(--text-color-cui-success);
+}
+.legend i[data-status='Removed'] {
+  background: var(--text-color-cui-danger);
+}
+.changeCount {
+  position: absolute;
+  top: 1.75rem;
+  right: 1rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.6875rem;
+}
+
+.boundary {
+  position: absolute;
+  padding: 1.125rem;
+  border: 0.0625rem dashed var(--border-color-cui-neutral-strong);
+  border-radius: 0.875rem;
+  background: var(--background-color-cui-base-1);
+}
+.boundaryHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.boundaryHeading > span {
+  color: var(--text-color-cui-secondary);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+.boundaryHeading > strong {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.webBoundary {
+  left: 3%;
+  top: 38%;
+  width: 29%;
+  height: 43%;
+}
+.serverBoundary {
+  left: 37%;
+  top: 22%;
+  width: 60%;
+  height: 74%;
+}
+.connections {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.connections path {
+  fill: none;
+  stroke: var(--border-color-cui-neutral);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 5;
+}
+.connections path[data-change='new'] {
+  stroke: var(--border-color-cui-success);
+  stroke-dasharray: none;
+}
+.connections path[data-change='potential'] {
+  stroke: var(--border-color-cui-danger);
+}
+.architectureConnections path[data-change='new'],
+.architectureConnections .arrowHead {
+  stroke: var(--text-color-cui-success);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: none;
+}
+.architectureConnections > path {
+  opacity: 0.65;
+}
+.architectureNode,
+.ownerCard {
+  --node-border: var(--border-color-cui-neutral);
+  --node-surface: var(--background-color-cui-base-2);
+
+  border: 0.0625rem solid var(--node-border);
+  border-radius: 0.375rem;
+  background: var(--node-surface);
+  text-align: left;
+  color: var(--text-color-cui-primary);
+}
+.architectureNode {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 25%;
+  height: 25%;
+  padding: 1rem;
+  border-color: var(--border-color-cui-neutral-strong);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.375rem 1rem color-mix(in srgb, var(--background-color-cui-base-0) 35%, transparent);
+}
+.ownerCard[data-status='New'] {
+  --node-border: var(--border-color-cui-success);
+  --node-surface: var(--graph-added-surface);
+}
+.ownerCard[data-status='Changed'] {
+  --node-border: var(--graph-evidence-border);
+  --node-surface: var(--graph-changed-surface);
+}
+.nodeHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.3;
+  font-weight: 600;
+  text-wrap: pretty;
+}
+.nodeDescription {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  padding: 0.0625rem 0.3125rem;
+  border: 0.0625rem solid var(--border-color-cui-neutral);
+  border-radius: 0.25rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.architectureNodeHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+.architectureNodeHeader > svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--text-color-cui-secondary);
+}
+.architectureNode .nodeHeading {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.architectureNodeFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.875rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.75rem;
+}
+.architectureNodeFooter > .badge {
+  gap: 0.375rem;
+  padding: 0.1875rem 0.5rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: var(--background-color-cui-base-1);
+  font-size: 0.75rem;
+}
+.architectureNodeFooter > .badge::before {
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+}
+.architectureNodeFooter > .badge[data-status='New'] {
+  background: var(--background-color-cui-success-subtle);
+}
+.architectureNodeFooter > .badge[data-status='Changed'] {
+  background: var(--graph-changed-surface);
+}
+.badge[data-status='New'] {
+  border-color: var(--border-color-cui-success);
+  color: var(--text-color-cui-success);
+}
+.badge[data-status='Changed'] {
+  border-color: var(--graph-evidence-border);
+  color: var(--graph-evidence-text);
+}
+.badge[data-status='Potentially impacted'] {
+  border-color: var(--border-color-cui-danger);
+  color: var(--text-color-cui-danger);
+}
+.edgeLabel {
+  position: absolute;
+  padding: 0.25rem 0.375rem;
+  border-radius: 0.375rem;
+  background: var(--background-color-cui-base-1);
+  color: var(--text-color-cui-secondary);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+}
+.requestEdge {
+  left: 35%;
+  top: 54%;
+  width: 9%;
+  transform: translate(-50%, -50%);
+  background: var(--background-color-cui-base-0);
+}
+.persistEdge {
+  left: 55%;
+  top: 63%;
+  transform: translateY(-50%);
+}
+.emailEdge {
+  left: 77.5%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+}
+.owner {
+  position: absolute;
+  width: 20%;
+  isolation: isolate;
+}
+.ownerCard {
+  display: block;
+  width: 100%;
+  min-height: 6.5rem;
+  padding: 0.875rem;
+  border-left-width: 0.1875rem;
+}
+.owner[data-stacked='true']::before,
+.owner[data-stacked='true']::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 0.0625rem solid var(--border-color-cui-success);
+  border-radius: 0.375rem;
+  background: var(--background-color-cui-success-subtle);
+  content: '';
+}
+.owner[data-stacked='true']::before {
+  transform: translate(0.625rem, 0.625rem);
+}
+.owner[data-stacked='true']::after {
+  z-index: -2;
+  transform: translate(1.25rem, 1.25rem);
+}
+.nodeKind {
+  display: block;
+  margin-top: 0.375rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.6875rem;
+}
+.rangeCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1875rem;
+  flex: none;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.625rem;
+  font-weight: 400;
+}
+.rangeCount svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+.ownerFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.625rem;
+}
+.controls {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+}
+.controls > span {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 0.0625rem solid var(--border-color-cui-neutral);
+  border-radius: 0.375rem;
+  color: var(--text-color-cui-secondary);
+}
+.controls svg {
+  width: 1rem;
+  height: 1rem;
+}
+/* The blast-radius illustration uses product graph semantics: green additions,
+   neutral context, blue evidence labels, and subdued dependency edges. */
+.blastConnections path {
+  stroke: var(--graph-edge);
+  stroke-dasharray: 5 4;
+}
+.blastConnections .arrowHead {
+  fill: var(--graph-edge);
+  stroke: none;
+}
+.ownerCard[data-status='New'] {
+  --node-surface: var(--graph-added-surface);
+
+  border-left-width: 0.0625rem;
+  box-shadow: inset 0.1875rem 0 0 var(--text-color-cui-success);
+}
+.owner[data-stacked='true']::before,
+.owner[data-stacked='true']::after {
+  background: var(--graph-added-surface);
+}
+.owner[data-highlighted='true'] .ownerCard {
+  border-color: var(--graph-evidence-border);
+}
+.ownerCard .nodeHeading,
+.contextCard .nodeHeading {
+  font-size: 0.8125rem;
+}
+.ownerCard .badge {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.contextCard {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 20%;
+  min-height: 6rem;
+  gap: 1rem;
+  padding: 0.875rem;
+  border: 0.0625rem solid var(--border-color-cui-neutral);
+  border-radius: 0.375rem;
+  background: var(--background-color-cui-base-2);
+  box-shadow: inset 0.1875rem 0 0 var(--border-color-cui-neutral-strong);
+}
+.contextBadge {
+  display: inline-flex;
+  align-self: flex-start;
+  width: fit-content;
+  padding: 0.125rem 0.3125rem;
+  border: 0.0625rem solid var(--border-color-cui-neutral);
+  border-radius: 0.1875rem;
+  color: var(--text-color-cui-secondary);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.relationship {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  width: 25%;
+  padding: 0.5rem;
+  border: 0.0625rem solid var(--graph-evidence-border);
+  border-radius: 0.25rem;
+  background: var(--background-color-cui-base-2);
+  color: var(--graph-evidence-text);
+  font-size: 0.625rem;
+  line-height: 1.4;
+}
+.relationship .contextBadge {
+  align-self: center;
+  font-size: 0.5rem;
+}
+.permissionRelationship {
+  left: 26%;
+  top: 34%;
+}
+.modelRelationship {
+  left: 57%;
+  top: 51%;
+  width: 19%;
+  grid-template-columns: auto 1fr;
+}
+.modelRelationship .contextBadge {
+  grid-column: 2;
+}
+.emailRelationship {
+  left: 27%;
+  top: 66%;
+}

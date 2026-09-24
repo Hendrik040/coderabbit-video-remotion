@@ -1,7 +1,13 @@
 import type {GlowLighting, GlowVignette} from './lib/glowSettings';
+import type {ReviewStackUi} from './products/change-stack/source/ReviewStackEditor';
+import type {TriageCardCopy, TriageUi, TriageViewId} from './products/triage/source/TriageEditor';
 export type Gesture = 'Open_Palm' | 'Pointing_Up' | 'Pinch' | 'Swipe' | 'None';
 export type BroadcastKind = 'presenter' | 'headline' | 'triage' | 'stack' | 'ticker' | 'bug' | 'ident';
-export type BrandAssetKind = 'name-intro' | 'name-intro-wipe' | 'logo-reveal' | 'circle-wipe' | 'stack-wipe' | 'color-bar-wipe' | 'pixel-glow-wipe' | 'type-reveal' | 'brand-signoff' | 'signal-loop' | 'color-bar-reveal' | 'color-bar-loop' | 'color-bar-transition';
+export type ProductAssetKind = 'change-stack' | 'triage-board';
+export type ProductView = 'overview' | 'layers' | 'architecture' | 'security';
+export type ProductAnimation = 'walkthrough' | 'scene' | 'still';
+export type ProductUiState = ReviewStackUi & {openSummaryIds: string[]};
+export type BrandAssetKind = 'name-intro' | 'name-intro-wipe' | 'logo-reveal' | 'circle-wipe' | 'stack-wipe' | 'color-bar-wipe' | 'pixel-glow-wipe' | 'type-reveal' | 'brand-signoff' | 'signal-loop' | 'color-bar-reveal' | 'color-bar-loop' | 'color-bar-transition' | ProductAssetKind;
 export type OverlayKind = 'code' | 'diagram' | 'callout' | 'terminal' | 'agentflow' | 'hero' | BroadcastKind | BrandAssetKind;
 export type AssetType = 'linear' | 'looping';
 export type Binding = 'cue' | 'progress' | 'follow';
@@ -18,6 +24,11 @@ export type Overlay = {
   colorway?: 'dark' | 'light'; direction?: 'left' | 'right';
   barHeight?: number; barPosition?: 'top' | 'center' | 'bottom'; barColors?: string[];
   pixelSize?: number; scatter?: number;
+  productView?: ProductView; productRepository?: string; productLayer?: number;
+  productAnimation?: ProductAnimation; productUi?: Partial<ProductUiState>;
+  productPr?: string; productOverviewTitle?: string; productHideContext?: boolean;
+  triageView?: TriageViewId; triageUi?: Partial<TriageUi>;
+  triageCards?: Record<string, Partial<TriageCardCopy>>;
 };
 export type Project = {
   name: string; mediaUrl: string | null; mediaName: string; duration: number; fps: number;
@@ -26,5 +37,6 @@ export type Project = {
   broadcast?: boolean;
   brandAsset?: boolean;
 };
-export type SceneProps = {project: Project; transparent?: boolean};
+export type ProductEditHandler = (id: string, patch: Partial<Overlay>) => void;
+export type SceneProps = {project: Project; transparent?: boolean; onProductEdit?: ProductEditHandler; reduceMotion?: boolean};
 export const gestureLabel: Record<Gesture, string> = {Open_Palm: 'Open palm', Pointing_Up: 'Point', Pinch: 'Pinch', Swipe: 'Hand sweep', None: 'No gesture'};

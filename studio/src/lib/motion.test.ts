@@ -69,7 +69,7 @@ test('motion curves do not overshoot and repeating phases are stable across back
 });
 
 test('removed assets disappear from both pickers while existing projects remain readable', () => {
-  assert.equal(availableBrandAssetKinds.length + 1, 9);
+  assert.equal(availableBrandAssetKinds.length + 1, 11);
   assert.deepEqual(groupLibraryKinds(availableBrandAssetKinds).find(group => group.id === 'names')?.kinds, ['name-intro', 'name-intro-wipe']);
   assert.ok(assetCollections.linear.includes('name-intro-wipe'));
   for (const kind of ['logo-reveal', 'circle-wipe', 'signal-loop', 'type-reveal', 'brand-signoff'] as const) {

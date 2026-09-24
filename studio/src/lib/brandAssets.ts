@@ -2,8 +2,10 @@ import type {BrandAssetKind, Overlay, OverlayKind, Project} from '../types';
 import {colorBarColors, colorBarSegments, isColorBar} from './colorBar';
 import {pixelWipeDefaults} from './pixelWipe';
 import {cycleProgress, frameProgress, motionCurves} from './motion';
+import {isProductAsset, productAssetDefaults, productAssetTemplates} from './productAssets';
 
 export const brandAssetTemplates = {
+  ...productAssetTemplates,
   'name-intro': {code: 'LT-01', name: 'Name intro', family: 'Lower thirds', duration: 5, alpha: true, title: 'Name', body: 'Position', titleMax: 56, bodyMax: 72, description: 'A name panel with position and company together on a contrasting color strip.', usage: 'Introduce a speaker over footage. Choose the side that leaves their face clear.'},
   'name-intro-wipe': {code: 'LT-02', name: 'Color bar intro', family: 'Lower thirds', duration: 5, alpha: true, title: 'Name', body: 'Position', titleMax: 56, bodyMax: 72, description: 'One continuous color bar reveals your name, then your details, and returns for a staggered exit.', usage: 'Introduce a speaker with the color bar reveal and exit cadence.'},
   'logo-reveal': {code: 'ID-01', name: 'Logo reveal', family: 'Reveals', duration: 3.2, alpha: true, title: 'Tagline', body: '', titleMax: 72, bodyMax: 0, description: 'A measured entrance for the full CodeRabbit lockup.', usage: 'Open a video, product launch, or presentation.'},
@@ -35,6 +37,7 @@ export const brandAssetDefaults = Object.fromEntries(brandAssetKinds.map(kind =>
   ...(kind === 'color-bar-wipe' ? {barColors: [...colorBarColors]} : {}),
   ...(kind === 'pixel-glow-wipe' ? {accent: '#687FF5', intensity: 1, ...pixelWipeDefaults} : {}),
   ...(isNameIntro(kind) ? {title: 'Your name', body: 'Position', company: 'CodeRabbit', placement: 'left', textColor: '#121014', detailBackground: '#25E2A8'} : {}),
+  ...(isProductAsset(kind) ? productAssetDefaults[kind] : {}),
 }])) as Record<BrandAssetKind, Omit<Overlay, 'id'>>;
 
 export function assetProject(asset: Overlay, width = 1280): Project {

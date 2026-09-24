@@ -20,6 +20,18 @@ On this Codex desktop workspace, dependencies are installed already. `./studio/s
 
 For production mode, run `npm run studio:build`, then `npm run studio:serve`. Existing authored videos still use `npm start` and the original render scripts.
 
+## Products
+
+**Library → Products → Change Stack** uses the website's actual `ReviewStackScreen` React mock UI, including its overview, three diff layers, architecture impact, and security blast-radius views. The original fixtures, SVG artwork, and styles are included locally; no GitHub connection is needed at runtime. See [source provenance and adaptation notes](src/products/change-stack/README.md).
+
+**Library → Products → Triage** uses the website's original `TriageScreen` / `ResourceBoard` mock, including Requires Action, All PRs, Delivery Guard, and Safe to close. Edit card text on the canvas or in the inspector, change grouping and layout, and open reviewer details. Native state and copy edits are saved in presets and compositions. The frame-driven walkthrough, selected-scene animation, and still mode support MP4 and transparent export. See [Triage source and animation adaptations](src/products/triage/README.md).
+
+Choose a walkthrough, an animated single view, or a still. Use the scene buttons below the playhead to jump to a readable frame, or click the product's own sidebar. Clicking the canvas pauses playback. The title, repository, PR number, overview heading, and summary can be edited directly on the canvas or in Customize. Context visibility, disclosures, and activity filters are saved with the asset. Presets and compositions export through the same renderer to MP4 or transparent ProRes at 720p/1080p.
+
+Motion comes entirely from Remotion's frame: the shell and panels reveal using opacity/translation, and the original graph nodes animate independently. The UI is memoized so static chrome, diff syntax, and SVG artwork do not rebuild every frame. CSS transitions/keyframes are disabled inside the product. Reduced-motion preview settings keep the UI visible without entrance or node motion.
+
+Run `npm run studio:styles` after changing product utility classes; `npm run studio:build` includes this step. The generator scopes Tailwind/Carrot styles to the product and derives a small used-selector subset of the original hero stylesheet. Generated styles are checked in so direct Remotion renders work without a separate CSS build.
+
 ## Linear and looping assets
 
 **Library → Linear** contains **Name intro**, **Stack wipe**, **Color bar wipe**, **Change Stack pixel wipe**, **Color bar reveal**, and **Color bar reveal & exit**. **Library → Looping** contains **Change Stack glow** and **Color bar loop**. Select and customize an asset, then choose **Export asset**. The export dialog has two options: **Video** (H.264 MP4) and **Transparent background** (ProRes 4444 MOV, graphics only, no audio). Full-frame background assets show the transparent option as unavailable. Choose 720p or 1080p in the same dialog. Covering wipes show their exact cut frame; the pixel wipe marks the fully revealed grid. Save/open JSON presets or add the asset to the existing composition.

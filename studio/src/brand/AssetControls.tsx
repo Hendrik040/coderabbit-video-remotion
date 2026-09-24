@@ -9,8 +9,11 @@ import {ColorBarControls} from './ColorBarControls';
 import {GlowControls} from './GlowControls';
 import {PixelWipeControls} from './PixelWipeControls';
 import {NameIntroControls} from './NameIntroControls';
+import {isProductAsset} from '../lib/productAssets';
+import {ProductControls} from '../products/ProductControls';
 
 export function AssetControls({asset, onChange}: {asset: Overlay; onChange: (patch: Partial<Overlay>) => void}) {
+  if (isProductAsset(asset.kind)) return <ProductControls asset={asset} onChange={onChange}/>;
   if (isNameIntro(asset.kind)) return <NameIntroControls asset={asset} onChange={onChange}/>;
   if (asset.kind === 'hero') return <GlowControls asset={asset} onChange={onChange}/>;
   if (asset.kind === 'pixel-glow-wipe') return <PixelWipeControls asset={asset} onChange={onChange}/>;

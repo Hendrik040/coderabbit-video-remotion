@@ -80,7 +80,7 @@ function TrackedHand({sample, simulated}: {sample: Sample; simulated: boolean}) 
   </div>;
 }
 
-export const Scene: React.FC<SceneProps> = ({project, transparent = false}) => {
+export const Scene: React.FC<SceneProps> = ({project, transparent = false, onProductEdit, reduceMotion}) => {
   useBroadcastFonts();
   const frame = useCurrentFrame();
   const {fps, width, height} = useVideoConfig();
@@ -105,7 +105,7 @@ export const Scene: React.FC<SceneProps> = ({project, transparent = false}) => {
       {project.overlays.filter(o => o.enabled && assetType(o.kind) === 'linear' && !isColorBar(o.kind) && !isTransition(o.kind)).map(overlay => {
         const local = frame - overlay.start * fps;
         if (local < 0 || local >= overlay.duration * fps) return null;
-        if (isBrandAsset(overlay.kind)) return <MotionAsset key={overlay.id} overlay={overlay} frame={local} fps={fps}/>;
+        if (isBrandAsset(overlay.kind)) return <MotionAsset key={overlay.id} overlay={overlay} frame={local} fps={fps} onProductEdit={onProductEdit} reduceMotion={reduceMotion}/>;
         if (isBroadcast(overlay.kind)) return <BroadcastOverlay key={overlay.id} overlay={overlay} frame={local} fps={fps} hasBackground={backgrounds.length > 0}/>;
         const motion = broadcastMotion(local, overlay.duration, fps);
         const progress = overlay.binding === 'progress' && hand?.visible ? clamp((hand.x - 0.18) / 0.65) : clamp(local / (overlay.duration * fps * 0.8));

@@ -1,0 +1,18 @@
+/* One P0 treatment for the product preview and its isolated illustrations. */
+.p0[data-priority='P0'] {
+  color: var(--text-color-cui-danger);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  background-color: var(--background-color-cui-danger-subtle);
+  border-color: color-mix(in srgb, var(--text-color-cui-danger) 24%, transparent);
+  box-shadow: none;
+}
+
+.p0[data-priority='P0'] > span:first-child {
+  background-color: var(--background-color-cui-danger);
+}
+
+.p0[data-priority='P0'] > span:last-child {
+  transform: none;
+}

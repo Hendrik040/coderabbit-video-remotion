@@ -1,0 +1,9 @@
+.product-view-picker {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px;}
+.product-view-picker > button {display: flex; flex-direction: column; align-items: flex-start; gap: 10px; text-align: left; border: 1px solid #3a3a3a; border-radius: 6px; background: #222; color: #aaa; padding: 13px 10px; min-height: 101px;}
+.product-view-picker > button[aria-pressed=true] {border-color: #b8b8b8; background: #303030; color: #f3f3f3;}
+.product-view-picker strong {font-size: 11px; font-weight: 500;}
+.product-view-picker small {font-size: 9px; line-height: 1.5; color: #999; margin-top: -5px;}
+.product-view-picker > button:active {transform: scale(.98);}
+.product-reference {font-size: 10px; margin-top: 18px; color: #999;}
+.triage-view-picker > button {min-height: 48px; justify-content: center;}
+@media (hover: hover) and (pointer: fine) {.product-view-picker > button:hover {border-color: #888; color: #eee;}}

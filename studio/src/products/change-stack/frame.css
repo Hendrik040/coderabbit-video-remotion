@@ -1,0 +1,12 @@
+/* Host behavior only; the product layout and artwork are the website components. */
+.change-stack-source *, .change-stack-source *::before, .change-stack-source *::after {
+  animation: none !important;
+  transition: none !important;
+}
+.change-stack-source [data-review-panel="content"], .change-stack-source [data-review-panel="context"] {
+  opacity: var(--product-panel-opacity, 1);
+  translate: 0 var(--product-panel-y, 0px);
+}
+.change-stack-source [contenteditable] {cursor: text; outline-offset: 3px;}
+.change-stack-source [contenteditable]:focus {outline: 1px solid var(--color-cui-mauve-9);}
+.change-stack-source:not([data-interactive="true"]) {pointer-events: none;}
