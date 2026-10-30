@@ -24,12 +24,14 @@ Read `references/scene-recipes.md` for each scene's structure and cue sheet, `re
 - A demo moment where the real screen is small, slow or busy: an agent prompt, a terminal command, an app flow, a review result, a list of changed files.
 - The user wants the presenter to stay visible: floating cards sit in the empty side of the shot, so no full-screen cutaway is needed for most beats.
 - One moment per video deserves a full-screen stage: the product's key result (here, the returned finding and its suggested fix).
+- A presenter film that explains several products also needs full-screen cutaways for the beats whose content is the product's own data or UI: a map, a graph, an app's real interface, a field of items. Those use the look of CodeRabbit's launch films, with these cards for everything that floats. `launch-look-cutaways` covers both, and how the two mix in one film.
 
 Not for:
 
 - A user's own polished screen recording (for example a Screen Studio export). Show it as recorded and put the presenter in a bubble; that is an editing task.
 - A faithful imitation of one app's real interface. Use `slack-ui-demo`.
 - Abstract loops and pipeline diagrams with no product content. Use `infographic-flows`.
+- Full-screen cutaways in the launch films' look: dark plates, the attack surface map, voxel agent cursors, an app rebuilt from Figma with camera push-ins. Use `launch-look-cutaways`.
 
 ## Workflow
 
@@ -78,7 +80,7 @@ The kit's cream keys are offset from the palette step numbers: `C.cream` is Crea
 | `Connector` | Elbow polyline that draws on with `strokeDasharray`, ending in one 6 px square brand pixel |
 | `typedCount(t, schedule)` | Characters shown from `[time, count]` pairs. Two pairs 0.01 s apart make a step, so words appear on their spoken word and hold |
 | `Caret` | Steady while typing, then at most four blinks (half-second phases) from `blinkFrom`, then steady. `until` hides it |
-| `Decode` | Characters resolve left to right out of seeded glyph noise that changes every two frames. Deterministic across renders |
+| `Decode` | Characters resolve left to right out of seeded glyph noise that changes every two frames. Deterministic across renders. Beside other text, decode inside a slot the width of the final text, so its neighbours don't shift while glyphs change |
 | `Cursor` | Orange arrow with a white outline. It travels between keys with the travel curve (at most 0.55 s per move), dips 14% on a click and draws an expanding orange ring |
 | `PixelCorners` | Three-square brand pixel brackets centered 10 px outside a card's corners (their outer edge sits 13 px out). They fade in over 0.2 s; the install, prompt and login cards start them 0.12 s before the tag (0.18 s before the card). Positions round to whole pixels, and opacity above 0.995 snaps to 1 |
 | `PixelField` | Fine 3 px pixel pattern with a radial falloff for light stages |
@@ -102,7 +104,7 @@ Each pattern below is one composition in `scenes.tsx`. The details and cue sheet
 
 ## Timing
 
-- Land each beat on the word that names it. Start each entrance (highlight, chip, row) on the ASR start of its word, as the worked example does.
+- Land each beat on the word that names it. Start each entrance (highlight, chip, row) on the voice onset of its word. ASR word times can be off by 0.4–0.7 s either way, so check each one against the dialogue master; the `launch-look-cutaways` skill's `scripts/onsets.py` measures them.
 - Cards wipe in over 0.45–0.55 s and chips over 0.45 s. Start a connector 0.15–0.2 s before its chip and draw it in 0.3–0.5 s, so the chip wipes in as the line arrives.
 - Typed commands follow the spoken words: a step to the next word at each word start, linear typing to the word's end, then a hold. When only word starts are known, type each word at about 28 characters per second (0.035 s per character, the 08 rate) and finish before the next word starts. For `coderabbit auth login` with words at 1.2, 2.0 and 2.9 s:
 
@@ -147,9 +149,9 @@ Each pattern below is one composition in `scenes.tsx`. The details and cue sheet
 | End-card title | Geist SemiBold 54 px with −1.2 px tracking |
 | Install chip | Hack Bold 44 px |
 
-- **Casing.** Tags and labels are sentence case and untracked (`Terminal`, `Suggested fix`). Chips that quote the prompt keep its lowercase (`rate limiting`), and status chips are lowercase like a CLI line (`review running`). The walk-and-talk cutaways use a different, louder scale; keep one style per film:
-  - kicker: Hack 700, 19 px, uppercase, +2.6 px tracking;
-  - headline: Geist 600, 76 px, line-height 1.06, −0.034 em tracking;
+- **Casing.** Tags and labels are sentence case and untracked (`Terminal`, `Suggested fix`). Chips that quote the prompt keep its lowercase (`rate limiting`), and status chips are lowercase like a CLI line (`review running`). The launch-look cutaways (`launch-look-cutaways`) use a louder scale with uppercase, tracked captions. In a film that mixes both, each scale stays on its own surfaces:
+  - kicker: Hack 700, 22 px, uppercase, +2.6 px tracking;
+  - headline: Geist 600, 60–76 px (76 by default), line-height 1.06, −0.034 em tracking;
   - body: Geist 400, 29 px, line-height 1.42, Mauve 11.
 - **Monospace only for code.** Hack is for commands, file names, code and chips. Geist carries every sentence the viewer reads.
 - **Font conflict.** The older skills in this repo (and the README's brand reference) still prescribe IBM Plex Mono and `spring()`. These inserts follow the current brand kit (`docs/brand-motion-system.md`): Geist and Hack, with bezier curves and no springs.
@@ -183,7 +185,7 @@ The Antigravity v7 cut shipped with dialogue only. When a film needs sound, plan
 - **Typing (not built yet).** The walk-and-talk set has no typing effect. When you add one, give each typed word one short keystroke burst, sized from that word's typing time in the `typedCount` schedule, near the click level. A pasted prompt gets one short burst, not a full run. Pair each `Cursor` click with the click effect.
 - **Bed and bus:**
   - The music runs at −19 dB gain, with `highpass=f=40` and `equalizer=f=2500:t=q:w=1.2:g=-4`, placed with the same `adelay` and `asetpts` pair. Cut or repeat it with a 40 ms `acrossfade` centered on a bar line, and fade it out over the last 1.2 s.
-  - The dialogue ducks the bed through `sidechaincompress=threshold=0.04:ratio=3:attack=20:release=350`, so speech sits 16–27 LU above it.
+  - The dialogue ducks the bed through `sidechaincompress=threshold=0.04:ratio=3:attack=20:release=700`, so speech sits 16–27 LU above it. The walk-and-talk raised the release from 350 ms so the bed doesn't breathe up in the gaps inside sentences, gives the music drop a short ramp back while the duck still releases, and pins every `eval=frame` gain curve with `asetnsamples=n=64:p=0` (see `launch-look-cutaways`).
   - Effects mix with `amix=inputs=N:normalize=0:duration=longest`. Then `[dialogue][bed][effects]amix=inputs=3:normalize=0:duration=first,alimiter=limit=0.84:level=false:latency=1`.
   - `level=false` keeps the ceiling at 0.84 (−1.5 dBFS) instead of auto-leveling to 0 dB. `latency=1` removes the limiter's 5 ms lookahead delay, so the voice stays sample-aligned with the picture. The walk-and-talk mixes measure about −16 LUFS integrated.
 - **Keep audio out of Git.** The bed (an Artlist track) and the effects (Artlist and the team's product-video assets) are linked into a gitignored `.studio-data/<film>/public/media/`. Adobe Stock preview files are not licensed for delivery.
@@ -197,6 +199,7 @@ The Antigravity v7 cut shipped with dialogue only. When a film needs sound, plan
 - For a new film, copy `scripts/render-antigravity.mjs` to `scripts/render-<project>.mjs` and change `entryPoint`, `shots` and the default output folder. `--stills` writes only the review frames, `--only=<ids>` re-renders single scenes and throws on an id that is not in `shots`, and `--out=<dir>` chooses the destination.
 - A CLI render needs the full flag set (`references/render-and-verify.md`). `remotion.config.ts` sets JPEG frames, so a transparent pixel format without `--image-format=png` fails. Without `--pixel-format`, Remotion sends its default `yuv420p`, so the file can be tagged 4444 yet carry no alpha.
 - Keep every value a pure function of the frame: no timers, CSS animations or wall clock, and seeded noise only. Use 2D transforms for anything that moves. Parallel renders dropped 3D-transformed layers in the walk-and-talk final.
+- Render with Remotion's own Chrome Headless Shell: leave `browserExecutable` unset. The installed Google Chrome returned about 0.5% of the walk-and-talk's frames as a 3 × 3 tiling of their top-left corner. `scripts/render-antigravity.mjs` still prefers the installed Chrome. Scan every render for 1–3-frame glitches before delivery with `glitch_runs.py`, in the `launch-look-cutaways` skill's `scripts/`. That skill lives on branch `claude/walk-talk-final-cut` until it merges.
 - Verify each master with `ffprobe` before placing it: the codec tag, the pixel format, the `30000/1001` frame rate and the frame count, then alpha on an open frame. FFmpeg reports a 4444 master with alpha as `yuva444p12le`, so don't expect the `yuva444p10le` you rendered. Premiere and FFmpeg both composite ProRes 4444 alpha correctly over the camera picture.
 - Never render into another project's or session's folder. Kill a render you stop with `pkill -f <script>` and check for orphaned `node` processes, because a killed parent can leave a renderer writing files.
 
