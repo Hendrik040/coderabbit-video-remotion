@@ -29,7 +29,7 @@ npm run studio:serve # serve the production build locally
 
 The most important thing to know: **this repo is built to be driven with Claude Code.** The design patterns for each video style are captured as skills in `.claude/skills/`, so you can ask Claude for a new video and it will follow the established look automatically — you rarely need to write a composition by hand.
 
-## The three video families
+## The four video families
 
 ### 1. Typewriter text slides (`remotion-typewriter` skill)
 
@@ -57,6 +57,16 @@ Videos that play like a **clean screen recording** of Slack showing a CodeRabbit
 - **Examples:** `PlanSlackDemo` V1–V3
 - **Look:** deliberately *not* brand-styled — Lato font and Slack's real dark palette, because realism beats branding for a fake screen recording. 1920×1080 @ 30fps.
 
+### 4. Simplified product-UI inserts (`product-ui-animations` skill)
+
+Animated product moments that replace raw screen recordings in presenter videos. Floating cards sit beside the speaker: a terminal that types the command on the spoken words, a prompt card whose phrases branch into chip trees, a simplified app card with a clicking pointer. A full-screen stage carries the key result (code under review, the returned finding, the suggested fix). Every beat is cued from word timings, so it lands as the line is spoken.
+
+- **Skill:** `.claude/skills/product-ui-animations/SKILL.md` (scene recipes, render and verify commands, and the reference-film method in `references/`)
+- **Canonical reference:** `src/antigravity/` (`kit.tsx` primitives, `scenes.tsx` scenes, and a separate entry point, `index.tsx`)
+- **Examples:** the eight inserts of the CodeRabbit plugin for Google Antigravity launch film (terminal install, prompt and review loop, login demo, questions, review run, finding stage, files changed, end card)
+- **Look:** the current brand kit rather than the older look above: Geist and Hack from `public/brand/fonts`, the Mauve, Cream, Orange, Mint and Cobalt tokens, the 600 ms reveal curve, and the official marks. Compositions use the edit's own frame rate (29.97 fps for that film). Overlays render as ProRes 4444 with alpha.
+- **Preview and render:** `npx remotion studio src/antigravity/index.tsx` opens these compositions. `npm start` does not list them, because they are not in `src/Root.tsx`. Render with `node scripts/render-antigravity.mjs`: `--stills` writes review frames only, `--only=<ids>` limits it to some compositions, and `--out=<dir>` sets the output folder (default `out/antigravity`).
+
 ## How to make a new video
 
 1. Open this repo in Claude Code.
@@ -75,12 +85,12 @@ npm install
 npm start        # opens Remotion Studio at http://localhost:3000
 ```
 
-All compositions are registered in `src/Root.tsx` and show up in the Studio sidebar.
+All compositions except the product-UI inserts are registered in `src/Root.tsx` and show up in the Studio sidebar. The inserts have their own entry point (see family 4).
 
 ## Rendering
 
 ```bash
-# Render any composition by its ID (see src/Root.tsx)
+# Render any composition in src/Root.tsx by its ID (product-UI inserts: see family 4)
 npx remotion render src/index.ts PlanSlackDemoV3 out/plan-slack-demo.mp4
 
 # As GIF
@@ -93,26 +103,33 @@ npx remotion render src/index.ts CodeRabbitIntro out/intro.mp4 --height=720 --wi
 ## Project structure
 
 ```
-├── .claude/skills/        # The three video-family skills (start here)
+├── .claude/skills/        # The four video-family skills (start here)
 │   ├── remotion-typewriter/
 │   ├── infographic-flows/
-│   └── slack-ui-demo/
+│   ├── slack-ui-demo/
+│   └── product-ui-animations/
 ├── src/
-│   ├── Root.tsx           # All compositions registered here
+│   ├── Root.tsx           # Compositions registered here (not the product-UI inserts)
 │   ├── index.ts           # Entry point
+│   ├── antigravity/       # Product-UI inserts kit, scenes and separate entry point
 │   └── *.tsx              # One file per composition
-├── public/                # Logos/avatars loaded via staticFile() (cr-logo.png, etc.)
+├── public/                # Logos/avatars loaded via staticFile() (cr-logo.png, brand/ fonts and marks)
+├── scripts/               # Render scripts (render-antigravity.mjs)
 ├── brand-samples/         # Brand reference assets, backgrounds, external logos
 └── out/                   # Rendered videos (gitignored)
 ```
 
 ## Brand reference
 
+These colors and the font belong to the older families:
+
 - **Orange** `#FF570A` — primary accent
 - **Aquamarine** `#25BAB1`, **Pink** `#F2B8EB` — secondary accents
 - **Dark** `#171717` / **Black** `#000000` — backgrounds
 - **Cream** `#F6F6F1` — light text/background
-- **Font:** IBM Plex Mono Medium (500) everywhere — except Slack UI demos, which use Lato for realism
+- **Font:** IBM Plex Mono Medium (500) — except Slack UI demos, which use Lato for realism
+
+Product-UI inserts use the official tokens in `studio/src/lib/brandPalette.ts` (CR Orange `#FF570A`, CR Mint `#25E2A8`, CR Cobalt `#687FF5`, Mauve grounds, Cream 6 `#F7F2EF`), with Geist and Hack from `public/brand/fonts`.
 
 ## License
 
