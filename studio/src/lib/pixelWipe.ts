@@ -18,13 +18,14 @@ const noise = (x: number, y: number) => {
 /** Previously saved coarse image tiles become the reference's fine points. */
 export const normalizeWipePixelSize = (size = pixelWipeDefaults.pixelSize) => size > 8 ? changeStackPixelGrid.size : Math.max(2, Math.min(8, Math.round(size)));
 
-/** Fixed points on the reference grid, with deterministic independent visibility timings. */
-export function createWipePixels(pixelSize = pixelWipeDefaults.pixelSize): WipePixel[] {
+/** Fixed points on the reference grid, with deterministic independent visibility timings.
+ * The field defaults to the 1280x720 studio canvas; other canvases pass their own size. */
+export function createWipePixels(pixelSize = pixelWipeDefaults.pixelSize, width = 1280, height = 720): WipePixel[] {
   const size = normalizeWipePixelSize(pixelSize), step = size + changeStackPixelGrid.gap;
-  const columns = Math.ceil(1280 / step), rows = Math.ceil(720 / step);
+  const columns = Math.ceil(width / step), rows = Math.ceil(height / step);
   return Array.from({length: columns * rows}, (_, index) => {
     const row = Math.floor(index / columns), column = index % columns;
-    return {x: column * step, y: row * step, width: size, height: Math.min(size, 720 - row * step),
+    return {x: column * step, y: row * step, width: size, height: Math.min(size, height - row * step),
       column: column / Math.max(1, columns - 1), rowDelay: noise(row, 101),
       timing: noise(column, row), exitTiming: noise(column + 97, row + 317),
       speed: noise(column + 163, row + 571), brightness: noise(column + 31, row + 83)};

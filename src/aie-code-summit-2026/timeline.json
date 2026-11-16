@@ -1,0 +1,68 @@
+{
+  "fps": {
+    "num": 24000,
+    "den": 1001
+  },
+  "width": 1920,
+  "height": 1080,
+  "source_clock": "phone",
+  "source_in_frame": 800,
+  "source_out_frame": 38704,
+  "intro_frames": 72,
+  "outro_frames": 72,
+  "total_frames": 38048,
+  "duration_seconds": 1586.9186666666665,
+  "late_slides_start_frame": 25285,
+  "qa_start_frame": 31600,
+  "chapters": [
+    {
+      "source_seconds": 33.36666666666667,
+      "sequence_seconds": 3.0029999999999997,
+      "number": "01",
+      "title": "THE EXPERIMENT"
+    },
+    {
+      "source_seconds": 166.5,
+      "sequence_seconds": 136.1363333333333,
+      "number": "02",
+      "title": "PROOF OF AUTONOMY"
+    },
+    {
+      "source_seconds": 384,
+      "sequence_seconds": 353.6363333333333,
+      "number": "03",
+      "title": "FIRST PRINCIPLES"
+    },
+    {
+      "source_seconds": 540,
+      "sequence_seconds": 509.6363333333333,
+      "number": "04",
+      "title": "OUT OF THE LOOP"
+    },
+    {
+      "source_seconds": 582,
+      "sequence_seconds": 551.6363333333334,
+      "number": "05",
+      "title": "PATTERNS THAT SCALE"
+    },
+    {
+      "source_seconds": 882,
+      "sequence_seconds": 851.6363333333334,
+      "number": "06",
+      "title": "ENGINEERING FOR AGENTS"
+    },
+    {
+      "source_seconds": 1182,
+      "sequence_seconds": 1151.6363333333334,
+      "number": "07",
+      "title": "TAKEAWAYS"
+    },
+    {
+      "source_seconds": 1317.9833333333333,
+      "sequence_seconds": 1287.6196666666667,
+      "number": "08",
+      "title": "AUDIENCE Q&A"
+    }
+  ],
+  "internal_content_removals": []
+}
