@@ -30,3 +30,6 @@ npm-debug.log*
 .studio-data/
 public/models/
 public/wasm/
+
+# AIE Code Summit 2026 clean layers (directory link made by scripts/link-aie-code-summit-media.mjs)
+public/aie-code-summit-2026

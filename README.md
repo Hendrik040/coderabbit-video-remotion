@@ -67,6 +67,19 @@ Animated product moments that replace raw screen recordings in presenter videos.
 - **Look:** the current brand kit rather than the older look above: Geist and Hack from `public/brand/fonts`, the Mauve, Cream, Orange, Mint and Cobalt tokens, the 600 ms reveal curve, and the official marks. Compositions use the edit's own frame rate (29.97 fps for that film). Overlays render as ProRes 4444 with alpha.
 - **Preview and render:** `npx remotion studio src/antigravity/index.tsx` opens these compositions. `npm start` does not list them, because they are not in `src/Root.tsx`. Render with `node scripts/render-antigravity.mjs`: `--stills` writes review frames only, `--only=<ids>` limits it to some compositions, and `--out=<dir>` sets the output folder (default `out/antigravity`).
 
+## Conference talk package: AIE Code Summit 2026
+
+This package covers Erik Thorelli's *Manage Yourself Out of the Loop* at AI Engineer Code Summit 2026. It is the Plain, Light and Full motion package, ported from the talk's Python engine, and matches it frame for frame (24000/1001 fps, 38,048 frames).
+
+- **Source:** `src/aie-code-summit-2026/`, with its own entry point, `index.tsx`. Cue text and times live in `cues.ts`. See its [README](src/aie-code-summit-2026/README.md).
+- **Compositions:** `AIE26-Plain`, `AIE26-Light` and `AIE26-Full` are the talk with its clean layers and program audio. `AIE26-Overlay-<Version>` is the transparent motion overlay for ProRes 4444.
+- **Media:** run `node scripts/link-aie-code-summit-media.mjs "<.../Edit-v4-Three-Versions>"` once. It links the v4 clean layers into `public/aie-code-summit-2026`. The link is gitignored and the media is never copied.
+- **Preview and render:** `npx remotion studio src/aie-code-summit-2026/index.tsx` opens the compositions. Render with `node scripts/render-aie-code-summit.mjs`:
+  - `--program` writes the `.mov` master and the `.mp4`.
+  - `--overlay [--only=card]` writes ProRes 4444.
+  - `--stills=<frames>` writes review frames.
+  - `--version=plain,light,full` and `--frames=a-b` narrow the render.
+
 ## How to make a new video
 
 1. Open this repo in Claude Code.
@@ -85,7 +98,7 @@ npm install
 npm start        # opens Remotion Studio at http://localhost:3000
 ```
 
-All compositions except the product-UI inserts are registered in `src/Root.tsx` and show up in the Studio sidebar. The inserts have their own entry point (see family 4).
+All compositions except the product-UI inserts and the conference talk package are registered in `src/Root.tsx` and show up in the Studio sidebar. Those two have their own entry points (see family 4 and the AIE Code Summit section).
 
 ## Rendering
 
@@ -112,9 +125,10 @@ npx remotion render src/index.ts CodeRabbitIntro out/intro.mp4 --height=720 --wi
 │   ├── Root.tsx           # Compositions registered here (not the product-UI inserts)
 │   ├── index.ts           # Entry point
 │   ├── antigravity/       # Product-UI inserts kit, scenes and separate entry point
+│   ├── aie-code-summit-2026/  # Conference talk package (engine port, cues, separate entry point)
 │   └── *.tsx              # One file per composition
 ├── public/                # Logos/avatars loaded via staticFile() (cr-logo.png, brand/ fonts and marks)
-├── scripts/               # Render scripts (render-antigravity.mjs)
+├── scripts/               # Render scripts (render-antigravity.mjs, render-aie-code-summit.mjs, media link)
 ├── brand-samples/         # Brand reference assets, backgrounds, external logos
 └── out/                   # Rendered videos (gitignored)
 ```

@@ -23,7 +23,7 @@ const lineClamp = (lines: number): CSSProperties => ({display: '-webkit-box', We
 const heading: CSSProperties = {fontFamily: sans, fontWeight: 600, letterSpacing: -2.2, lineHeight: 1.06, margin: 0, ...lineClamp(3)};
 const body: CSSProperties = {fontFamily: sans, fontSize: 22, lineHeight: 1.45, color: brand.muted, ...lineClamp(2)};
 
-function Logo({width = 220}: {width?: number}) {
+export function Logo({width = 220}: {width?: number}) {
   // Supplied full lockup; no reconstructed lettering, masks, recoloring or rotation.
   return <Img src={staticFile('brand/white-typemark.svg')} style={{width, height: width * 313 / 2152, objectFit: 'contain', display: 'block'}}/>;
 }
