@@ -123,6 +123,28 @@ An unrounded start shows up to half a frame of false lag.
 
 **Code:** commit only when asked ("Commit, don't push"). Update the README section and memory with what changed and where it lives.
 
+## Cleaning the voice
+
+A street recording carries traffic, wind and water. The walk-and-talk's worst clips had their noise only 23-30 dB under the voice. `scripts/voice_denoise.py` reduces it clip by clip against each clip's own noise profile, offline and sample-aligned (with no reduction it returns its input bit for bit).
+
+**What he chose, and what he rejected:**
+- **Keep the reduction even.** He posted the first version: one Wiener gain throughout, so the background is lower but the same whether he talks or pauses. Give every clip the same `floor_db` (for example -20) and pass the same value for the speech limits, `<hf dB> <mid dB>` = `-20 -20`, so the reduction doesn't change when he starts talking.
+- **Never gate the pauses.** Versions that cleared the pauses to silence (-100 dBFS) while letting the noise through under his words "sound super weird", worse than no cleanup. Noise that comes and goes with the voice is more noticeable than steady noise.
+- **Watch the top end.** A strong Wiener gain dulls the voice above 6 kHz (8-10 dB on the noisiest clip), which he heard as "numb". Compare speech frames band by band against the original; more than about 1 dB of loss above 4 kHz is audible as numbness.
+- **Judge by ear, on a copy without music.** The bed masks both the noise and the artifacts; a no-music version (`music.off`) is the one to listen to.
+
+**Measures that helped decide:** per-clip noise floor (10th percentile of 20 ms frames), the voice's level per band in its strong frames, isolated time-frequency blips in the pauses (musical noise), and how much more the background varies right after a phrase than in the original (breathing).
+
+**Tried and not worth it here:** DeepFilterNet3 alone dulled the top end 2-4 dB and left more in the pauses; blended below 4 kHz it removed about 1 dB more and thinned the voice's body.
+
+## Social copy
+
+- **Post a personal film from the presenter's own account, and have the brand quote it.** The brand's quote names the products; his post tells the story.
+- **Every number in the copy must match the film.** A count that differs from the one on screen reads as an error; say "in a single week" when the week isn't last week.
+- **Say what was counted:** PRs merged into the monorepo's main branch, not "shipped to prod".
+- **Keep it under 280 characters** with X's weighting (emoji and arrows count double), put links in the first reply, and upload the SRT as captions. Slack shortcodes (`:arrow_down:`) don't render on X.
+- Private numbers in a post are his call; flag them once, then use what he approves.
+
 ## Data that is not public
 
 - Real numbers from private repositories stay out of Git; this repository is public.
