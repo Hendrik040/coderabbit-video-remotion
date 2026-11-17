@@ -2,7 +2,7 @@
 name: launch-look-cutaways
 description: Use this skill whenever building or revising full-screen product cutaways in the look of CodeRabbit's launch films (Leon's Triage, Change Stack and Secure films) in Remotion, or a presenter-led product film (a walk-and-talk, a product update) that mixes such cutaways with floating product-UI cards. It covers dark plates with rail wipes; the attack surface map with a DeepScan sweep, red vulnerable tiles and exploit paths; voxel AI AGENT cursors; a PR dot field; an app rebuilt from Figma with camera push-ins; blast-radius graphs; commit graphs from real data; studio wipes, colour-bar straps and the sting outro; and music beds fitted to the cut. Use it to decide which beats go full screen and which float, to work through Cutroom notes on such a film, and to render, verify and deliver it, even when the user only says "make it look like the launch videos", "use Leon's animations" or "another walk-and-talk".
 metadata:
-  version: 1.2.0
+  version: 1.3.0
 ---
 
 # Launch-look cutaways
@@ -149,6 +149,7 @@ In V3 of the example, a several-product film, about 35% of the running time is f
   - Never say review doesn't scale; say "Human review doesn't."
   - Say "PR inbox", never "merge inbox".
   - On screen, use the current launch names even when the voice uses older ones. Straps read "Explain" and "Secure", with "CodeRabbit" after the body on the details bar (he asked to keep it). Kickers read "CodeRabbit Explain" and "CodeRabbit Secure". Keep straps, kickers, chips and the close consistent.
+- **Clean the voice evenly, or not at all.** A cleanup that silences the pauses but lets the noise through under the words sounds worse than the raw recording, and a strong one that dulls the top end sounds "numb". Check on a copy without music (`references/review-and-delivery.md`, "Cleaning the voice").
 - **A chip never sits on a line of code.** Give it its own row, like a review comment.
 - **Nothing beside a decode moves.** Decode each word in a slot the width of its final text.
 - **Small motions:** a PR that drifts onto the pile eases out sideways while it falls; its landing flash draws under it, on the pile's top edge, not through its label.
@@ -189,7 +190,8 @@ All paths are under `studio/src/walktalk-final/` unless noted.
   - review briefs, and lenses with skeptics;
   - technical checks;
   - render and mix pitfalls, and chunked renders;
-  - delivery.
+  - delivery;
+  - cleaning the voice, and social copy for the post.
 - `references/leon-assets.md`: what Leon's studio handed over, where it lives, what each piece fed, and where the unbuilt pieces appear in his films.
 - `scripts/` (each script's docstring gives its usage):
   - `onsets.py`: measured voice onsets for cues.
@@ -200,4 +202,5 @@ All paths are under `studio/src/walktalk-final/` unless noted.
   - `verify_section.py`: frames, tags, loudness and sync of a section render.
   - `make_srt.py`: SRT captions from the word list.
   - `music_grid.py`, `bed_check.py`: a music track's beat grid and sections, and a check of the fitted bed in the mix.
+  - `voice_denoise.py`: per-clip, sample-aligned noise reduction for a dialogue master.
   - `daily_prs.py`, `make_graph_data.py`: real merge counts for a commit graph.
